@@ -1,0 +1,97 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: "18"
+
+jobs:
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        workspace: [backend, frontend]
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.workspace }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ matrix.workspace }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+        continue-on-error: ${{ matrix.workspace == 'frontend' }}
+
+      - name: Run typecheck (backend)
+        if: matrix.workspace == 'backend'
+        run: npm run typecheck
+        continue-on-error: true
+
+      - name: Run tests
+        run: npm test -- --ci --coverage
+
+      - name: Build project
+        run: npm run build
+
+  deploy:
+    name: Deploy to Production
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          script: |
+            set -e
+
+            cd ${{ secrets.DEPLOY_PATH }}
+
+            # Load environment
+            export COMPOSE_PROJECT_NAME=saas
+
+            # Pull latest images
+            docker compose -f docker/docker-compose.yml pull
+
+            # Rebuild and restart changed services
+            docker compose -f docker/docker-compose.yml up --build -d --remove-orphans
+
+            # Clean up unused images, containers, and volumes
+            docker image prune -f
+            docker container prune -f
+
+            # Verify services are healthy
+            echo "Deployment completed. Checking service status..."
+            docker compose -f docker/docker-compose.yml ps

@@ -1,0 +1,18 @@
+# ============================================
+# LocalSite AI - Grafana Dashboard Provisioning
+# ============================================
+
+apiVersion: 1
+
+providers:
+  - name: "LocalSite AI Dashboards"
+    orgId: 1
+    folder: "LocalSite AI"
+    folderUid: "localsite-ai"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false

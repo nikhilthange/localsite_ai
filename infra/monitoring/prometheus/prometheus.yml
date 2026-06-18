@@ -1,0 +1,84 @@
+# ============================================
+# LocalSite AI - Prometheus Configuration
+# ============================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+  external_labels:
+    environment: production
+    service: localsite-ai
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+      scheme: http
+      timeout: 10s
+      api_version: v2
+
+# Rule files
+rule_files:
+  - /etc/prometheus/alert.rules
+
+# Scrape configuration
+scrape_configs:
+  # ------------------------------------------
+  # Prometheus self-monitoring
+  # ------------------------------------------
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # ------------------------------------------
+  # Node Exporter (Host-level metrics: CPU, RAM, Disk, Network)
+  # ------------------------------------------
+  - job_name: "node-exporter"
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["node-exporter:9100"]
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: "(.*):9100"
+        target_label: instance
+        replacement: "localsite-ec2"
+
+  # ------------------------------------------
+  # cAdvisor (Container-level metrics)
+  # ------------------------------------------
+  - job_name: "cadvisor"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["cadvisor:8080"]
+    metric_relabel_configs:
+      - source_labels: [container_label_com_docker_compose_service]
+        target_label: service
+      - source_labels: [container_label_com_docker_compose_container_number]
+        target_label: container_number
+
+  # ------------------------------------------
+  # Backend API (custom metrics endpoint)
+  # ------------------------------------------
+  - job_name: "backend"
+    scrape_interval: 15s
+    metrics_path: "/api/metrics"
+    static_configs:
+      - targets: ["backend:5000"]
+    basic_auth:
+      username: prometheus
+      password: ${PROMETHEUS_PASSWORD:-prometheus}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: "localsite-backend"
+
+  # ------------------------------------------
+  # Loki (for log scraping targets)
+  # ------------------------------------------
+  - job_name: "loki"
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["loki:3100"]

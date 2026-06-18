@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 99 102 241;
+    --color-secondary: 20 184 166;
+    --color-accent: 249 115 22;
+    --color-bg: 255 255 255;
+    --color-surface: 249 250 251;
+    --color-border: 229 231 235;
+    --color-text: 17 24 39;
+    --color-text-muted: 107 114 128;
+    --color-success: 34 197 94;
+    --color-warning: 234 179 8;
+    --color-error: 239 68 68;
+    --sidebar-width: 16rem;
+    --header-height: 4rem;
+  }
+
+  .dark {
+    --color-bg: 15 23 42;
+    --color-surface: 30 41 59;
+    --color-border: 51 65 85;
+    --color-text: 241 245 249;
+    --color-text-muted: 148 163 184;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-[rgb(var(--color-bg))] text-[rgb(var(--color-text))] transition-colors duration-200;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  * {
+    @apply border-[rgb(var(--color-border))];
+  }
+
+  ::selection {
+    @apply bg-primary-500/20 text-primary-900 dark:text-primary-100;
+  }
+
+  ::-webkit-scrollbar {
+    @apply h-2 w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-[rgb(var(--color-border))] hover:bg-[rgb(var(--color-text-muted))];
+  }
+
+  input,
+  textarea,
+  select {
+    @apply outline-none ring-0 focus:ring-2 focus:ring-primary-500/50 focus:ring-offset-0;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-dark-bg;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-[rgb(var(--color-border))] bg-transparent px-5 py-2.5 text-sm font-medium text-[rgb(var(--color-text))] transition-all hover:bg-[rgb(var(--color-surface))] focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus:ring-offset-dark-bg;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-[rgb(var(--color-text-muted))] transition-all hover:bg-[rgb(var(--color-surface))] hover:text-[rgb(var(--color-text))] focus:outline-none;
+  }
+
+  .card {
+    @apply rounded-xl border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] p-6 shadow-sm backdrop-blur-sm;
+  }
+
+  .input-field {
+    @apply w-full rounded-lg border border-[rgb(var(--color-border))] bg-transparent px-4 py-2.5 text-sm text-[rgb(var(--color-text))] placeholder:text-[rgb(var(--color-text-muted))] transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20;
+  }
+
+  .section-heading {
+    @apply text-3xl font-bold tracking-tight sm:text-4xl;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 bg-clip-text text-transparent;
+  }
+
+  .shimmer-bg {
+    @apply bg-gradient-to-r from-transparent via-white/10 to-transparent bg-[length:200%_100%] animate-shimmer;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -1,0 +1,50 @@
+# ============================================
+# LocalSite AI - Backend (Production)
+# Multi-stage: builder -> production
+# Node 20 LTS + Alpine for minimal footprint
+# ============================================
+
+# ---- Builder Stage ----
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache python3 make g++ curl
+
+COPY package*.json ./
+RUN npm ci --include=dev
+
+COPY tsconfig.json ./
+COPY src/ ./src/
+
+RUN npm run build
+
+# ---- Production Stage ----
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+RUN apk add --no-cache tini curl ca-certificates
+
+# Create non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+COPY package*.json ./
+RUN npm ci --only=production --ignore-scripts
+
+COPY --chown=appuser:appgroup --from=builder /app/dist ./dist
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD curl -f http://localhost:5000/api/health || exit 1
+
+USER appuser
+
+EXPOSE 5000
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node", "dist/server.js"]
+
+LABEL org.opencontainers.image.title="LocalSite AI Backend"
+LABEL org.opencontainers.image.description="Production SaaS backend for AI-powered website building"
+LABEL org.opencontainers.image.version="2.0.0"

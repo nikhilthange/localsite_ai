@@ -1,0 +1,184 @@
+# ============================================
+# LocalSite AI - Monitoring Stack
+# Prometheus + Grafana + Node Exporter + cAdvisor
+# ============================================
+
+name: localsite-monitoring
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-restart: &default-restart
+  restart: unless-stopped
+
+networks:
+  monitoring-network:
+    driver: bridge
+  app-network:
+    name: localsite-ai_app-network
+    external: true
+
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  loki-data:
+    driver: local
+
+services:
+  # ========================================
+  # Prometheus (Metrics Collection)
+  # ========================================
+  prometheus:
+    image: prom/prometheus:v2.53
+    container_name: localsite-prometheus
+    <<: *default-restart
+    networks:
+      - monitoring-network
+      - app-network
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ../../infra/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../../infra/monitoring/prometheus/alert.rules:/etc/prometheus/alert.rules:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--storage.tsdb.retention.size=10GB"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-lifecycle"
+      - "--alertmanager.timeout=10s"
+    logging: *default-logging
+
+  # ========================================
+  # Node Exporter (Host Metrics)
+  # ========================================
+  node-exporter:
+    image: prom/node-exporter:v1.8
+    container_name: localsite-node-exporter
+    <<: *default-restart
+    networks:
+      - monitoring-network
+    ports:
+      - "127.0.0.1:9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+    logging: *default-logging
+
+  # ========================================
+  # cAdvisor (Container Metrics)
+  # ========================================
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49
+    container_name: localsite-cadvisor
+    <<: *default-restart
+    networks:
+      - monitoring-network
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    logging: *default-logging
+
+  # ========================================
+  # Loki (Log Aggregation)
+  # ========================================
+  loki:
+    image: grafana/loki:3.1
+    container_name: localsite-loki
+    <<: *default-restart
+    networks:
+      - monitoring-network
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - ../../infra/monitoring/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+    command:
+      - "-config.file=/etc/loki/loki-config.yml"
+    logging: *default-logging
+
+  # ========================================
+  # Promtail (Log Shipper)
+  # ========================================
+  promtail:
+    image: grafana/promtail:3.1
+    container_name: localsite-promtail
+    <<: *default-restart
+    networks:
+      - monitoring-network
+    volumes:
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ../../infra/monitoring/loki/promtail-config.yml:/etc/promtail/config.yml:ro
+    command:
+      - "-config.file=/etc/promtail/config.yml"
+    logging: *default-logging
+
+  # ========================================
+  # Grafana (Visualization)
+  # ========================================
+  grafana:
+    image: grafana/grafana:11.2
+    container_name: localsite-grafana
+    <<: *default-restart
+    networks:
+      - monitoring-network
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ../../infra/monitoring/grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ../../infra/monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ../../infra/monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Grafana admin password required}
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # ========================================
+  # Alertmanager (Alert Routing)
+  # ========================================
+  alertmanager:
+    image: prom/alertmanager:v0.27
+    container_name: localsite-alertmanager
+    <<: *default-restart
+    networks:
+      - monitoring-network
+    ports:
+      - "127.0.0.1:9093:9093"
+    volumes:
+      - ../../infra/monitoring/prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+    logging: *default-logging

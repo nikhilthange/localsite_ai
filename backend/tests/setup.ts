@@ -1,0 +1,17 @@
+process.env.NODE_ENV = 'test';
+process.env.JWT_ACCESS_SECRET = 'test-access-secret-minimum-32-chars!!';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-minimum-32-chars!';
+process.env.COOKIE_SECRET = 'test-cookie-secret';
+process.env.CSRF_SECRET = 'test-csrf-secret';
+process.env.MONGODB_URI = 'mongodb://localhost:27017/localsite-ai-test';
+process.env.REDIS_URL = '';
+process.env.STRIPE_SECRET_KEY = 'sk_test_mock';
+process.env.STRIPE_PUBLISHABLE_KEY = 'pk_test_mock';
+process.env.OPENAI_API_KEY = 'sk-test-mock';
+process.env.AWS_ACCESS_KEY_ID = 'AKIA-test';
+process.env.AWS_SECRET_ACCESS_KEY = 'test-secret';
+process.env.AWS_S3_BUCKET = 'test-bucket';
+process.env.CLIENT_URL = 'http://localhost:3000';
+process.env.SENDGRID_API_KEY = 'SG.test';
+process.env.GOOGLE_CLIENT_ID = 'test-client-id';
+process.env.GOOGLE_CLIENT_SECRET = 'test-client-secret';

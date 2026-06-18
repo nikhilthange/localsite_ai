@@ -1,0 +1,13 @@
+{
+  "name": "localsite-ai-load-tests",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:api": "k6 run k6/api-load-test.js",
+    "test:auth": "k6 run k6/auth-stress-test.js",
+    "test:api:staging": "k6 run -e BASE_URL=https://api.staging.localsiteai.com k6/api-load-test.js",
+    "test:api:prod": "k6 run -e BASE_URL=https://api.localsiteai.com k6/api-load-test.js",
+    "test:auth:staging": "k6 run -e BASE_URL=https://api.staging.localsiteai.com k6/auth-stress-test.js",
+    "test:auth:prod": "k6 run -e BASE_URL=https://api.localsiteai.com k6/auth-stress-test.js"
+  }
+}

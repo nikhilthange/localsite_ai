@@ -1,0 +1,271 @@
+# ============================================
+# LocalSite AI - Production Docker Compose
+# Stack: MongoDB, Redis, Backend, Worker,
+#        Nginx, Certbot (SSL)
+# ============================================
+
+name: localsite-ai
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-restart: &default-restart
+  restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  mongodb-data:
+    driver: local
+  redis-data:
+    driver: local
+  backend-uploads:
+    driver: local
+  certbot-www:
+    driver: local
+  certbot-conf:
+    driver: local
+
+services:
+  # ========================================
+  # MongoDB 7 (Primary Database)
+  # ========================================
+  mongodb:
+    image: mongo:7
+    container_name: localsite-mongodb
+    <<: *default-restart
+    networks:
+      - app-network
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+      - ../../docker/mongo/init.js:/docker-entrypoint-initdb.d/init.js:ro
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?MongoDB root password required}
+      MONGO_INITDB_DATABASE: localsite_ai
+    logging: *default-logging
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # ========================================
+  # Redis 7 (Cache + Queue Backend)
+  # ========================================
+  redis:
+    image: redis:7-alpine
+    container_name: localsite-redis
+    <<: *default-restart
+    networks:
+      - app-network
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:?Redis password required}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ========================================
+  # Backend API Server
+  # ========================================
+  backend:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.backend
+    container_name: localsite-backend
+    <<: *default-restart
+    networks:
+      - app-network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5000:5000"
+    volumes:
+      - backend-uploads:/app/uploads
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGODB_URI: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD}@mongodb:27017/localsite_ai?authSource=admin&retryWrites=true&w=majority
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_PREFIX: localsite:
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT access secret required}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT refresh secret required}
+      JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-15m}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-7d}
+      COOKIE_SECRET: ${COOKIE_SECRET:?Cookie secret required}
+      CSRF_SECRET: ${CSRF_SECRET:?CSRF secret required}
+      CLIENT_URL: https://${APP_DOMAIN:-app.localsiteai.com}
+      APP_URL: https://api.${APP_DOMAIN:-localsiteai.com}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-sendgrid}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@localsiteai.com}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-localsite-ai-assets}
+      CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+      CLOUDFLARE_ZONE_ID: ${CLOUDFLARE_ZONE_ID}
+      CLOUDFLARE_DOMAIN: ${CLOUDFLARE_DOMAIN}
+      CLOUDFLARE_R2_BUCKET: ${CLOUDFLARE_R2_BUCKET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: https://api.${APP_DOMAIN:-localsiteai.com}/api/auth/google/callback
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-support@localsiteai.com}
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # ========================================
+  # Background Worker
+  # ========================================
+  worker:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.worker
+    container_name: localsite-worker
+    <<: *default-restart
+    networks:
+      - app-network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - backend-uploads:/app/uploads
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD}@mongodb:27017/localsite_ai?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_PREFIX: localsite:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-localsite-ai-assets}
+      CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+      CLOUDFLARE_ZONE_ID: ${CLOUDFLARE_ZONE_ID}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+    logging: *default-logging
+    healthcheck:
+      disable: true
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  # ========================================
+  # Nginx (Reverse Proxy + SSL Termination)
+  # ========================================
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: localsite-nginx
+    <<: *default-restart
+    networks:
+      - app-network
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../../infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../../infra/nginx/sites/localsite-ai.conf:/etc/nginx/conf.d/localsite-ai.conf:ro
+      - certbot-www:/var/www/certbot:ro
+      - certbot-conf:/etc/letsencrypt:ro
+    depends_on:
+      - backend
+      - frontend
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+
+  # ========================================
+  # Frontend (React SPA)
+  # ========================================
+  frontend:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.frontend
+    container_name: localsite-frontend
+    <<: *default-restart
+    networks:
+      - app-network
+    depends_on:
+      - backend
+    logging: *default-logging
+    healthcheck:
+      disable: true
+
+  # ========================================
+  # Certbot (Let's Encrypt SSL Auto-Renewal)
+  # ========================================
+  certbot:
+    image: certbot/certbot:v2
+    container_name: localsite-certbot
+    networks:
+      - app-network
+    volumes:
+      - certbot-www:/var/www/certbot
+      - certbot-conf:/etc/letsencrypt
+    entrypoint: >
+      /bin/sh -c "
+      trap exit TERM;
+      while true; do
+        certbot renew --quiet --no-self-upgrade;
+        sleep 43200;
+      done
+      "
+    logging: *default-logging
+    profiles:
+      - ssl

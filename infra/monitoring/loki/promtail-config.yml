@@ -1,0 +1,53 @@
+# ============================================
+# LocalSite AI - Promtail Log Shipper Config
+# Ships Docker container logs to Loki
+# ============================================
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: info
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: docker
+    pipeline_stages:
+      - docker: {}
+      - match:
+          selector: '{container_name=~".+"}'
+          stages:
+            - regex:
+                expression: "^(?P<level>\\w+)\\s+(?P<message>.*)"
+            - labels:
+                level:
+      - static_labels:
+          service: localsite-ai
+          environment: production
+
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 15s
+        filters:
+          - name: label
+            values:
+              - com.docker.compose.project=localsite-ai
+
+    relabel_configs:
+      - source_labels: ["__meta_docker_container_name"]
+        regex: "/(.*)"
+        target_label: container_name
+      - source_labels: ["__meta_docker_container_label_com_docker_compose_service"]
+        target_label: service_name
+      - source_labels: ["__meta_docker_container_label_com_docker_compose_project"]
+        target_label: compose_project
+      - source_labels: ["__meta_docker_container_id"]
+        target_label: container_id
+      - action: replace
+        source_labels: ["__meta_docker_container_label_com_docker_compose_service"]
+        target_label: job
+        replacement: localsite-ai/$1

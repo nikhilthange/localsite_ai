@@ -1,0 +1,149 @@
+version: '3.8'
+
+name: localsite-ai
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: localsite-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: localsite_ai
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+      - ./docker/mongo/init.js:/docker-entrypoint-initdb.d/init.js:ro
+    networks:
+      - localsite-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: localsite-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redispass}
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - localsite-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: localsite-backend
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGODB_URI: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-password}@mongodb:27017/localsite_ai?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      CLIENT_URL: https://app.localsiteai.com
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+      CLOUDFLARE_ZONE_ID: ${CLOUDFLARE_ZONE_ID}
+    ports:
+      - '5000:5000'
+    volumes:
+      - backend_uploads:/app/uploads
+    networks:
+      - localsite-network
+    healthcheck:
+      test: curl -f http://localhost:5000/api/health || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: localsite-worker
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-password}@mongodb:27017/localsite_ai?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+    command: node dist/workers/index.js
+    volumes:
+      - backend_uploads:/app/uploads
+    networks:
+      - localsite-network
+    healthcheck:
+      disable: true
+
+  nginx:
+    image: nginx:alpine
+    container_name: localsite-nginx
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/sites:/etc/nginx/sites-enabled:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - certbot_data:/var/www/certbot
+    networks:
+      - localsite-network
+
+  certbot:
+    image: certbot/certbot
+    container_name: localsite-certbot
+    volumes:
+      - certbot_data:/var/www/certbot
+      - ./docker/nginx/ssl:/etc/letsencrypt
+    entrypoint: "/bin/sh -c \"trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;\""
+
+networks:
+  localsite-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  certbot_data:
+    driver: local

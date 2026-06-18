@@ -1,0 +1,213 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "title": "LocalSite AI - Overview",
+  "uid": "localsite-ai-overview",
+  "version": 1,
+  "schemaVersion": 39,
+  "tags": ["localsite-ai", "production"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "title": "System Uptime",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [{
+        "expr": "time() - node_boot_time_seconds{instance=~\"$instance\"}",
+        "format": "time_series"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "CPU Usage",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [{
+        "expr": "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\",instance=~\"$instance\"}[5m])) * 100)"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 80 },
+              { "color": "red", "value": 95 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Memory Usage",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [{
+        "expr": "(1 - (node_memory_MemAvailable_bytes{instance=~\"$instance\"} / node_memory_MemTotal_bytes{instance=~\"$instance\"})) * 100"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 80 },
+              { "color": "red", "value": 95 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Disk Usage",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "targets": [{
+        "expr": "(node_filesystem_size_bytes{mountpoint=\"/\",instance=~\"$instance\"} - node_filesystem_avail_bytes{mountpoint=\"/\",instance=~\"$instance\"}) / node_filesystem_size_bytes{mountpoint=\"/\",instance=~\"$instance\"} * 100"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 85 },
+              { "color": "red", "value": 95 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "API Request Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{job=\"backend\"}[5m])",
+          "legendFormat": "{{status}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "reqps" }
+      }
+    },
+    {
+      "title": "API Latency (p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [{
+        "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"backend\"}[5m]))",
+        "legendFormat": "p95"
+      }],
+      "fieldConfig": {
+        "defaults": { "unit": "s" }
+      }
+    },
+    {
+      "title": "Container CPU",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
+      "targets": [{
+        "expr": "rate(container_cpu_usage_seconds_total{name=~\".*localsite.*\"}[5m]) * 100",
+        "legendFormat": "{{name}}"
+      }],
+      "fieldConfig": {
+        "defaults": { "unit": "percent" }
+      }
+    },
+    {
+      "title": "Container Memory",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 12 },
+      "targets": [{
+        "expr": "container_memory_usage_bytes{name=~\".*localsite.*\"}",
+        "legendFormat": "{{name}}"
+      }],
+      "fieldConfig": {
+        "defaults": { "unit": "bytes" }
+      }
+    },
+    {
+      "title": "BullMQ Queue Status",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 12 },
+      "targets": [
+        {
+          "expr": "bullmq_queue_waiting{queue=~\"ai-generation|email|website-deployment\"}",
+          "legendFormat": "{{queue}} - waiting"
+        },
+        {
+          "expr": "bullmq_queue_active{queue=~\"ai-generation|email|website-deployment\"}",
+          "legendFormat": "{{queue}} - active"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "none" }
+      }
+    },
+    {
+      "title": "AI Usage (Daily)",
+      "type": "bargauge",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 20 },
+      "targets": [{
+        "expr": "sum(increase(ai_requests_total{job=\"backend\"}[24h]))",
+        "legendFormat": "AI Requests"
+      }],
+      "fieldConfig": {
+        "defaults": { "unit": "none" }
+      }
+    },
+    {
+      "title": "Error Logs (24h)",
+      "type": "logs",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 20 },
+      "targets": [{
+        "expr": "{job=~\"localsite-ai/.*\"} |= \"error\"",
+        "legendFormat": ""
+      }],
+      "datasource": "Loki"
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "instance",
+        "type": "query",
+        "query": "label_values(node_boot_time_seconds, instance)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": { "text": "all", "value": "$__all" }
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "name": "Deployments",
+        "type": "event",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "enable": true,
+        "iconColor": "blue",
+        "query": "timestamp(deployment_timestamp{job=\"backend\"})"
+      }
+    ]
+  }
+}

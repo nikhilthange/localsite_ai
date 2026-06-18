@@ -1,0 +1,59 @@
+# ============================================
+# Docker ignore rules for all services
+# ============================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Build output
+dist
+build
+.next
+
+# Environment
+.env
+.env.local
+.env.production
+.env.development
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Test coverage
+coverage
+
+# Temp files
+tmp
+temp
+*.tmp
+
+# Uploads (runtime volume)
+uploads
+
+# Certificates
+*.pem
+*.key
+certbot

@@ -1,0 +1,191 @@
+# ============================================
+# LocalSite AI - Prometheus Alerting Rules
+# Groups: hosts, containers, application
+# ============================================
+
+groups:
+  # ------------------------------------------
+  # Host-level alerts
+  # ------------------------------------------
+  - name: hosts
+    interval: 30s
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage ({{ $value }}%) on {{ $labels.instance }}"
+          description: "CPU usage has been above 80% for more than 10 minutes."
+
+      - alert: CriticalCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical CPU usage ({{ $value }}%) on {{ $labels.instance }}"
+          description: "CPU usage has been above 95% for more than 5 minutes. Immediate action required."
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage ({{ $value | humanizePercentage }}) on {{ $labels.instance }}"
+          description: "Memory usage is above 85%."
+
+      - alert: CriticalMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical memory usage ({{ $value | humanizePercentage }}) on {{ $labels.instance }}"
+          description: "Memory usage is above 95%."
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space ({{ $value | humanizePercentage }} free) on {{ $labels.instance }}"
+          description: "Disk space is below 15% on the root filesystem."
+
+      - alert: DiskSpaceCritical
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical disk space ({{ $value | humanizePercentage }} free) on {{ $labels.instance }}"
+          description: "Disk space is below 5%. Immediate cleanup required."
+
+      - alert: HighDiskIO
+        expr: rate(node_disk_io_time_seconds_total[5m]) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk I/O on {{ $labels.device }} ({{ $labels.instance }})"
+
+      - alert: NetworkInterfaceDown
+        expr: node_network_up{device!="lo"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Network interface {{ $labels.device }} is down on {{ $labels.instance }}"
+
+      - alert: HostUnreachable
+        expr: up{job="node-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Host {{ $labels.instance }} is unreachable"
+
+  # ------------------------------------------
+  # Container-level alerts
+  # ------------------------------------------
+  - name: containers
+    interval: 30s
+    rules:
+      - alert: ContainerDown
+        expr: up{job="cadvisor"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container {{ $labels.name }} is down"
+          description: "Container {{ $labels.name }} has been down for more than 1 minute."
+
+      - alert: ContainerHighCPU
+        expr: rate(container_cpu_usage_seconds_total[5m]) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU in container {{ $labels.container_label_com_docker_compose_service }}"
+          description: "Container CPU usage is above 80% for 10 minutes."
+
+      - alert: ContainerHighMemory
+        expr: container_memory_usage_bytes / container_spec_memory_limit_bytes * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory in container {{ $labels.container_label_com_docker_compose_service }}"
+          description: "Container memory usage is above 85%."
+
+      - alert: ContainerRestarting
+        expr: rate(container_last_seen[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.container_label_com_docker_compose_service }} is restarting frequently"
+          description: "Container has restarted multiple times in the last 5 minutes."
+
+  # ------------------------------------------
+  # Application-level alerts
+  # ------------------------------------------
+  - name: application
+    interval: 30s
+    rules:
+      - alert: APIHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API p95 latency is {{ $value }}s (threshold: 5s)"
+          description: "95th percentile API response time is above 5 seconds."
+
+      - alert: APIErrorRateHigh
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API error rate is {{ $value }}% (threshold: 5%)"
+          description: "More than 5% of API requests are returning 5xx errors."
+
+      - alert: AIQueueBacklog
+        expr: bullmq_queue_waiting{queue="ai-generation"} > 100
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "AI generation queue backlog: {{ $value }} jobs waiting"
+          description: "The AI generation queue has more than 100 jobs waiting."
+
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory usage at {{ $value | humanizePercentage }}"
+          description: "Redis is using more than 80% of its max memory."
+
+      - alert: MongoDBConnectionsHigh
+        expr: mongodb_connections_current / mongodb_connections_available * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MongoDB connection usage at {{ $value | humanizePercentage }}"
+          description: "MongoDB is using more than 80% of available connections."
+
+      - alert: CertificateExpiring
+        expr: (certbot_cert_expiry_seconds - time()) / 86400 < 30
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "SSL certificate expires in {{ $value | humanizeDuration }}"
+          description: "SSL certificate for {{ $labels.domain }} expires in less than 30 days."

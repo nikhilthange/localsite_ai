@@ -1,0 +1,241 @@
+import OpenAI from 'openai';
+import { config } from '../../../config';
+import { Logger } from '../../../core/logging/Logger';
+import { CacheService } from '../../../core/cache/CacheService';
+import {
+  AICompletionRequest,
+  AICompletionResponse,
+  AIModel,
+  AITaskType,
+  MODEL_COSTS,
+  TASK_MODEL_MAP,
+  TASK_DEFAULT_MAX_TOKENS,
+} from '../types';
+
+const RETRY_DELAYS = [1000, 2000, 4000, 8000];
+const MAX_RETRIES = 4;
+
+export class AIClient {
+  private static instance: AIClient;
+  private client: OpenAI;
+
+  private constructor() {
+    this.client = new OpenAI({
+      apiKey: config.openai.apiKey,
+      maxRetries: 0,
+      timeout: 60000,
+    });
+  }
+
+  static getInstance(): AIClient {
+    if (!this.instance) {
+      this.instance = new AIClient();
+    }
+    return this.instance;
+  }
+
+  async complete(request: AICompletionRequest): Promise<AICompletionResponse> {
+    const startTime = Date.now();
+    const model = request.model || TASK_MODEL_MAP[request.taskType];
+    const maxTokens = request.maxTokens || TASK_DEFAULT_MAX_TOKENS[request.taskType];
+
+    if (request.cacheKey) {
+      const cached = await CacheService.get<{ content: string; usage: { promptTokens: number; completionTokens: number; totalTokens: number } }>(request.cacheKey);
+      if (cached) {
+        const cost = this.calculateCost(model, cached.usage.promptTokens, cached.usage.completionTokens);
+        return {
+          content: cached.content,
+          model,
+          taskType: request.taskType,
+          usage: cached.usage,
+          cost,
+          cached: true,
+          latency: Date.now() - startTime,
+        };
+      }
+    }
+
+    if (request.taskType === AITaskType.LOGO_GENERATION) {
+      return this.generateImage(request, model);
+    }
+
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+        if (request.systemPrompt) {
+          messages.push({ role: 'system', content: request.systemPrompt });
+        }
+        messages.push({ role: 'user', content: request.userPrompt });
+
+        const completion = await this.client.chat.completions.create({
+          model,
+          messages,
+          max_tokens: maxTokens,
+          temperature: request.temperature ?? config.openai.temperature,
+          ...(request.responseFormat === 'json_object' ? { response_format: { type: 'json_object' } as const } : {}),
+          stream: false,
+        });
+
+        const choice = completion.choices[0];
+        const content = choice?.message?.content || '';
+        const usage = completion.usage
+          ? {
+              promptTokens: completion.usage.prompt_tokens ?? 0,
+              completionTokens: completion.usage.completion_tokens ?? 0,
+              totalTokens: completion.usage.total_tokens ?? 0,
+            }
+          : { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
+
+        const cost = this.calculateCost(model, usage.promptTokens, usage.completionTokens);
+
+        if (request.cacheKey && usage.totalTokens > 0) {
+          await CacheService.set(request.cacheKey, { content, usage }, request.cacheTtl || 3600);
+        }
+
+        return {
+          content,
+          model,
+          taskType: request.taskType,
+          usage,
+          cost,
+          cached: false,
+          latency: Date.now() - startTime,
+        };
+      } catch (error) {
+        lastError = error as Error;
+        const isRetryable = this.isRetryableError(error);
+
+        if (!isRetryable || attempt === MAX_RETRIES) {
+          break;
+        }
+
+        const delay = RETRY_DELAYS[attempt];
+        Logger.warn('AI request failed, retrying', {
+          attempt: attempt + 1,
+          maxRetries: MAX_RETRIES,
+          taskType: request.taskType,
+          model,
+          delay,
+          error: lastError.message,
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+
+    throw lastError || new Error('AI request failed after all retries');
+  }
+
+  async completeStream(
+    request: AICompletionRequest,
+    onChunk: (chunk: string) => void,
+    onDone: (response: AICompletionResponse) => void,
+    onError: (error: Error) => void
+  ): Promise<void> {
+    const startTime = Date.now();
+    const model = request.model || TASK_MODEL_MAP[request.taskType];
+    const maxTokens = request.maxTokens || TASK_DEFAULT_MAX_TOKENS[request.taskType];
+
+    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+    if (request.systemPrompt) {
+      messages.push({ role: 'system', content: request.systemPrompt });
+    }
+    messages.push({ role: 'user', content: request.userPrompt });
+
+    try {
+      const stream = await this.client.chat.completions.create({
+        model,
+        messages,
+        max_tokens: maxTokens,
+        temperature: request.temperature ?? config.openai.temperature,
+        stream: true,
+      });
+
+      let fullContent = '';
+      let promptTokens = 0;
+      let completionTokens = 0;
+
+      for await (const chunk of stream) {
+        const delta = chunk.choices[0]?.delta?.content || '';
+        if (delta) {
+          fullContent += delta;
+          onChunk(delta);
+        }
+        if (chunk.usage) {
+          promptTokens = chunk.usage.prompt_tokens || promptTokens;
+          completionTokens = chunk.usage.completion_tokens || completionTokens;
+        }
+      }
+
+      const totalTokens = promptTokens + completionTokens;
+      const cost = this.calculateCost(model, promptTokens, completionTokens);
+
+      onDone({
+        content: fullContent,
+        model,
+        taskType: request.taskType,
+        usage: { promptTokens, completionTokens, totalTokens },
+        cost,
+        cached: false,
+        latency: Date.now() - startTime,
+      });
+
+      if (request.cacheKey && totalTokens > 0) {
+        await CacheService.set(request.cacheKey, { content: fullContent, usage: { promptTokens, completionTokens, totalTokens } }, request.cacheTtl || 3600);
+      }
+    } catch (error) {
+      onError(error as Error);
+    }
+  }
+
+  private async generateImage(request: AICompletionRequest, _model: AIModel): Promise<AICompletionResponse> {
+    const startTime = Date.now();
+
+    const response = await this.client.images.generate({
+      model: 'dall-e-3',
+      prompt: request.userPrompt,
+      n: 1,
+      size: '1024x1024',
+      quality: 'standard',
+    });
+
+    const content = JSON.stringify({
+      url: response.data?.[0]?.url,
+      revisedPrompt: response.data?.[0]?.revised_prompt,
+    });
+
+    return {
+      content,
+      model: AIModel.Dalle3,
+      taskType: request.taskType,
+      usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+      cost: MODEL_COSTS[AIModel.Dalle3].output,
+      cached: false,
+      latency: Date.now() - startTime,
+    };
+  }
+
+  private calculateCost(model: AIModel, promptTokens: number, completionTokens: number): number {
+    const rates = MODEL_COSTS[model];
+    if (!rates) return 0;
+    return (promptTokens * rates.input) + (completionTokens * rates.output);
+  }
+
+  private isRetryableError(error: any): boolean {
+    if (error instanceof OpenAI.APIError) {
+      const status = error.status;
+      return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+    }
+    if (error instanceof Error) {
+      const msg = error.message.toLowerCase();
+      return msg.includes('timeout') || msg.includes('rate limit') || msg.includes('internal server error') || msg.includes('service unavailable') || msg.includes('network error') || msg.includes('econnrefused') || msg.includes('econnreset') || msg.includes('etimedout') || msg.includes('429');
+    }
+    return false;
+  }
+
+  getClient(): OpenAI {
+    return this.client;
+  }
+}
