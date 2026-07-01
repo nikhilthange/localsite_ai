@@ -44,14 +44,14 @@ export class CacheService {
 
   static async delByPattern(pattern: string): Promise<void> {
     if (!this.client) return;
-    let cursor = 0;
+    let cursor = '0';
     do {
-      const result = await this.client.scan(cursor, { match: pattern, count: 100 });
+      const result = await this.client.scan(cursor, { MATCH: pattern, COUNT: 100 });
       cursor = result.cursor;
       if (result.keys.length > 0) {
         await this.client.del(result.keys);
       }
-    } while (cursor !== 0);
+    } while (cursor !== '0');
   }
 
   static async exists(key: string): Promise<boolean> {
