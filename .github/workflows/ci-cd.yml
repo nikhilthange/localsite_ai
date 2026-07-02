@@ -38,12 +38,11 @@ jobs:
 
       - name: Run lint
         run: npm run lint
-        continue-on-error: ${{ matrix.workspace == 'frontend' }}
+        continue-on-error: false
 
       - name: Run typecheck (backend)
         if: matrix.workspace == 'backend'
         run: npm run typecheck
-        continue-on-error: true
 
       - name: Run tests (frontend)
         if: matrix.workspace == 'frontend'
