@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { HiMail, HiPhone, HiLocationMarker, HiClock } from 'react-icons/hi';
+import { FiSend, FiArrowRight } from 'react-icons/fi';
 import Button from '@/components/common/Button';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
@@ -43,72 +44,84 @@ export default function Contact() {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 pt-24 pb-16">
+    <div className="min-h-screen pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">Get in Touch</h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">Have a question, feedback, or need help? We're here for you.</p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-16"
+        >
+          <h1 className="section-heading mb-4">Get in Touch</h1>
+          <p className="section-subheading mx-auto">Have a question, feedback, or need help? We're here for you.</p>
         </motion.div>
 
         <div className="grid lg:grid-cols-5 gap-12 max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-2 space-y-6">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="lg:col-span-2 space-y-4"
+          >
             {contactInfo.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.label} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800">
-                  <div className="w-10 h-10 bg-violet-100 dark:bg-violet-900/30 rounded-lg flex items-center justify-center shrink-0">
-                    <Icon className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                <div key={item.label} className="card-hover flex items-start gap-4">
+                  <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{item.label}</p>
-                    <p className="font-medium text-gray-900 dark:text-white">{item.value}</p>
+                    <p className="text-xs text-[rgb(var(--color-text-muted))]">{item.label}</p>
+                    <p className="font-medium text-[rgb(var(--color-text))]">{item.value}</p>
                   </div>
                 </div>
               );
             })}
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="lg:col-span-3">
-            <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800 shadow-sm">
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="lg:col-span-3"
+          >
+            <form onSubmit={handleSubmit} className="card">
               <div className="grid sm:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name *</label>
+                  <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Name *</label>
                   <input type="text" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                    className={`w-full px-4 py-3 rounded-xl border bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-colors ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'}`}
+                    className={`input-field ${errors.name ? 'input-error' : ''}`}
                     placeholder="Your name" />
-                  {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+                  {errors.name && <p className="mt-1.5 text-sm text-red-500">{errors.name}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email *</label>
+                  <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Email *</label>
                   <input type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                    className={`w-full px-4 py-3 rounded-xl border bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-colors ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'}`}
+                    className={`input-field ${errors.email ? 'input-error' : ''}`}
                     placeholder="you@example.com" />
-                  {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+                  {errors.email && <p className="mt-1.5 text-sm text-red-500">{errors.email}</p>}
                 </div>
               </div>
               <div className="grid sm:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone</label>
+                  <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Phone</label>
                   <input type="tel" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-colors"
-                    placeholder="+1 (555) 000-0000" />
+                    className="input-field" placeholder="+1 (555) 000-0000" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subject</label>
+                  <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Subject</label>
                   <input type="text" value={form.subject} onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-colors"
-                    placeholder="How can we help?" />
+                    className="input-field" placeholder="How can we help?" />
                 </div>
               </div>
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Message *</label>
+                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Message *</label>
                 <textarea rows={5} value={form.message} onChange={(e) => setForm((p) => ({ ...p, message: e.target.value }))}
-                  className={`w-full px-4 py-3 rounded-xl border bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none resize-none transition-colors ${errors.message ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'}`}
+                  className={`input-field resize-none ${errors.message ? 'input-error' : ''}`}
                   placeholder="Tell us more about what you need..." />
-                {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
+                {errors.message && <p className="mt-1.5 text-sm text-red-500">{errors.message}</p>}
               </div>
-              <Button type="submit" variant="primary" className="w-full rounded-xl py-3.5" loading={loading}>
-                Send Message
+              <Button type="submit" variant="primary" className="w-full py-3.5" loading={loading}>
+                <FiSend className="w-4 h-4" /> Send Message
               </Button>
             </form>
           </motion.div>

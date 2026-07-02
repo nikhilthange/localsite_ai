@@ -29,21 +29,21 @@ const COLORS = ['#6366f1', '#14b8a6', '#f97316', '#ef4444', '#22c55e', '#3b82f6'
 
 function StatusBadge({ status }) {
   const config = {
-    completed: { bg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', label: 'Completed' },
-    generating: { bg: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400', label: 'Generating' },
-    failed: { bg: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', label: 'Failed' },
+    completed: { bg: 'badge-success', label: 'Completed' },
+    generating: { bg: 'badge-primary', label: 'Generating' },
+    failed: { bg: 'badge-error', label: 'Failed' },
   };
   const c = config[status] || config.generating;
-  return <span className={twMerge('px-2.5 py-0.5 rounded-full text-xs font-medium', c.bg)}>{c.label}</span>;
+  return <span className={c.bg}>{c.label}</span>;
 }
 
 function MetricCard({ label, value, change, icon: Icon, color }) {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-200 dark:border-gray-800 shadow-sm">
+      className="card">
       <div className="flex items-start justify-between mb-3">
-        <div className={twMerge('w-10 h-10 rounded-xl flex items-center justify-center', `bg-${color}-50 dark:bg-${color}-900/20`)}>
-          <Icon className={twMerge('w-5 h-5', `text-${color}-600 dark:text-${color}-400`)} />
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-${color}-50 dark:bg-${color}-900/20`}>
+          <Icon className={`w-5 h-5 text-${color}-600 dark:text-${color}-400`} />
         </div>
         {change != null && (
           <span className={twMerge('flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full',
@@ -53,8 +53,8 @@ function MetricCard({ label, value, change, icon: Icon, color }) {
           </span>
         )}
       </div>
-      <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{label}</p>
+      <p className="text-2xl font-bold text-[rgb(var(--color-text))]">{value}</p>
+      <p className="text-sm text-[rgb(var(--color-text-muted))] mt-1">{label}</p>
     </motion.div>
   );
 }
@@ -65,37 +65,36 @@ function AnalysisTab({ icon: Icon, label, analysis, trend }) {
   const items = [
     { label: 'Total', value: analysis.total ?? analysis.totalVisitors ?? 0 },
     { label: 'Rate', value: analysis.rate ? `${analysis.rate}%` : analysis.conversionRate ? `${analysis.conversionRate}%` : '-' },
-    { label: 'Trend', value: trend === 'up' ? '↑ Growing' : trend === 'down' ? '↓ Declining' : '→ Stable' },
+    { label: 'Trend', value: trend === 'up' ? '\u2191 Growing' : trend === 'down' ? '\u2193 Declining' : '\u2192 Stable' },
   ];
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-violet-100 dark:bg-violet-900/30 rounded-xl flex items-center justify-center">
-          <Icon className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+        <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center">
+          <Icon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
         </div>
         <div>
-          <h3 className="font-semibold text-gray-900 dark:text-white">{label}</h3>
-          <p className="text-xs text-gray-500">{analysis.summary}</p>
+          <h3 className="font-semibold text-[rgb(var(--color-text))]">{label}</h3>
+          <p className="text-xs text-[rgb(var(--color-text-muted))]">{analysis.summary}</p>
         </div>
       </div>
       <div className="grid grid-cols-3 gap-4 mb-4">
         {items.map((item) => (
-          <div key={item.label} className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
-            <p className="text-lg font-bold text-gray-900 dark:text-white">{item.value}</p>
-            <p className="text-xs text-gray-500">{item.label}</p>
+          <div key={item.label} className="text-center p-3 bg-[rgb(var(--color-surface))] rounded-xl">
+            <p className="text-lg font-bold text-[rgb(var(--color-text))]">{item.value}</p>
+            <p className="text-xs text-[rgb(var(--color-text-muted))]">{item.label}</p>
           </div>
         ))}
       </div>
       {analysis.topPages && analysis.topPages.length > 0 && (
         <div>
-          <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Top Pages</p>
+          <p className="text-xs font-medium text-[rgb(var(--color-text-muted))] mb-2 uppercase tracking-wider">Top Pages</p>
           <div className="space-y-1.5">
             {analysis.topPages.slice(0, 5).map((page, i) => (
               <div key={i} className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400 truncate max-w-[200px]">{page.url}</span>
-                <span className="text-gray-900 dark:text-white font-medium">{page.views}</span>
+                <span className="text-[rgb(var(--color-text-secondary))] truncate max-w-[200px]">{page.url}</span>
+                <span className="text-[rgb(var(--color-text))] font-medium">{page.views}</span>
               </div>
             ))}
           </div>
@@ -153,23 +152,23 @@ export default function GrowthAssistant() {
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/25">
+          <div className="w-14 h-14 bg-gradient-to-br from-primary-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/25">
             <HiSparkles className="w-7 h-7 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AI Business Growth Assistant</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">AI-powered insights and recommendations to grow your business</p>
+            <h1 className="text-2xl font-bold text-[rgb(var(--color-text))]">AI Business Growth Assistant</h1>
+            <p className="text-sm text-[rgb(var(--color-text-muted))]">AI-powered insights and recommendations to grow your business</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <select value={selectedWebsite} onChange={(e) => setSelectedWebsite(e.target.value)}
-            className="px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none">
+            className="input-field w-auto min-w-[160px]">
             <option value="">Select website</option>
             {(websites || []).map((w) => (
               <option key={w._id || w.id} value={w._id || w.id}>{w.name || w.businessName}</option>
             ))}
           </select>
-          <Button variant="primary" className="rounded-xl whitespace-nowrap" loading={generating}
+          <Button variant="primary" className="whitespace-nowrap" loading={generating}
             disabled={!selectedWebsite} onClick={handleGenerateReport}>
             <HiRefresh className="w-4 h-4 mr-1.5" /> Generate Report
           </Button>
@@ -188,27 +187,26 @@ export default function GrowthAssistant() {
       )}
 
       {!latestReport && !loading && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className="text-center py-16 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800">
-          <div className="w-16 h-16 bg-violet-100 dark:bg-violet-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <HiSparkles className="w-8 h-8 text-violet-600 dark:text-violet-400" />
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card text-center py-16">
+          <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <HiSparkles className="w-8 h-8 text-primary-600 dark:text-primary-400" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Reports Yet</h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">Select a website and generate your first AI-powered business report.</p>
-          <Button variant="primary" className="rounded-xl" disabled={!selectedWebsite} onClick={handleGenerateReport}>
+          <h3 className="text-lg font-semibold text-[rgb(var(--color-text))] mb-2">No Reports Yet</h3>
+          <p className="text-[rgb(var(--color-text-muted))] mb-6">Select a website and generate your first AI-powered business report.</p>
+          <Button variant="primary" disabled={!selectedWebsite} onClick={handleGenerateReport}>
             <HiRefresh className="w-4 h-4 mr-1.5" /> Generate First Report
           </Button>
         </motion.div>
       )}
 
       {/* Tabs */}
-      <div className="flex overflow-x-auto gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
+      <div className="flex overflow-x-auto gap-1 p-1 bg-[rgb(var(--color-surface))] rounded-xl">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
               className={twMerge('flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all',
-                activeTab === tab.id ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200')}>
+                activeTab === tab.id ? 'bg-white dark:bg-surface-800 shadow-sm text-[rgb(var(--color-text))]' : 'text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text-secondary))]')}>
               <Icon className="w-4 h-4" /> {tab.label}
             </button>
           );
@@ -220,8 +218,8 @@ export default function GrowthAssistant() {
         {activeTab === 'overview' && (
           <motion.div key="overview" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
             {trends && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Score Trends (Last {trends.labels?.length || 0} Weeks)</h3>
+              <div className="card">
+                <h3 className="text-lg font-semibold text-[rgb(var(--color-text))] mb-6">Score Trends (Last {trends.labels?.length || 0} Weeks)</h3>
                 <div className="h-80">
                   <TrendChart data={trends} metrics={trendMetrics} height={300} />
                 </div>
@@ -236,12 +234,12 @@ export default function GrowthAssistant() {
             )}
 
             {latestReport?.aiSummary && (
-              <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-8 text-white">
+              <div className="bg-gradient-to-r from-primary-600 to-indigo-600 rounded-2xl p-8 text-white">
                 <div className="flex items-center gap-3 mb-4">
-                  <HiSparkles className="w-6 h-6 text-violet-200" />
+                  <HiSparkles className="w-6 h-6 text-primary-200" />
                   <h3 className="text-lg font-semibold">AI Executive Summary</h3>
                 </div>
-                <p className="text-violet-100 leading-relaxed text-lg">{latestReport.aiSummary}</p>
+                <p className="text-primary-100 leading-relaxed text-lg">{latestReport.aiSummary}</p>
               </div>
             )}
           </motion.div>
@@ -258,27 +256,27 @@ export default function GrowthAssistant() {
                 <AnalysisTab icon={HiSearch} label="SEO Analysis" analysis={latestReport.analysis.seo} trend="" />
               </div>
             ) : (
-              <div className="text-center py-12 text-gray-400">Generate a report to see detailed analysis</div>
+              <div className="text-center py-12 text-[rgb(var(--color-text-muted))] card">Generate a report to see detailed analysis</div>
             )}
 
             {latestReport?.growthOpportunities && latestReport.growthOpportunities.length > 0 && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <div className="card">
+                <h3 className="text-lg font-semibold text-[rgb(var(--color-text))] mb-4 flex items-center gap-2">
                   <HiLightBulb className="w-5 h-5 text-amber-500" /> Growth Opportunities
                 </h3>
                 <div className="space-y-3">
                   {latestReport.growthOpportunities.map((opp, i) => (
                     <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
-                      className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700">
+                      className="flex items-start gap-4 p-4 rounded-xl bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))]">
                       <div className={twMerge('px-2.5 py-1 rounded text-xs font-bold uppercase',
-                        opp.impact === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                        opp.impact === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                        'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400')}>
+                        opp.impact === 'high' ? 'badge-error' :
+                        opp.impact === 'medium' ? 'badge-warning' :
+                        'badge-success')}>
                         {opp.impact}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-sm text-gray-900 dark:text-white">{opp.title}</h4>
-                        <p className="text-sm text-gray-500 mt-1">{opp.description}</p>
+                        <h4 className="font-semibold text-sm text-[rgb(var(--color-text))]">{opp.title}</h4>
+                        <p className="text-sm text-[rgb(var(--color-text-muted))] mt-1">{opp.description}</p>
                         {opp.potentialRevenue > 0 && (
                           <p className="text-xs text-emerald-600 mt-2">Potential Revenue: ${opp.potentialRevenue.toLocaleString()}</p>
                         )}
@@ -300,7 +298,7 @@ export default function GrowthAssistant() {
                 const Icon = config.icon;
                 return (
                   <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-                    className={twMerge('bg-white dark:bg-gray-900 rounded-2xl p-6 border shadow-sm', config.border)}>
+                    className={twMerge('card border-l-4', config.border.replace('border-', 'border-l-'))}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className={twMerge('w-10 h-10 rounded-xl flex items-center justify-center', config.bg)}>
@@ -308,21 +306,21 @@ export default function GrowthAssistant() {
                         </div>
                         <div>
                           <span className={twMerge('text-xs font-bold uppercase', config.color)}>{action.priority}</span>
-                          <h3 className="font-semibold text-gray-900 dark:text-white">{action.title}</h3>
+                          <h3 className="font-semibold text-[rgb(var(--color-text))]">{action.title}</h3>
                         </div>
                       </div>
                       {action.deadline && (
-                        <span className="text-xs text-gray-400 whitespace-nowrap">Due: {action.deadline}</span>
+                        <span className="text-xs text-[rgb(var(--color-text-muted))] whitespace-nowrap">Due: {action.deadline}</span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{action.description}</p>
+                    <p className="text-sm text-[rgb(var(--color-text-secondary))] mb-4">{action.description}</p>
                     {action.steps && action.steps.length > 0 && (
-                      <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
-                        <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wider">Steps</p>
+                      <div className="bg-[rgb(var(--color-surface))] rounded-xl p-4">
+                        <p className="text-xs font-medium text-[rgb(var(--color-text-muted))] mb-2 uppercase tracking-wider">Steps</p>
                         <ol className="space-y-2">
                           {action.steps.map((step, j) => (
-                            <li key={j} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
-                              <span className="w-5 h-5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs font-medium shrink-0 mt-0.5">
+                            <li key={j} className="flex items-start gap-2 text-sm text-[rgb(var(--color-text-secondary))]">
+                              <span className="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-medium shrink-0 mt-0.5">
                                 {j + 1}
                               </span>
                               {step}
@@ -341,8 +339,8 @@ export default function GrowthAssistant() {
                 );
               })
             ) : (
-              <div className="text-center py-12 text-gray-400 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8">
-                <FiTarget className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center py-12 text-[rgb(var(--color-text-muted))] card">
+                <FiTarget className="w-12 h-12 mx-auto mb-4 text-[rgb(var(--color-text-muted))]" />
                 <p>No recommendations yet. Generate a report to get AI-powered recommendations.</p>
               </div>
             )}
@@ -357,8 +355,8 @@ export default function GrowthAssistant() {
                 <InsightCard key={insight._id} insight={insight} onDismiss={dismissInsight} onMarkRead={markInsightRead} index={i} />
               ))
             ) : (
-              <div className="text-center py-12 text-gray-400 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8">
-                <FiZap className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center py-12 text-[rgb(var(--color-text-muted))] card">
+                <FiZap className="w-12 h-12 mx-auto mb-4 text-[rgb(var(--color-text-muted))]" />
                 <p>No insights yet. Insights will appear as your website generates data.</p>
               </div>
             )}
@@ -372,22 +370,22 @@ export default function GrowthAssistant() {
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {reports.map((report, i) => (
                   <motion.div key={report._id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                    className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    className="card-hover cursor-pointer">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                      <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-xl flex items-center justify-center">
                         <HiCalendar className="w-5 h-5 text-white" />
                       </div>
                       <StatusBadge status={report.status} />
                     </div>
-                    <p className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                      {report.scores?.businessHealth || '—'}/100
+                    <p className="text-lg font-bold text-[rgb(var(--color-text))] mb-1">
+                      {report.scores?.businessHealth || '\u2014'}/100
                     </p>
-                    <p className="text-sm text-gray-500">
-                      {report.weekStart ? new Date(report.weekStart).toLocaleDateString() : '—'} - {report.weekEnd ? new Date(report.weekEnd).toLocaleDateString() : '—'}
+                    <p className="text-sm text-[rgb(var(--color-text-muted))]">
+                      {report.weekStart ? new Date(report.weekStart).toLocaleDateString() : '\u2014'} - {report.weekEnd ? new Date(report.weekEnd).toLocaleDateString() : '\u2014'}
                     </p>
                     <div className="flex gap-2 mt-4">
                       {['seo', 'leadGeneration', 'conversion'].map((key) => (
-                        <span key={key} className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                        <span key={key} className="text-xs text-[rgb(var(--color-text-muted))] bg-[rgb(var(--color-surface))] px-2 py-1 rounded">
                           {key.slice(0, 3)}: {report.scores?.[key] || 0}
                         </span>
                       ))}
@@ -396,8 +394,8 @@ export default function GrowthAssistant() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-gray-400 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8">
-                <HiCalendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <div className="text-center py-12 text-[rgb(var(--color-text-muted))] card">
+                <HiCalendar className="w-12 h-12 mx-auto mb-4 text-[rgb(var(--color-text-muted))]" />
                 <p>No reports generated yet. Weekly reports are generated automatically every Monday.</p>
               </div>
             )}

@@ -46,7 +46,7 @@ export default function AdminDashboard() {
   }, []);
 
   const adminStats = [
-    { label: 'Total Users', value: stats?.totalUsers || '2,451', icon: FiUsers, change: '+12%', color: 'from-violet-500 to-indigo-600' },
+    { label: 'Total Users', value: stats?.totalUsers || '2,451', icon: FiUsers, change: '+12%', color: 'from-primary-500 to-indigo-600' },
     { label: 'Monthly Revenue', value: `$${stats?.monthlyRevenue?.toLocaleString() || '9,600'}`, icon: FiDollarSign, change: '+18%', color: 'from-emerald-500 to-teal-600' },
     { label: 'Active Websites', value: stats?.activeWebsites || '1,234', icon: FiServer, change: '+24%', color: 'from-blue-500 to-cyan-600' },
     { label: 'AI Generations', value: stats?.aiGenerations || '8,947', icon: FiActivity, change: '+31%', color: 'from-amber-500 to-orange-600' },
@@ -55,8 +55,8 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Overview of your platform's performance</p>
+        <h1 className="text-2xl font-bold text-[rgb(var(--color-text))]">Admin Dashboard</h1>
+        <p className="text-sm text-[rgb(var(--color-text-muted))]">Overview of your platform's performance</p>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -64,7 +64,7 @@ export default function AdminDashboard() {
           const Icon = stat.icon;
           return (
             <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-              className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
+              className="card">
               <div className="flex items-start justify-between mb-4">
                 <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center`}>
                   <Icon className="w-6 h-6 text-white" />
@@ -73,17 +73,16 @@ export default function AdminDashboard() {
                   <HiArrowUp className="w-3.5 h-3.5" /> {stat.change}
                 </span>
               </div>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{stat.value}</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{stat.label}</p>
+              <p className="text-3xl font-bold text-[rgb(var(--color-text))] mb-1">{stat.value}</p>
+              <p className="text-sm text-[rgb(var(--color-text-muted))]">{stat.label}</p>
             </motion.div>
           );
         })}
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Revenue Overview</h3>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="card">
+          <h3 className="text-lg font-semibold text-[rgb(var(--color-text))] mb-6">Revenue Overview</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
@@ -103,9 +102,8 @@ export default function AdminDashboard() {
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">User Growth</h3>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="card">
+          <h3 className="text-lg font-semibold text-[rgb(var(--color-text))] mb-6">User Growth</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
@@ -121,44 +119,43 @@ export default function AdminDashboard() {
         </motion.div>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-        className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Users</h3>
-          <Link to="/admin/users" className="text-sm text-violet-600 dark:text-violet-400 hover:underline font-medium">View All</Link>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="card p-0 overflow-hidden">
+        <div className="p-6 border-b border-[rgb(var(--color-border))] flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-[rgb(var(--color-text))]">Recent Users</h3>
+          <Link to="/admin/users" className="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium">View All</Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-800">
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+              <tr className="border-b border-[rgb(var(--color-border))]">
+                <th className="text-left px-6 py-4 text-xs font-medium text-[rgb(var(--color-text-muted))] uppercase tracking-wider">User</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-[rgb(var(--color-text-muted))] uppercase tracking-wider">Plan</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-[rgb(var(--color-text-muted))] uppercase tracking-wider">Status</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-[rgb(var(--color-text-muted))] uppercase tracking-wider">Joined</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+            <tbody className="divide-y divide-[rgb(var(--color-border))]">
               {recentUsers.map((u) => (
-                <tr key={u.email} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                <tr key={u.email} className="hover:bg-[rgb(var(--color-surface))] transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">
+                      <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">
                         {u.name.charAt(0)}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">{u.name}</p>
-                        <p className="text-xs text-gray-500">{u.email}</p>
+                        <p className="text-sm font-medium text-[rgb(var(--color-text))]">{u.name}</p>
+                        <p className="text-xs text-[rgb(var(--color-text-muted))]">{u.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{u.plan}</td>
+                  <td className="px-6 py-4 text-sm text-[rgb(var(--color-text-secondary))]">{u.plan}</td>
                   <td className="px-6 py-4">
-                    <span className={twMerge('px-2.5 py-1 rounded-full text-xs font-medium',
-                      u.status === 'active' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500')}>
+                    <span className={twMerge('badge',
+                      u.status === 'active' ? 'badge-success' : 'badge-neutral')}>
                       {u.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{u.date}</td>
+                  <td className="px-6 py-4 text-sm text-[rgb(var(--color-text-muted))]">{u.date}</td>
                 </tr>
               ))}
             </tbody>
@@ -167,22 +164,21 @@ export default function AdminDashboard() {
       </motion.div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-          className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Subscription Distribution</h3>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="card">
+          <h3 className="text-lg font-semibold text-[rgb(var(--color-text))] mb-4">Subscription Distribution</h3>
           <div className="space-y-3">
             {[
               { plan: 'Free', count: '1,200', color: 'bg-gray-400', width: '48%' },
               { plan: 'Starter', count: '680', color: 'bg-blue-500', width: '27%' },
-              { plan: 'Professional', count: '420', color: 'bg-violet-500', width: '17%' },
+              { plan: 'Professional', count: '420', color: 'bg-primary-500', width: '17%' },
               { plan: 'Enterprise', count: '151', color: 'bg-emerald-500', width: '8%' },
             ].map(({ plan, count, color, width }) => (
               <div key={plan}>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600 dark:text-gray-400">{plan}</span>
-                  <span className="text-gray-900 dark:text-white font-medium">{count}</span>
+                  <span className="text-[rgb(var(--color-text-secondary))]">{plan}</span>
+                  <span className="text-[rgb(var(--color-text))] font-medium">{count}</span>
                 </div>
-                <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-[rgb(var(--color-border))] rounded-full overflow-hidden">
                   <div className={`h-full rounded-full ${color}`} style={{ width }} />
                 </div>
               </div>
@@ -190,28 +186,26 @@ export default function AdminDashboard() {
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-          className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">AI Usage Overview</h3>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="card">
+          <h3 className="text-lg font-semibold text-[rgb(var(--color-text))] mb-4">AI Usage Overview</h3>
           <div className="text-center py-8">
-            <div className="text-5xl font-bold text-gray-900 dark:text-white mb-2">8,947</div>
-            <p className="text-gray-500">Total AI Generations</p>
-            <div className="mt-6 p-4 bg-violet-50 dark:bg-violet-900/20 rounded-xl">
+            <div className="text-5xl font-bold text-[rgb(var(--color-text))] mb-2">8,947</div>
+            <p className="text-[rgb(var(--color-text-muted))]">Total AI Generations</p>
+            <div className="mt-6 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-xl">
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-violet-700 dark:text-violet-300">Today</span>
-                <span className="text-violet-700 dark:text-violet-300 font-medium">+247</span>
+                <span className="text-primary-700 dark:text-primary-300">Today</span>
+                <span className="text-primary-700 dark:text-primary-300 font-medium">+247</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">This week</span>
-                <span className="text-gray-900 dark:text-white font-medium">+1,832</span>
+                <span className="text-[rgb(var(--color-text-muted))]">This week</span>
+                <span className="text-[rgb(var(--color-text))] font-medium">+1,832</span>
               </div>
             </div>
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-          className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="card">
+          <h3 className="text-lg font-semibold text-[rgb(var(--color-text))] mb-4">Quick Actions</h3>
           <div className="space-y-3">
             {[
               { label: 'Manage Templates', link: '/admin/templates' },
@@ -220,9 +214,9 @@ export default function AdminDashboard() {
               { label: 'System Settings', link: '/admin/settings' },
             ].map((action) => (
               <Link key={action.label} to={action.link}
-                className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{action.label}</span>
-                <HiArrowUp className="w-4 h-4 text-gray-400 rotate-45" />
+                className="flex items-center justify-between p-3 rounded-xl hover:bg-[rgb(var(--color-surface))] transition-colors">
+                <span className="text-sm font-medium text-[rgb(var(--color-text-secondary))]">{action.label}</span>
+                <HiArrowUp className="w-4 h-4 text-[rgb(var(--color-text-muted))] rotate-45" />
               </Link>
             ))}
           </div>

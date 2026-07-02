@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
-import { HiLockClosed, HiEye, HiEyeOff } from 'react-icons/hi';
+import { HiLockClosed, HiEye, HiEyeOff, HiCheckCircle } from 'react-icons/hi';
 import Button from '@/components/common/Button';
 import { useAuth } from '@/context/AuthContext';
 
@@ -39,7 +39,7 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.password) { setError('Password is required'); return; }
-    if (form.password.length < 8) { setError('Password must be at least 8 characters'); return; }
+    if (form.password.length < 8) { setError('Minimum 8 characters'); return; }
     if (form.password !== form.confirmPassword) { setError('Passwords do not match'); return; }
     setError('');
     setLoading(true);
@@ -55,28 +55,28 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-8 bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen flex items-center justify-center p-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800 shadow-sm">
+        <div className="card">
           {!success ? (
             <>
-              <div className="w-14 h-14 bg-violet-100 dark:bg-violet-900/30 rounded-xl flex items-center justify-center mb-6">
-                <HiLockClosed className="w-7 h-7 text-violet-600 dark:text-violet-400" />
+              <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mb-6">
+                <HiLockClosed className="w-7 h-7 text-primary-600 dark:text-primary-400" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reset Password</h1>
-              <p className="text-gray-500 dark:text-gray-400 mb-8">Enter your new password below.</p>
+              <h1 className="text-2xl font-bold text-[rgb(var(--color-text))] mb-2">Reset Password</h1>
+              <p className="text-[rgb(var(--color-text-secondary))] mb-8">Enter your new password below.</p>
 
-              {error && <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-600">{error}</div>}
+              {error && <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-600">{error}</div>}
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">New Password</label>
+                  <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">New Password</label>
                   <div className="relative">
-                    <HiLockClosed className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <HiLockClosed className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[rgb(var(--color-text-muted))]" />
                     <input type={showPassword ? 'text' : 'password'} value={form.password} onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-                      className="w-full pl-11 pr-12 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-colors"
+                      className="w-full pl-11 pr-12 py-3 rounded-xl border border-[rgb(var(--color-border))] bg-transparent text-[rgb(var(--color-text))] placeholder:text-[rgb(var(--color-text-muted))] focus:ring-2 focus:ring-primary-500/30 outline-none transition-all"
                       placeholder="Min. 8 characters" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))]">
                       {showPassword ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
                     </button>
                   </div>
@@ -84,31 +84,31 @@ export default function ResetPassword() {
                     <div className="mt-2">
                       <div className="flex gap-1 mb-1">
                         {[...Array(4)].map((_, i) => (
-                          <div key={i} className={`h-1 flex-1 rounded-full ${i <= strength ? strengthConfig[strength].color : 'bg-gray-200 dark:bg-gray-700'}`} />
+                          <div key={i} className={`h-1.5 flex-1 rounded-full ${i <= strength ? strengthConfig[strength].color : 'bg-[rgb(var(--color-border))]'}`} />
                         ))}
                       </div>
-                      <p className="text-xs text-gray-500">{strengthConfig[strength]?.label}</p>
+                      <p className="text-xs text-[rgb(var(--color-text-muted))]">{strengthConfig[strength]?.label}</p>
                     </div>
                   )}
                 </div>
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Confirm Password</label>
+                  <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Confirm Password</label>
                   <input type="password" value={form.confirmPassword} onChange={(e) => setForm((p) => ({ ...p, confirmPassword: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-[rgb(var(--color-border))] bg-transparent text-[rgb(var(--color-text))] placeholder:text-[rgb(var(--color-text-muted))] focus:ring-2 focus:ring-primary-500/30 outline-none transition-all"
                     placeholder="Repeat your password" />
                 </div>
-                <Button type="submit" variant="primary" className="w-full rounded-xl py-3.5" loading={loading}>
+                <Button type="submit" variant="primary" className="w-full py-3.5" loading={loading}>
                   Reset Password
                 </Button>
               </form>
             </>
           ) : (
             <div className="text-center">
-              <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <HiCheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Password Reset!</h2>
-              <p className="text-gray-500 dark:text-gray-400">Your password has been reset successfully. Redirecting to login...</p>
+              <h2 className="text-2xl font-bold text-[rgb(var(--color-text))] mb-2">Password Reset!</h2>
+              <p className="text-[rgb(var(--color-text-secondary))]">Your password has been reset. Redirecting to login...</p>
             </div>
           )}
         </div>

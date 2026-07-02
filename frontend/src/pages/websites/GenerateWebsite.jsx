@@ -2,8 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { twMerge } from 'tailwind-merge';
-import { HiOfficeBuilding, HiCollection, HiSparkles, HiEye, HiGlobe, HiCheck, HiChevronLeft, HiChevronRight, HiLocationMarker, HiColorSwatch, HiDesktopComputer } from 'react-icons/hi';
-import { FiArrowRight } from 'react-icons/fi';
+import {
+  HiOfficeBuilding, HiCollection, HiSparkles, HiEye, HiGlobe,
+  HiCheck, HiChevronLeft, HiChevronRight, HiLocationMarker,
+  HiColorSwatch, HiDesktopComputer, HiLightningBolt,
+} from 'react-icons/hi';
+import { FiArrowRight, FiCheck } from 'react-icons/fi';
 import Button from '@/components/common/Button';
 import { useWebsites } from '@/context/WebsiteContext';
 
@@ -40,6 +44,12 @@ const steps = [
   { id: 4, label: 'Preview', icon: HiEye },
   { id: 5, label: 'Deploy', icon: HiGlobe },
 ];
+
+const stepVariants = {
+  initial: { opacity: 0, x: 80 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -80 },
+};
 
 export default function GenerateWebsite() {
   const navigate = useNavigate();
@@ -86,8 +96,11 @@ export default function GenerateWebsite() {
 
   const handleDeploy = async () => {
     await createWebsite({
-      ...form, template: selectedTemplate,
-      domain: deployOption === 'custom' ? customDomain : `${form.name.toLowerCase().replace(/\s+/g, '-')}.localsite.app`,
+      ...form,
+      template: selectedTemplate,
+      domain: deployOption === 'custom'
+        ? customDomain
+        : `${form.name.toLowerCase().replace(/\s+/g, '-')}.localsite.app`,
       status: 'published',
     });
     navigate('/websites');
@@ -101,15 +114,24 @@ export default function GenerateWebsite() {
         const isCompleted = currentStep > step.id;
         return (
           <div key={step.id} className="flex items-center">
-            <div className={twMerge('flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all',
-              isActive && 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300',
-              isCompleted && 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
-              !isActive && !isCompleted && 'text-gray-400')}>
+            <div
+              className={twMerge(
+                'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all',
+                isActive && 'badge-primary',
+                isCompleted && 'badge-success',
+                !isActive && !isCompleted && 'text-[rgb(var(--color-text-muted))]'
+              )}
+            >
               <StepIcon className="w-4 h-4" />
               <span className="hidden sm:inline">{step.label}</span>
             </div>
             {i < steps.length - 1 && (
-              <div className={twMerge('w-8 h-0.5 mx-1', isCompleted ? 'bg-emerald-400' : 'bg-gray-200 dark:bg-gray-700')} />
+              <div
+                className={twMerge(
+                  'w-8 h-0.5 mx-1 rounded-full',
+                  isCompleted ? 'bg-emerald-400' : 'bg-[rgb(var(--color-border))]'
+                )}
+              />
             )}
           </div>
         );
@@ -123,52 +145,86 @@ export default function GenerateWebsite() {
 
       <AnimatePresence mode="wait">
         {currentStep === 1 && (
-          <motion.div key="step1" initial={{ opacity: 0, x: 100 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -100 }}
-            className="bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800 shadow-sm">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Tell us about your business</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-8">We'll use this information to generate the perfect website.</p>
+          <motion.div
+            key="step1"
+            variants={stepVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="card"
+          >
+            <h2 className="text-2xl font-bold text-[rgb(var(--color-text))] mb-2">Tell us about your business</h2>
+            <p className="text-[rgb(var(--color-text-secondary))] mb-8">
+              We'll use this information to generate the perfect website.
+            </p>
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Business Name</label>
-                <input type="text" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                  className={twMerge('w-full px-4 py-3.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-colors',
-                    errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-700')}
-                  placeholder="e.g., The Coffee House" />
+                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Business Name</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                  className={twMerge('input-field', errors.name && 'border-red-500 focus:ring-red-500/20')}
+                  placeholder="e.g., The Coffee House"
+                />
                 {errors.name && <p className="mt-1.5 text-sm text-red-500">{errors.name}</p>}
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Category</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {categories.map((cat) => (
-                    <button key={cat} type="button" onClick={() => setForm((p) => ({ ...p, category: cat }))}
-                      className={twMerge('px-4 py-3 rounded-xl border text-sm font-medium transition-all',
-                        form.category === cat ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600')}>
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setForm((p) => ({ ...p, category: cat }))}
+                      className={twMerge(
+                        'px-4 py-3 rounded-xl border text-sm font-medium transition-all',
+                        form.category === cat
+                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                          : 'border-[rgb(var(--color-border))] text-[rgb(var(--color-text-secondary))] hover:border-[rgb(var(--color-text-muted))]'
+                      )}
+                    >
                       {cat}
                     </button>
                   ))}
                 </div>
                 {errors.category && <p className="mt-1.5 text-sm text-red-500">{errors.category}</p>}
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location (optional)</label>
+                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Location (optional)</label>
                 <div className="relative">
-                  <HiLocationMarker className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input type="text" value={form.location} onChange={(e) => setForm((p) => ({ ...p, location: e.target.value }))}
-                    className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-colors"
-                    placeholder="New York, NY" />
+                  <HiLocationMarker className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[rgb(var(--color-text-muted))]" />
+                  <input
+                    type="text"
+                    value={form.location}
+                    onChange={(e) => setForm((p) => ({ ...p, location: e.target.value }))}
+                    className="input-field pl-12"
+                    placeholder="New York, NY"
+                  />
                 </div>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
-                <textarea rows={4} value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-                  className={twMerge('w-full px-4 py-3.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none resize-none transition-colors',
-                    errors.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-700')}
-                  placeholder="Describe your business, what makes it unique, and what you want visitors to know..." />
+                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Description</label>
+                <textarea
+                  rows={4}
+                  value={form.description}
+                  onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                  className={twMerge('input-field resize-none', errors.description && 'border-red-500 focus:ring-red-500/20')}
+                  placeholder="Describe your business, what makes it unique, and what you want visitors to know..."
+                />
                 {errors.description && <p className="mt-1.5 text-sm text-red-500">{errors.description}</p>}
               </div>
             </div>
+
             <div className="flex justify-end mt-8">
-              <Button variant="primary" size="lg" className="rounded-xl" onClick={() => { if (validateStep1()) setCurrentStep(2); }}>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={() => { if (validateStep1()) setCurrentStep(2); }}
+              >
                 Choose Template <FiArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </div>
@@ -176,21 +232,41 @@ export default function GenerateWebsite() {
         )}
 
         {currentStep === 2 && (
-          <motion.div key="step2" initial={{ opacity: 0, x: 100 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -100 }}>
+          <motion.div
+            key="step2"
+            variants={stepVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Choose a template</h2>
-              <p className="text-gray-500 dark:text-gray-400">Pick a starting point that matches your style.</p>
+              <h2 className="text-2xl font-bold text-[rgb(var(--color-text))] mb-2">Choose a template</h2>
+              <p className="text-[rgb(var(--color-text-secondary))]">Pick a starting point that matches your style.</p>
             </div>
+
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {templates.map((template, i) => (
-                <motion.button key={template.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                <motion.button
+                  key={template.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
                   onClick={() => setSelectedTemplate(template)}
-                  className={twMerge('relative text-left rounded-2xl overflow-hidden border-2 transition-all',
-                    selectedTemplate?.id === template.id ? 'border-violet-500 shadow-lg shadow-violet-500/10' : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600')}>
+                  className={twMerge(
+                    'relative text-left rounded-2xl overflow-hidden border-2 transition-all',
+                    selectedTemplate?.id === template.id
+                      ? 'border-primary-500 shadow-lg shadow-primary-500/10'
+                      : 'border-transparent hover:border-[rgb(var(--color-border))]'
+                  )}
+                >
                   <div className={`aspect-[3/4] bg-gradient-to-br ${template.color} p-4 flex flex-col justify-between`}>
                     <div className="flex justify-between items-start">
                       <div className="w-8 h-2 bg-white/30 rounded-full" />
-                      {template.popular && <span className="px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[10px] text-white font-medium">Popular</span>}
+                      {template.popular && (
+                        <span className="px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[10px] text-white font-medium">
+                          Popular
+                        </span>
+                      )}
                     </div>
                     <div>
                       <div className="w-full h-2 bg-white/20 rounded-full mb-2" />
@@ -201,21 +277,29 @@ export default function GenerateWebsite() {
                       </div>
                     </div>
                     {selectedTemplate?.id === template.id && (
-                      <div className="absolute top-2 right-2 w-6 h-6 bg-violet-500 rounded-full flex items-center justify-center">
+                      <div className="absolute top-2 right-2 w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
                         <HiCheck className="w-4 h-4 text-white" />
                       </div>
                     )}
                   </div>
-                  <div className="p-3 bg-white dark:bg-gray-900">
-                    <p className="font-medium text-sm text-gray-900 dark:text-white">{template.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{template.category}</p>
+                  <div className="p-3 bg-[rgb(var(--color-bg))]">
+                    <p className="font-medium text-sm text-[rgb(var(--color-text))]">{template.name}</p>
+                    <p className="text-xs text-[rgb(var(--color-text-secondary))]">{template.category}</p>
                   </div>
                 </motion.button>
               ))}
             </div>
+
             <div className="flex justify-between mt-8">
-              <Button variant="ghost" onClick={() => setCurrentStep(1)}><HiChevronLeft className="mr-2 w-5 h-5" /> Back</Button>
-              <Button variant="primary" size="lg" className="rounded-xl" disabled={!selectedTemplate} onClick={startGeneration}>
+              <Button variant="ghost" onClick={() => setCurrentStep(1)}>
+                <HiChevronLeft className="mr-2 w-5 h-5" /> Back
+              </Button>
+              <Button
+                variant="primary"
+                size="lg"
+                disabled={!selectedTemplate}
+                onClick={startGeneration}
+              >
                 Generate Website <HiSparkles className="ml-2 w-5 h-5" />
               </Button>
             </div>
@@ -223,42 +307,80 @@ export default function GenerateWebsite() {
         )}
 
         {currentStep === 3 && (
-          <motion.div key="step3" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-gray-900 rounded-2xl p-12 border border-gray-200 dark:border-gray-800 shadow-sm text-center">
+          <motion.div
+            key="step3"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="card text-center py-12"
+          >
             <div className="relative w-24 h-24 mx-auto mb-8">
               <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="6" className="text-gray-200 dark:text-gray-700" />
-                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 45}`} strokeDashoffset={`${2 * Math.PI * 45 * (1 - generationProgress / 100)}`}
-                  className="text-violet-500 transition-all duration-300" />
+                <circle
+                  cx="50" cy="50" r="45"
+                  fill="none" stroke="currentColor" strokeWidth="6"
+                  className="text-[rgb(var(--color-border))]"
+                />
+                <circle
+                  cx="50" cy="50" r="45"
+                  fill="none" stroke="currentColor" strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * 45}`}
+                  strokeDashoffset={`${2 * Math.PI * 45 * (1 - generationProgress / 100)}`}
+                  className="text-primary-500 transition-all duration-300"
+                />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">{generationProgress}%</span>
+                <span className="text-2xl font-bold text-[rgb(var(--color-text))]">
+                  {generationProgress}%
+                </span>
               </div>
             </div>
+
             <AnimatePresence mode="wait">
-              <motion.div key={genStatusIndex} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                className="flex items-center justify-center gap-3">
-                {(() => { const Icon = generationStatuses[genStatusIndex]?.icon || HiSparkles; return <Icon className="w-5 h-5 text-violet-500 animate-pulse" />; })()}
-                <span className="text-lg text-gray-600 dark:text-gray-300">{generationStatuses[genStatusIndex]?.message}</span>
+              <motion.div
+                key={genStatusIndex}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex items-center justify-center gap-3"
+              >
+                {(() => {
+                  const Icon = generationStatuses[genStatusIndex]?.icon || HiSparkles;
+                  return <Icon className="w-5 h-5 text-primary-500 animate-pulse" />;
+                })()}
+                <span className="text-lg text-[rgb(var(--color-text-secondary))]">
+                  {generationStatuses[genStatusIndex]?.message}
+                </span>
               </motion.div>
             </AnimatePresence>
-            <div className="mt-8 w-full max-w-md mx-auto bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-              <motion.div className="h-full bg-gradient-to-r from-violet-500 to-indigo-600 rounded-full" animate={{ width: `${generationProgress}%` }} transition={{ duration: 0.3 }} />
+
+            <div className="mt-8 w-full max-w-md mx-auto bg-[rgb(var(--color-border))] rounded-full h-2 overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-primary-500 to-indigo-600 rounded-full"
+                animate={{ width: `${generationProgress}%` }}
+                transition={{ duration: 0.3 }}
+              />
             </div>
           </motion.div>
         )}
 
         {currentStep === 4 && generatedWebsite && (
-          <motion.div key="step4" initial={{ opacity: 0, x: 100 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -100 }} className="space-y-6">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
-              <div className="p-4 bg-gray-100 dark:bg-gray-800 flex items-center gap-3 border-b border-gray-200 dark:border-gray-700">
+          <motion.div
+            key="step4"
+            variants={stepVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="space-y-6"
+          >
+            <div className="card overflow-hidden p-0">
+              <div className="p-3 bg-[rgb(var(--color-surface))] flex items-center gap-3 border-b border-[rgb(var(--color-border))]">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-red-500" />
                   <div className="w-3 h-3 rounded-full bg-yellow-500" />
                   <div className="w-3 h-3 rounded-full bg-green-500" />
                 </div>
-                <div className="flex-1 max-w-md mx-auto h-7 bg-white dark:bg-gray-700 rounded-lg flex items-center justify-center text-xs text-gray-500">
+                <div className="flex-1 max-w-md mx-auto h-7 bg-[rgb(var(--color-bg))] rounded-lg flex items-center justify-center text-xs text-[rgb(var(--color-text-muted))]">
                   {form.name.toLowerCase().replace(/\s+/g, '-')}.localsite.app
                 </div>
               </div>
@@ -273,47 +395,103 @@ export default function GenerateWebsite() {
                 </div>
               </div>
             </div>
+
             <div className="flex justify-between">
-              <Button variant="ghost" onClick={() => setCurrentStep(2)}><HiChevronLeft className="mr-2 w-5 h-5" /> Change Template</Button>
-              <Button variant="primary" size="lg" className="rounded-xl" onClick={() => setCurrentStep(5)}>Continue <FiArrowRight className="ml-2 w-5 h-5" /></Button>
+              <Button variant="ghost" onClick={() => setCurrentStep(2)}>
+                <HiChevronLeft className="mr-2 w-5 h-5" /> Change Template
+              </Button>
+              <Button variant="primary" size="lg" onClick={() => setCurrentStep(5)}>
+                Continue <FiArrowRight className="ml-2 w-5 h-5" />
+              </Button>
             </div>
           </motion.div>
         )}
 
         {currentStep === 5 && (
-          <motion.div key="step5" initial={{ opacity: 0, x: 100 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -100 }}
-            className="bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800 shadow-sm">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Launch your website</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-8">Choose how you want to deploy your site.</p>
+          <motion.div
+            key="step5"
+            variants={stepVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="card"
+          >
+            <h2 className="text-2xl font-bold text-[rgb(var(--color-text))] mb-2">Launch your website</h2>
+            <p className="text-[rgb(var(--color-text-secondary))] mb-8">
+              Choose how you want to deploy your site.
+            </p>
+
             <div className="space-y-4 mb-8">
-              <label className={twMerge('flex items-center gap-4 p-5 rounded-xl border cursor-pointer transition-all',
-                deployOption === 'subdomain' ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600')}>
-                <input type="radio" name="deploy" value="subdomain" checked={deployOption === 'subdomain'} onChange={() => setDeployOption('subdomain')} className="w-4 h-4 text-violet-600" />
+              <label
+                className={twMerge(
+                  'flex items-center gap-4 p-5 rounded-xl border cursor-pointer transition-all',
+                  deployOption === 'subdomain'
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                    : 'border-[rgb(var(--color-border))] hover:border-[rgb(var(--color-text-muted))]'
+                )}
+              >
+                <input
+                  type="radio"
+                  name="deploy"
+                  value="subdomain"
+                  checked={deployOption === 'subdomain'}
+                  onChange={() => setDeployOption('subdomain')}
+                  className="w-4 h-4 text-primary-600"
+                />
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Free Subdomain</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">yourbusiness.localsite.app — included free</p>
+                  <p className="font-medium text-[rgb(var(--color-text))]">Free Subdomain</p>
+                  <p className="text-sm text-[rgb(var(--color-text-secondary))]">
+                    yourbusiness.localsite.app — included free
+                  </p>
                 </div>
               </label>
-              <label className={twMerge('flex items-center gap-4 p-5 rounded-xl border cursor-pointer transition-all',
-                deployOption === 'custom' ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600')}>
-                <input type="radio" name="deploy" value="custom" checked={deployOption === 'custom'} onChange={() => setDeployOption('custom')} className="w-4 h-4 text-violet-600" />
+
+              <label
+                className={twMerge(
+                  'flex items-center gap-4 p-5 rounded-xl border cursor-pointer transition-all',
+                  deployOption === 'custom'
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                    : 'border-[rgb(var(--color-border))] hover:border-[rgb(var(--color-text-muted))]'
+                )}
+              >
+                <input
+                  type="radio"
+                  name="deploy"
+                  value="custom"
+                  checked={deployOption === 'custom'}
+                  onChange={() => setDeployOption('custom')}
+                  className="w-4 h-4 text-primary-600"
+                />
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-white">Custom Domain</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Use your own domain (requires paid plan)</p>
+                  <p className="font-medium text-[rgb(var(--color-text))]">Custom Domain</p>
+                  <p className="text-sm text-[rgb(var(--color-text-secondary))]">
+                    Use your own domain (requires paid plan)
+                  </p>
                   {deployOption === 'custom' && (
-                    <input type="text" value={customDomain} onChange={(e) => setCustomDomain(e.target.value)}
-                      className="mt-3 w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none"
-                      placeholder="mybusiness.com" onClick={(e) => e.stopPropagation()} />
+                    <input
+                      type="text"
+                      value={customDomain}
+                      onChange={(e) => setCustomDomain(e.target.value)}
+                      className="mt-3 input-field"
+                      placeholder="mybusiness.com"
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   )}
                 </div>
               </label>
             </div>
+
             <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-8">
-              <p className="text-sm text-amber-700 dark:text-amber-400"><strong>Tip:</strong> You can always connect a custom domain later from the website settings.</p>
+              <p className="text-sm text-amber-700 dark:text-amber-400">
+                <strong>Tip:</strong> You can always connect a custom domain later from the website settings.
+              </p>
             </div>
+
             <div className="flex justify-between">
-              <Button variant="ghost" onClick={() => setCurrentStep(4)}><HiChevronLeft className="mr-2 w-5 h-5" /> Back to Preview</Button>
-              <Button variant="primary" size="lg" className="rounded-xl" onClick={handleDeploy}>
+              <Button variant="ghost" onClick={() => setCurrentStep(4)}>
+                <HiChevronLeft className="mr-2 w-5 h-5" /> Back to Preview
+              </Button>
+              <Button variant="primary" size="lg" onClick={handleDeploy}>
                 <HiGlobe className="mr-2 w-5 h-5" /> Deploy Website
               </Button>
             </div>

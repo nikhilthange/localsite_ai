@@ -8,7 +8,7 @@ import {
 export default function TrendChart({ data, metrics, height = 300, showLegend = true }) {
   if (!data || !data.labels || data.labels.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-400 text-sm">
+      <div className="flex items-center justify-center h-64 text-[rgb(var(--color-text-muted))] text-sm">
         No trend data available yet
       </div>
     );
@@ -61,7 +61,7 @@ export default function TrendChart({ data, metrics, height = 300, showLegend = t
 export function AreaTrendChart({ data, dataKey = 'value', label = 'Score', color = '#6366f1', height = 200 }) {
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
+      <div className="flex items-center justify-center h-48 text-[rgb(var(--color-text-muted))] text-sm">
         No data available
       </div>
     );

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { HiMenu, HiX, HiChevronDown, HiSun, HiMoon } from 'react-icons/hi';
-import { FiLogOut, FiSettings, FiLayout } from 'react-icons/fi';
+import { FiLogOut, FiSettings, FiLayout, FiGrid } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import { twMerge } from 'tailwind-merge';
 import Button from '../common/Button';
@@ -21,7 +21,7 @@ export default function Navbar({ user, onLogout, onToggleDark, isDark }) {
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -35,79 +35,115 @@ export default function Navbar({ user, onLogout, onToggleDark, isDark }) {
 
   return (
     <motion.nav
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
+      initial={{ y: -80 }}
+      animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-      className={twMerge('fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        scrolled ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-lg' : 'bg-transparent')}
+      className={twMerge(
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
+        scrolled
+          ? 'bg-white/80 dark:bg-surface-900/80 backdrop-blur-xl shadow-sm border-b border-[rgb(var(--color-border))]'
+          : 'bg-transparent'
+      )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-lg flex items-center justify-center">
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
               <FiLayout className="text-white w-4 h-4" />
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">LocalSite AI</span>
+            <span className="text-xl font-bold text-[rgb(var(--color-text))]">
+              LocalSite<span className="text-primary-500">AI</span>
+            </span>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <Link key={link.label} to={link.href}
-                className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+              <Link
+                key={link.label}
+                to={link.href}
+                className="text-sm font-medium text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-text))] transition-colors relative group"
+              >
                 {link.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-500 group-hover:w-full transition-all duration-300" />
               </Link>
             ))}
           </div>
 
-          <div className="flex items-center space-x-3">
-            <button onClick={onToggleDark}
-              className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Toggle dark mode">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onToggleDark}
+              className="p-2.5 rounded-xl text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-surface))] transition-colors"
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
               {isDark ? <HiSun className="w-5 h-5" /> : <HiMoon className="w-5 h-5" />}
             </button>
 
             {user ? (
               <div className="relative" ref={dropdownRef}>
-                <button onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center space-x-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                  <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[rgb(var(--color-surface))] transition-colors"
+                  aria-haspopup="true"
+                  aria-expanded={dropdownOpen}
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white text-sm font-semibold shadow-sm">
                     {user.name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
-                  <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-200">{user.name}</span>
-                  <HiChevronDown className={twMerge('w-4 h-4 text-gray-400 transition-transform', dropdownOpen && 'rotate-180')} />
+                  <span className="hidden sm:block text-sm font-medium text-[rgb(var(--color-text))]">{user.name}</span>
+                  <HiChevronDown className={twMerge('w-4 h-4 text-[rgb(var(--color-text-muted))] transition-transform duration-200', dropdownOpen && 'rotate-180')} />
                 </button>
                 <AnimatePresence>
                   {dropdownOpen && (
-                    <motion.div initial={{ opacity: 0, y: -10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.95 }} transition={{ duration: 0.15 }}
-                      className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-1">
-                      <button onClick={() => { navigate('/dashboard'); setDropdownOpen(false); }}
-                        className="flex items-center space-x-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <FiLayout className="w-4 h-4" /> <span>Dashboard</span>
-                      </button>
-                      <button onClick={() => { navigate('/settings'); setDropdownOpen(false); }}
-                        className="flex items-center space-x-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <FiSettings className="w-4 h-4" /> <span>Settings</span>
-                      </button>
-                      <hr className="my-1 border-gray-200 dark:border-gray-700" />
-                      <button onClick={() => { onLogout?.(); setDropdownOpen(false); }}
-                        className="flex items-center space-x-2 w-full px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                        <FiLogOut className="w-4 h-4" /> <span>Logout</span>
-                      </button>
+                    <motion.div
+                      initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-56 bg-white dark:bg-surface-800 rounded-2xl shadow-[var(--shadow-dropdown)] border border-[rgb(var(--color-border))] py-1.5 overflow-hidden"
+                    >
+                      <div className="px-4 py-3 border-b border-[rgb(var(--color-border))]">
+                        <p className="text-sm font-semibold text-[rgb(var(--color-text))]">{user.name}</p>
+                        <p className="text-xs text-[rgb(var(--color-text-muted))]">{user.email}</p>
+                      </div>
+                      <div className="py-1">
+                        <button
+                          onClick={() => { navigate('/dashboard'); setDropdownOpen(false); }}
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-surface))] transition-colors"
+                        >
+                          <FiGrid className="w-4 h-4 text-[rgb(var(--color-text-muted))]" /> Dashboard
+                        </button>
+                        <button
+                          onClick={() => { navigate('/settings'); setDropdownOpen(false); }}
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-surface))] transition-colors"
+                        >
+                          <FiSettings className="w-4 h-4 text-[rgb(var(--color-text-muted))]" /> Settings
+                        </button>
+                      </div>
+                      <div className="border-t border-[rgb(var(--color-border))] pt-1">
+                        <button
+                          onClick={() => { onLogout?.(); setDropdownOpen(false); }}
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        >
+                          <FiLogOut className="w-4 h-4" /> Logout
+                        </button>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             ) : (
-              <div className="hidden md:flex items-center space-x-3">
-                <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>Login</Button>
-                <Button variant="primary" size="sm" onClick={() => navigate('/signup')}>Sign Up</Button>
+              <div className="hidden md:flex items-center gap-3">
+                <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>Log in</Button>
+                <Button variant="primary" size="sm" onClick={() => navigate('/signup')}>Get Started</Button>
               </div>
             )}
 
-            <button onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Toggle menu">
-              {mobileOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="md:hidden p-2.5 rounded-xl text-[rgb(var(--color-text-muted))] hover:bg-[rgb(var(--color-surface))] transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <HiX className="w-5 h-5" /> : <HiMenu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -115,19 +151,28 @@ export default function Navbar({ user, onLogout, onToggleDark, isDark }) {
 
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }}
-            className="md:hidden overflow-hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden overflow-hidden bg-white dark:bg-surface-900 border-t border-[rgb(var(--color-border))]"
+          >
             <div className="px-4 py-4 space-y-3">
               {navLinks.map((link) => (
-                <Link key={link.label} to={link.href} onClick={() => setMobileOpen(false)}
-                  className="block text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <Link
+                  key={link.label}
+                  to={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="block py-2 text-sm font-medium text-[rgb(var(--color-text-secondary))] hover:text-[rgb(var(--color-text))] transition-colors"
+                >
                   {link.label}
                 </Link>
               ))}
               {!user && (
-                <div className="pt-3 space-y-2 border-t border-gray-200 dark:border-gray-800">
-                  <Button variant="outline" className="w-full" onClick={() => navigate('/login')}>Login</Button>
-                  <Button variant="primary" className="w-full" onClick={() => navigate('/signup')}>Sign Up</Button>
+                <div className="pt-3 space-y-2 border-t border-[rgb(var(--color-border))]">
+                  <Button variant="outline" className="w-full" onClick={() => navigate('/login')}>Log in</Button>
+                  <Button variant="primary" className="w-full" onClick={() => navigate('/signup')}>Get Started</Button>
                 </div>
               )}
             </div>

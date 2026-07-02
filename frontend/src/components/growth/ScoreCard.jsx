@@ -2,10 +2,10 @@ import { motion } from 'framer-motion';
 import { twMerge } from 'tailwind-merge';
 
 const scoreConfig = {
-  excellent: { range: [80, 100], color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-200 dark:border-emerald-800', ring: 'ring-emerald-500', label: 'Excellent' },
-  good: { range: [60, 79], color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', ring: 'ring-blue-500', label: 'Good' },
-  fair: { range: [40, 59], color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800', ring: 'ring-amber-500', label: 'Fair' },
-  poor: { range: [0, 39], color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-red-200 dark:border-red-800', ring: 'ring-red-500', label: 'Needs Work' },
+  excellent: { range: [80, 100], color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-200 dark:border-emerald-800', ring: '#22c55e', label: 'Excellent' },
+  good: { range: [60, 79], color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', ring: '#3b82f6', label: 'Good' },
+  fair: { range: [40, 59], color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800', ring: '#f59e0b', label: 'Fair' },
+  poor: { range: [0, 39], color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-red-200 dark:border-red-800', ring: '#ef4444', label: 'Needs Work' },
 };
 
 function getScoreConfig(score) {
@@ -27,7 +27,7 @@ export default function ScoreCard({ label, score, subtitle, icon: Icon, trend, s
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className={twMerge(
-        'relative flex flex-col items-center p-6 rounded-2xl border bg-white dark:bg-gray-900 shadow-sm',
+        'relative flex flex-col items-center p-6 rounded-2xl border bg-white dark:bg-surface-800 shadow-[var(--shadow-card)]',
         config.border,
         className
       )}
@@ -43,16 +43,15 @@ export default function ScoreCard({ label, score, subtitle, icon: Icon, trend, s
           <circle cx={radius + 8} cy={radius + 8} r={radius}
             fill="none" stroke="currentColor"
             strokeWidth={isLarge ? 8 : 6}
-            className="text-gray-100 dark:text-gray-800"
+            className="text-[rgb(var(--color-border))]"
           />
           <circle cx={radius + 8} cy={radius + 8} r={radius}
-            fill="none" stroke="currentColor"
+            fill="none" stroke={config.ring}
             strokeWidth={isLarge ? 8 : 6}
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            className={twMerge('transition-all duration-1000 ease-out', config.color.replace('text-', 'text-').replace('600', '500'))}
-            style={{ color: config.ring.replace('ring-', '#') }}
+            className="transition-all duration-1000 ease-out"
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
@@ -62,14 +61,14 @@ export default function ScoreCard({ label, score, subtitle, icon: Icon, trend, s
         </div>
       </div>
 
-      <p className="text-sm font-semibold text-gray-900 dark:text-white text-center">{label}</p>
-      {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+      <p className="text-sm font-semibold text-[rgb(var(--color-text))] text-center">{label}</p>
+      {subtitle && <p className="text-xs text-[rgb(var(--color-text-muted))] mt-1">{subtitle}</p>}
       <span className={twMerge('mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium', config.bg, config.color)}>
         {config.label}
       </span>
       {trend && (
-        <span className={twMerge('text-xs mt-2', trend > 0 ? 'text-emerald-600' : trend < 0 ? 'text-red-600' : 'text-gray-400')}>
-          {trend > 0 ? '↑' : trend < 0 ? '↓' : '→'} {Math.abs(trend)}%
+        <span className={twMerge('text-xs mt-2', trend > 0 ? 'text-emerald-600' : trend < 0 ? 'text-red-600' : 'text-[rgb(var(--color-text-muted))]')}>
+          {trend > 0 ? '\u2191' : trend < 0 ? '\u2193' : '\u2192'} {Math.abs(trend)}%
         </span>
       )}
     </motion.div>

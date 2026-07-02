@@ -7,10 +7,10 @@ import api from '@/lib/axios';
 
 const roles = ['user', 'admin', 'super_admin'];
 const planColors = {
-  free: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400',
-  starter: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  free: 'badge-neutral',
+  starter: 'badge-primary',
   professional: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
-  enterprise: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+  enterprise: 'badge-success',
 };
 
 export default function AdminUsers() {
@@ -27,7 +27,6 @@ export default function AdminUsers() {
         const { data } = await api.get('/admin/users', { params: { page, limit: 20, search, role: roleFilter !== 'all' ? roleFilter : undefined } });
         setUsers(data.users || data.data || []);
       } catch {
-        // Use placeholder data
         setUsers([
           { _id: '1', name: 'John Smith', email: 'john@example.com', role: 'user', plan: 'professional', status: 'active', websites: 5, createdAt: '2026-01-15' },
           { _id: '2', name: 'Sarah Johnson', email: 'sarah@example.com', role: 'admin', plan: 'enterprise', status: 'active', websites: 12, createdAt: '2026-02-20' },
@@ -66,22 +65,22 @@ export default function AdminUsers() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Manage all registered users</p>
+        <h1 className="text-2xl font-bold text-[rgb(var(--color-text))]">User Management</h1>
+        <p className="text-sm text-[rgb(var(--color-text-muted))]">Manage all registered users</p>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 card">
         <div className="flex items-center gap-3 flex-1 w-full sm:w-auto">
           <div className="relative flex-1 max-w-md">
-            <HiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <HiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[rgb(var(--color-text-muted))]" />
             <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search users..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-colors" />
+              className="input-field pl-10" />
           </div>
           <div className="flex items-center gap-2">
             {['all', 'user', 'admin', 'super_admin'].map((r) => (
               <button key={r} onClick={() => setRoleFilter(r)}
                 className={twMerge('px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition-colors',
-                  roleFilter === r ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800')}>
+                  roleFilter === r ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300' : 'text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text-secondary))] hover:bg-[rgb(var(--color-surface))]')}>
                 {r === 'super_admin' ? 'Super Admin' : r}
               </button>
             ))}
@@ -89,69 +88,69 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+      <div className="card p-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Websites</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="text-left px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                <th className="text-right px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <tr className="border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))]">
+                <th className="text-left px-6 py-4 text-xs font-medium text-[rgb(var(--color-text-muted))] uppercase tracking-wider">User</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-[rgb(var(--color-text-muted))] uppercase tracking-wider">Role</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-[rgb(var(--color-text-muted))] uppercase tracking-wider">Plan</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-[rgb(var(--color-text-muted))] uppercase tracking-wider">Websites</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-[rgb(var(--color-text-muted))] uppercase tracking-wider">Status</th>
+                <th className="text-left px-6 py-4 text-xs font-medium text-[rgb(var(--color-text-muted))] uppercase tracking-wider">Joined</th>
+                <th className="text-right px-6 py-4 text-xs font-medium text-[rgb(var(--color-text-muted))] uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+            <tbody className="divide-y divide-[rgb(var(--color-border))]">
               {users.map((u, i) => (
                 <motion.tr key={u._id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  className="hover:bg-[rgb(var(--color-surface))] transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center text-white text-sm font-bold">
+                      <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-xl flex items-center justify-center text-white text-sm font-bold">
                         {u.name?.charAt(0) || 'U'}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">{u.name}</p>
-                        <p className="text-xs text-gray-500">{u.email}</p>
+                        <p className="text-sm font-medium text-[rgb(var(--color-text))]">{u.name}</p>
+                        <p className="text-xs text-[rgb(var(--color-text-muted))]">{u.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <select value={u.role} onChange={(e) => handleRoleChange(u._id, e.target.value)}
-                      className="text-sm bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none cursor-pointer">
+                      className="text-sm bg-transparent border border-[rgb(var(--color-border))] rounded-lg px-2.5 py-1.5 text-[rgb(var(--color-text-secondary))] focus:ring-2 focus:ring-primary-500 outline-none cursor-pointer">
                       {roles.map((r) => (
                         <option key={r} value={r} className="capitalize">{r.replace('_', ' ')}</option>
                       ))}
                     </select>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={twMerge('px-2.5 py-1 rounded-full text-xs font-medium capitalize', planColors[u.plan] || planColors.free)}>
+                    <span className={twMerge('capitalize', planColors[u.plan] || planColors.free)}>
                       {u.plan || 'free'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{u.websites || 0}</td>
+                  <td className="px-6 py-4 text-sm text-[rgb(var(--color-text-secondary))]">{u.websites || 0}</td>
                   <td className="px-6 py-4">
-                    <span className={twMerge('px-2.5 py-1 rounded-full text-xs font-medium',
-                      u.status === 'active' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500')}>
+                    <span className={twMerge('badge',
+                      u.status === 'active' ? 'badge-success' : 'badge-neutral')}>
                       {u.status || 'active'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
+                  <td className="px-6 py-4 text-sm text-[rgb(var(--color-text-muted))]">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '\u2014'}</td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       <button onClick={() => { navigator.clipboard.writeText(u.email); toast.success('Email copied'); }}
-                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                        className="p-2 rounded-lg hover:bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text-secondary))] transition-colors">
                         <HiMail className="w-4 h-4" />
                       </button>
                       <button onClick={() => handleRoleChange(u._id, u.role === 'user' ? 'admin' : 'user')}
-                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                        className="p-2 rounded-lg hover:bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text-secondary))] transition-colors"
                         title="Toggle admin status">
                         <HiShieldCheck className="w-4 h-4" />
                       </button>
                       <button onClick={() => handleDeleteUser(u._id)}
-                        className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors">
+                        className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-[rgb(var(--color-text-muted))] hover:text-red-500 transition-colors">
                         <HiTrash className="w-4 h-4" />
                       </button>
                     </div>
@@ -163,18 +162,18 @@ export default function AdminUsers() {
         </div>
         {users.length === 0 && !loading && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No users found</p>
+            <p className="text-[rgb(var(--color-text-muted))]">No users found</p>
           </div>
         )}
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">Showing {users.length} users</p>
+        <p className="text-sm text-[rgb(var(--color-text-muted))]">Showing {users.length} users</p>
         <div className="flex gap-2">
           <button disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 transition-colors">Previous</button>
+            className="btn-outline btn-sm">Previous</button>
           <button onClick={() => setPage((p) => p + 1)}
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Next</button>
+            className="btn-outline btn-sm">Next</button>
         </div>
       </div>
     </div>

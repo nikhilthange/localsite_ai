@@ -20,7 +20,7 @@ export default function InsightCard({ insight, onDismiss, onMarkRead, index = 0 
       transition={{ delay: index * 0.05 }}
       className={twMerge(
         'flex items-start gap-4 p-4 rounded-xl border transition-all',
-        insight.read ? 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800' : `${config.bg} ${config.border}`,
+        insight.read ? 'bg-white dark:bg-surface-800 border-[rgb(var(--color-border))]' : `${config.bg} ${config.border}`,
       )}
     >
       <div className={twMerge('w-10 h-10 rounded-xl flex items-center justify-center shrink-0', config.bg)}>
@@ -30,22 +30,22 @@ export default function InsightCard({ insight, onDismiss, onMarkRead, index = 0 
         <div className="flex items-center gap-2 mb-1">
           <span className={twMerge('text-xs font-semibold uppercase', config.color)}>{config.label}</span>
           {insight.metric && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-[rgb(var(--color-text-muted))]">
               {insight.metric.name}: {insight.metric.value}{insight.metric.unit ? ` ${insight.metric.unit}` : ''}
             </span>
           )}
         </div>
-        <h4 className="font-semibold text-sm text-gray-900 dark:text-white">{insight.title}</h4>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{insight.description}</p>
+        <h4 className="font-semibold text-sm text-[rgb(var(--color-text))]">{insight.title}</h4>
+        <p className="text-sm text-[rgb(var(--color-text-muted))] mt-1">{insight.description}</p>
         <div className="flex items-center gap-3 mt-3">
           {!insight.read && (
             <button onClick={() => onMarkRead?.(insight._id)}
-              className="text-xs font-medium text-violet-600 dark:text-violet-400 hover:underline">
+              className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">
               Mark as read
             </button>
           )}
           <button onClick={() => onDismiss?.(insight._id)}
-            className="text-xs font-medium text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            className="text-xs font-medium text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text-secondary))]">
             Dismiss
           </button>
         </div>
