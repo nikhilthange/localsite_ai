@@ -1,25 +1,26 @@
 import { Chatbot } from '../../src/modules/chatbot/models/Chatbot';
+import { AIClient } from '../../src/modules/ai/services/AIClient';
 
-jest.mock('../../src/modules/chatbot/models/Chatbot', () => ({
+vi.mock('../../src/modules/chatbot/models/Chatbot', () => ({
   Chatbot: {
-    create: jest.fn(),
-    find: jest.fn(),
-    findOne: jest.fn(),
-    findById: jest.fn(),
-    findByIdAndUpdate: jest.fn(),
-    findByIdAndDelete: jest.fn(),
-    countDocuments: jest.fn(),
-    aggregate: jest.fn(),
+    create: vi.fn(),
+    find: vi.fn(),
+    findOne: vi.fn(),
+    findById: vi.fn(),
+    findByIdAndUpdate: vi.fn(),
+    findByIdAndDelete: vi.fn(),
+    countDocuments: vi.fn(),
+    aggregate: vi.fn(),
   },
 }));
 
-jest.mock('../../src/modules/ai/services/AIClient', () => ({
-  AIClient: { generateChatResponse: jest.fn() },
+vi.mock('../../src/modules/ai/services/AIClient', () => ({
+  AIClient: { generateChatResponse: vi.fn() },
 }));
 
 describe('Chatbot', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create', () => {
@@ -32,7 +33,7 @@ describe('Chatbot', () => {
         autoRespond: true,
       };
 
-      (Chatbot.create as jest.Mock).mockResolvedValue({
+      (Chatbot.create as vi.Mock).mockResolvedValue({
         _id: 'bot-1',
         ...config,
         isActive: true,
@@ -47,7 +48,7 @@ describe('Chatbot', () => {
 
   describe('findByWebsiteId', () => {
     it('should return chatbot for a website', async () => {
-      (Chatbot.findOne as jest.Mock).mockResolvedValue({
+      (Chatbot.findOne as vi.Mock).mockResolvedValue({
         _id: 'bot-1',
         websiteId: 'web-1',
         name: 'Support Bot',
@@ -61,7 +62,7 @@ describe('Chatbot', () => {
     });
 
     it('should return null when no chatbot exists', async () => {
-      (Chatbot.findOne as jest.Mock).mockResolvedValue(null);
+      (Chatbot.findOne as vi.Mock).mockResolvedValue(null);
 
       const result = await Chatbot.findOne({ websiteId: 'web-none' });
 
@@ -73,7 +74,7 @@ describe('Chatbot', () => {
     it('should update chatbot configuration', async () => {
       const updates = { greeting: 'Hi there!', theme: { primaryColor: '#059669' } };
 
-      (Chatbot.findByIdAndUpdate as jest.Mock).mockResolvedValue({
+      (Chatbot.findByIdAndUpdate as vi.Mock).mockResolvedValue({
         _id: 'bot-1',
         greeting: 'Hi there!',
         theme: { primaryColor: '#059669', position: 'bottom-right' },
@@ -89,8 +90,7 @@ describe('Chatbot', () => {
 
   describe('response generation', () => {
     it('should generate a response using AI', async () => {
-      const { AIClient } = require('../../src/modules/ai/services/AIClient');
-      (AIClient.generateChatResponse as jest.Mock).mockResolvedValue({
+      (AIClient.generateChatResponse as vi.Mock).mockResolvedValue({
         message: 'Thanks for reaching out! How can I assist you today?',
         confidence: 0.95,
       });
@@ -102,8 +102,7 @@ describe('Chatbot', () => {
     });
 
     it('should handle context-aware responses', async () => {
-      const { AIClient } = require('../../src/modules/ai/services/AIClient');
-      (AIClient.generateChatResponse as jest.Mock).mockResolvedValue({
+      (AIClient.generateChatResponse as vi.Mock).mockResolvedValue({
         message: 'Our pricing starts at $9.99/month',
         intent: 'pricing_inquiry',
       });
@@ -120,7 +119,7 @@ describe('Chatbot', () => {
 
   describe('countDocuments', () => {
     it('should count active chatbots', async () => {
-      (Chatbot.countDocuments as jest.Mock).mockResolvedValue(10);
+      (Chatbot.countDocuments as vi.Mock).mockResolvedValue(10);
 
       const count = await Chatbot.countDocuments({ isActive: true });
 

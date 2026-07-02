@@ -1,23 +1,24 @@
 import { LeadService } from '../../src/modules/lead/services/LeadService';
+import { EventBus } from '../../src/core/events/EventBus';
 
 const VALID_ID = '507f1f77bcf86cd799439011';
 
-jest.mock('../../src/modules/lead/repositories/LeadRepository', () => {
+vi.mock('../../src/modules/lead/repositories/LeadRepository', () => {
   const mock = {
-    findById: jest.fn(),
-    findByWebsiteId: jest.fn(),
-    findByEmail: jest.fn(),
-    assignLead: jest.fn(),
-    updateStatus: jest.fn(),
-    getLeadsByUserWebsite: jest.fn(),
-    paginate: jest.fn(),
+    findById: vi.fn(),
+    findByWebsiteId: vi.fn(),
+    findByEmail: vi.fn(),
+    assignLead: vi.fn(),
+    updateStatus: vi.fn(),
+    getLeadsByUserWebsite: vi.fn(),
+    paginate: vi.fn(),
   };
   (global as any).__mockLeadRepository = mock;
-  return { LeadRepository: jest.fn().mockImplementation(() => mock) };
+  return { LeadRepository: vi.fn().mockImplementation(() => mock) };
 });
 
-jest.mock('../../src/core/events/EventBus', () => ({
-  EventBus: { emit: jest.fn() },
+vi.mock('../../src/core/events/EventBus', () => ({
+  EventBus: { emit: vi.fn() },
 }));
 
 const mockLeadRepository = (global as any).__mockLeadRepository;
@@ -26,7 +27,7 @@ describe('LeadService', () => {
   let service: LeadService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new LeadService();
   });
 
@@ -73,7 +74,6 @@ describe('LeadService', () => {
 
       await service.updateLeadStatus(VALID_ID, VALID_ID, 'converted');
 
-      const { EventBus } = require('../../src/core/events/EventBus');
       expect(EventBus.emit).toHaveBeenCalled();
     });
   });

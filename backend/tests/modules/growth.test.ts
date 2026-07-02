@@ -1,52 +1,54 @@
 import { GrowthService } from '../../src/modules/growth/services/GrowthService';
+import { Website } from '../../src/modules/website/models/Website';
+import { BusinessInsight } from '../../src/modules/growth/models/BusinessInsight';
 
 const VALID_ID = '507f1f77bcf86cd799439011';
 
-jest.mock('../../src/modules/growth/repositories/GrowthRepository', () => {
+vi.mock('../../src/modules/growth/repositories/GrowthRepository', () => {
   const mock = {
-    getLatestReport: jest.fn(),
-    getReportsByWebsite: jest.fn(),
-    getReportById: jest.fn(),
-    getWeeklyTrends: jest.fn(),
-    getInsights: jest.fn(),
-    getUnreadInsightCount: jest.fn(),
-    markInsightRead: jest.fn(),
-    markInsightDismissed: jest.fn(),
+    getLatestReport: vi.fn(),
+    getReportsByWebsite: vi.fn(),
+    getReportById: vi.fn(),
+    getWeeklyTrends: vi.fn(),
+    getInsights: vi.fn(),
+    getUnreadInsightCount: vi.fn(),
+    markInsightRead: vi.fn(),
+    markInsightDismissed: vi.fn(),
   };
   (global as any).__mockGrowthRepo = mock;
-  return { GrowthRepository: jest.fn().mockImplementation(() => mock) };
+  return { GrowthRepository: vi.fn().mockImplementation(() => mock) };
 });
 
-jest.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: jest.fn() } }));
+vi.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: vi.fn() } }));
 
 const mockLean = (val: any) => ({
-  lean: jest.fn().mockResolvedValue(val),
+  lean: vi.fn().mockResolvedValue(val),
 });
 
-jest.mock('../../src/modules/website/models/Website', () => ({
+vi.mock('../../src/modules/website/models/Website', () => ({
   Website: {
-    find: jest.fn(),
-    findOne: jest.fn(),
+    find: vi.fn(),
+    findOne: vi.fn(),
   },
 }));
 
-jest.mock('../../src/modules/growth/models/BusinessInsight', () => ({
+vi.mock('../../src/modules/growth/models/BusinessInsight', () => ({
   BusinessInsight: {
-    create: jest.fn(),
-    findOne: jest.fn(),
+    create: vi.fn(),
+    findOne: vi.fn(),
   },
 }));
 
-jest.mock('../../src/modules/growth/models/WeeklyReport', () => ({
-  WeeklyReport: { create: jest.fn() },
+vi.mock('../../src/modules/growth/models/WeeklyReport', () => ({
+  WeeklyReport: { create: vi.fn() },
 }));
 
-jest.mock('../../src/modules/analytics/models/Analytics', () => ({
-  Analytics: { aggregate: jest.fn(), countDocuments: jest.fn() },
+vi.mock('../../src/modules/analytics/models/Analytics', () => ({
+  Analytics: { aggregate: vi.fn(), countDocuments: vi.fn() },
 }));
 
-jest.mock('../../src/modules/lead/models/Lead', () => ({
-  Lead: { find: jest.fn(), countDocuments: jest.fn() },
+vi.mock('../../src/modules/lead/models/Lead', () => ({
+  Lead: { find: vi.fn(), countDocuments: vi.fn() },
 }));
 
 const mockRepo = (global as any).__mockGrowthRepo;
@@ -55,14 +57,14 @@ describe('GrowthService', () => {
   let service: GrowthService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new GrowthService();
   });
 
   describe('getDashboard', () => {
     it('should return aggregated dashboard', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.find as jest.Mock).mockReturnValue(mockLean([
+      
+      (Website.find as vi.Mock).mockReturnValue(mockLean([
         { _id: VALID_ID, name: 'Site 1', userId: VALID_ID },
       ]));
       mockRepo.getLatestReport.mockResolvedValue({
@@ -81,8 +83,8 @@ describe('GrowthService', () => {
 
   describe('getWebsiteDashboard', () => {
     it('should return website-specific dashboard', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findOne as jest.Mock).mockReturnValue(mockLean({
+      
+      (Website.findOne as vi.Mock).mockReturnValue(mockLean({
         _id: VALID_ID, name: 'Site 1', userId: VALID_ID,
       }));
       mockRepo.getLatestReport.mockResolvedValue({
@@ -99,8 +101,8 @@ describe('GrowthService', () => {
     });
 
     it('should throw if website not found', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findOne as jest.Mock).mockReturnValue(mockLean(null));
+      
+      (Website.findOne as vi.Mock).mockReturnValue(mockLean(null));
 
       await expect(service.getWebsiteDashboard(VALID_ID, 'other-user')).rejects.toThrow('Website not found');
     });
@@ -108,8 +110,8 @@ describe('GrowthService', () => {
 
   describe('getReports', () => {
     it('should return paginated reports for owned website', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findOne as jest.Mock).mockReturnValue(mockLean({ _id: VALID_ID, userId: VALID_ID }));
+      
+      (Website.findOne as vi.Mock).mockReturnValue(mockLean({ _id: VALID_ID, userId: VALID_ID }));
 
       const reports = {
         data: [{ _id: 'r-1', scores: { businessHealth: 75 } }],
@@ -123,8 +125,8 @@ describe('GrowthService', () => {
     });
 
     it('should throw if website not owned', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findOne as jest.Mock).mockReturnValue(mockLean(null));
+      
+      (Website.findOne as vi.Mock).mockReturnValue(mockLean(null));
 
       await expect(service.getReports(VALID_ID, 'other-user', { page: 1, limit: 10 })).rejects.toThrow('Website not found');
     });
@@ -132,8 +134,8 @@ describe('GrowthService', () => {
 
   describe('getReportDetail', () => {
     it('should return report detail for authorized user', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findOne as jest.Mock).mockReturnValue(mockLean({ _id: VALID_ID, userId: VALID_ID }));
+      
+      (Website.findOne as vi.Mock).mockReturnValue(mockLean({ _id: VALID_ID, userId: VALID_ID }));
 
       const report = { _id: 'r-1', websiteId: VALID_ID, scores: { businessHealth: 82 } };
       mockRepo.getReportById.mockResolvedValue(report);
@@ -150,8 +152,8 @@ describe('GrowthService', () => {
     });
 
     it('should throw if unauthorized', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findOne as jest.Mock).mockReturnValue(mockLean(null));
+      
+      (Website.findOne as vi.Mock).mockReturnValue(mockLean(null));
 
       mockRepo.getReportById.mockResolvedValue({ _id: 'r-1', websiteId: VALID_ID });
 
@@ -161,8 +163,8 @@ describe('GrowthService', () => {
 
   describe('getTrends', () => {
     it('should return trend data for owned website', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findOne as jest.Mock).mockReturnValue(mockLean({ _id: VALID_ID, userId: VALID_ID }));
+      
+      (Website.findOne as vi.Mock).mockReturnValue(mockLean({ _id: VALID_ID, userId: VALID_ID }));
 
       mockRepo.getWeeklyTrends.mockResolvedValue([
         { weekStart: new Date('2024-01-01'), scores: { businessHealth: 70, seo: 65, leads: 60, conversion: 75, satisfaction: 80 } },
@@ -176,8 +178,8 @@ describe('GrowthService', () => {
     });
 
     it('should throw if website not owned', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findOne as jest.Mock).mockReturnValue(mockLean(null));
+      
+      (Website.findOne as vi.Mock).mockReturnValue(mockLean(null));
 
       await expect(service.getTrends(VALID_ID, 'other-user')).rejects.toThrow('Website not found');
     });
@@ -199,8 +201,8 @@ describe('GrowthService', () => {
 
   describe('markInsightRead', () => {
     it('should mark insight as read for owner', async () => {
-      const { BusinessInsight } = require('../../src/modules/growth/models/BusinessInsight');
-      (BusinessInsight.findOne as jest.Mock).mockReturnValue(mockLean({ _id: 'i-1', userId: VALID_ID }));
+      
+      (BusinessInsight.findOne as vi.Mock).mockReturnValue(mockLean({ _id: 'i-1', userId: VALID_ID }));
 
       mockRepo.markInsightRead.mockResolvedValue({ _id: 'i-1', read: true });
 
@@ -210,8 +212,8 @@ describe('GrowthService', () => {
     });
 
     it('should throw if insight not found', async () => {
-      const { BusinessInsight } = require('../../src/modules/growth/models/BusinessInsight');
-      (BusinessInsight.findOne as jest.Mock).mockReturnValue(mockLean(null));
+      
+      (BusinessInsight.findOne as vi.Mock).mockReturnValue(mockLean(null));
 
       await expect(service.markInsightRead('nonexistent', VALID_ID)).rejects.toThrow('Insight not found');
     });
@@ -219,8 +221,8 @@ describe('GrowthService', () => {
 
   describe('markInsightDismissed', () => {
     it('should mark insight as dismissed', async () => {
-      const { BusinessInsight } = require('../../src/modules/growth/models/BusinessInsight');
-      (BusinessInsight.findOne as jest.Mock).mockReturnValue(mockLean({ _id: 'i-1', userId: VALID_ID }));
+      
+      (BusinessInsight.findOne as vi.Mock).mockReturnValue(mockLean({ _id: 'i-1', userId: VALID_ID }));
 
       mockRepo.markInsightDismissed.mockResolvedValue({ _id: 'i-1', dismissed: true });
 

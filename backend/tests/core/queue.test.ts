@@ -1,11 +1,11 @@
 import { Queue } from 'bullmq';
 import { QueueService, QueueNames } from '../../src/core/queue/QueueService';
 
-jest.mock('bullmq', () => ({
-  Queue: jest.fn(),
-  Worker: jest.fn().mockImplementation(() => ({
-    on: jest.fn(),
-    close: jest.fn(),
+vi.mock('bullmq', () => ({
+  Queue: vi.fn(),
+  Worker: vi.fn().mockImplementation(() => ({
+    on: vi.fn(),
+    close: vi.fn(),
   })),
 }));
 
@@ -23,18 +23,18 @@ describe('QueueService', () => {
   beforeEach(async () => {
     await QueueService.closeAll().catch(() => {});
     mockQueue = {
-      add: jest.fn(),
-      addBulk: jest.fn(),
-      getWaitingCount: jest.fn(),
-      getActiveCount: jest.fn(),
-      getCompletedCount: jest.fn(),
-      getFailedCount: jest.fn(),
-      getDelayedCount: jest.fn(),
-      pause: jest.fn(),
-      resume: jest.fn(),
-      close: jest.fn(),
+      add: vi.fn(),
+      addBulk: vi.fn(),
+      getWaitingCount: vi.fn(),
+      getActiveCount: vi.fn(),
+      getCompletedCount: vi.fn(),
+      getFailedCount: vi.fn(),
+      getDelayedCount: vi.fn(),
+      pause: vi.fn(),
+      resume: vi.fn(),
+      close: vi.fn(),
     };
-    (Queue as jest.Mock).mockImplementation(() => mockQueue);
+    (Queue as vi.Mock).mockImplementation(() => mockQueue);
   });
 
   afterAll(async () => {

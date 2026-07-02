@@ -1,39 +1,42 @@
 import { UserService } from '../../src/modules/user/services/UserService';
+import * as bcrypt from 'bcryptjs';
 import { User } from '../../src/modules/auth/models/User';
 
 const VALID_ID = '507f1f77bcf86cd799439011';
 
-jest.mock('bcryptjs', () => ({
-  hashSync: jest.fn(() => 'hashed-password'),
-  compare: jest.fn(),
-  genSalt: jest.fn(() => Promise.resolve('fake-salt')),
-  hash: jest.fn((pwd: string) => Promise.resolve(`hashed:${pwd}`)),
-}));
-
-jest.mock('../../src/modules/user/repositories/UserRepository', () => {
-  const mock = {
-    findById: jest.fn(),
-    findByEmail: jest.fn(),
-    updateProfile: jest.fn(),
-    updatePassword: jest.fn(),
-    updatePreferences: jest.fn(),
-    getAllUsers: jest.fn(),
-    count: jest.fn(),
-    paginate: jest.fn(),
+vi.mock('bcryptjs', () => {
+  const mockBcrypt = {
+    hashSync: vi.fn(() => 'hashed-password'),
+    compare: vi.fn(),
+    genSalt: vi.fn(() => Promise.resolve('fake-salt')),
+    hash: vi.fn((pwd: string) => Promise.resolve(`hashed:${pwd}`)),
   };
-  (global as any).__mockUserRepository = mock;
-  return { UserRepository: jest.fn().mockImplementation(() => mock) };
+  return { default: mockBcrypt, ...mockBcrypt };
 });
 
-jest.mock('../../src/modules/auth/models/User', () => ({
-  User: { findById: jest.fn(), aggregate: jest.fn() },
+vi.mock('../../src/modules/user/repositories/UserRepository', () => {
+  const mock = {
+    findById: vi.fn(),
+    findByEmail: vi.fn(),
+    updateProfile: vi.fn(),
+    updatePassword: vi.fn(),
+    updatePreferences: vi.fn(),
+    getAllUsers: vi.fn(),
+    count: vi.fn(),
+    paginate: vi.fn(),
+  };
+  (global as any).__mockUserRepository = mock;
+  return { UserRepository: vi.fn().mockImplementation(() => mock) };
+});
+
+vi.mock('../../src/modules/auth/models/User', () => ({
+  User: { findById: vi.fn(), aggregate: vi.fn() },
 }));
 
 const mockUserRepository = (global as any).__mockUserRepository;
-const bcrypt = jest.requireMock('bcryptjs');
 
 describe('UserService', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => { vi.clearAllMocks(); });
 
   describe('getProfile', () => {
     it('should return user profile', async () => {
@@ -68,15 +71,15 @@ describe('UserService', () => {
 
   describe('updatePassword', () => {
     it('should update password with valid current password', async () => {
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      (User.findById as jest.Mock).mockReturnValue({ select: jest.fn().mockResolvedValue({ password: 'hashed-old', save: jest.fn().mockResolvedValue(true) }) });
+      (bcrypt.compare as vi.Mock).mockResolvedValue(true);
+      (User.findById as vi.Mock).mockReturnValue({ select: vi.fn().mockResolvedValue({ password: 'hashed-old', save: vi.fn().mockResolvedValue(true) }) });
 
       await UserService.updatePassword(VALID_ID, 'OldP@ss123', 'NewP@ss456');
     });
 
     it('should throw on incorrect current password', async () => {
-      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
-      (User.findById as jest.Mock).mockReturnValue({ select: jest.fn().mockResolvedValue({ password: 'hashed-real' }) });
+      (bcrypt.compare as vi.Mock).mockResolvedValue(false);
+      (User.findById as vi.Mock).mockReturnValue({ select: vi.fn().mockResolvedValue({ password: 'hashed-real' }) });
 
       await expect(UserService.updatePassword(VALID_ID, 'WrongP@ss', 'NewP@ss456')).rejects.toThrow('Current password is incorrect');
     });
@@ -112,7 +115,7 @@ describe('UserService', () => {
   describe('getUserAnalytics', () => {
     it('should return user analytics', async () => {
       mockUserRepository.count.mockResolvedValueOnce(100).mockResolvedValueOnce(75).mockResolvedValueOnce(10);
-      (User.aggregate as jest.Mock).mockResolvedValue([{ _id: 'user', count: 80 }, { _id: 'admin', count: 20 }]);
+      (User.aggregate as vi.Mock).mockResolvedValue([{ _id: 'user', count: 80 }, { _id: 'admin', count: 20 }]);
 
       const analytics = await UserService.getUserAnalytics();
       expect(analytics.totalUsers).toBe(100);

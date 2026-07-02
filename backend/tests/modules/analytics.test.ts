@@ -3,22 +3,22 @@ import { AnalyticsService } from '../../src/modules/analytics/services/Analytics
 const VALID_ID = '507f1f77bcf86cd799439011';
 
 const mockAnalyticsRepository = {
-  trackEvent: jest.fn(),
-  getWebsiteAnalytics: jest.fn(),
-  getAnalyticsByPage: jest.fn(),
-  getTrafficSources: jest.fn(),
-  getGeoData: jest.fn(),
-  getDeviceStats: jest.fn(),
-  getHourlyTraffic: jest.fn(),
-  paginate: jest.fn(),
+  trackEvent: vi.fn(),
+  getWebsiteAnalytics: vi.fn(),
+  getAnalyticsByPage: vi.fn(),
+  getTrafficSources: vi.fn(),
+  getGeoData: vi.fn(),
+  getDeviceStats: vi.fn(),
+  getHourlyTraffic: vi.fn(),
+  paginate: vi.fn(),
 };
 
-jest.mock('../../src/modules/analytics/repositories/AnalyticsRepository', () => ({
-  AnalyticsRepository: jest.fn().mockImplementation(() => mockAnalyticsRepository),
+vi.mock('../../src/modules/analytics/repositories/AnalyticsRepository', () => ({
+  AnalyticsRepository: vi.fn().mockImplementation(() => mockAnalyticsRepository),
 }));
 
-const mockWebsiteFindById = jest.fn();
-jest.mock('../../src/modules/website/models/Website', () => ({
+const mockWebsiteFindById = vi.fn();
+vi.mock('../../src/modules/website/models/Website', () => ({
   Website: { findById: (...args: any[]) => mockWebsiteFindById(...args) },
 }));
 
@@ -26,8 +26,8 @@ describe('AnalyticsService', () => {
   let service: AnalyticsService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockWebsiteFindById.mockReturnValue({ lean: jest.fn().mockResolvedValue(null) });
+    vi.clearAllMocks();
+    mockWebsiteFindById.mockReturnValue({ lean: vi.fn().mockResolvedValue(null) });
     service = new AnalyticsService();
   });
 
@@ -53,7 +53,7 @@ describe('AnalyticsService', () => {
 
   describe('getWebsiteStats', () => {
     it('should return aggregated website stats', async () => {
-      mockWebsiteFindById.mockReturnValue({ lean: jest.fn().mockResolvedValue({ _id: VALID_ID }) });
+      mockWebsiteFindById.mockReturnValue({ lean: vi.fn().mockResolvedValue({ _id: VALID_ID }) });
       mockAnalyticsRepository.getWebsiteAnalytics.mockResolvedValue([{
         totalVisitors: ['v1', 'v2', 'v3'], totalPageViews: 150, avgDuration: 45.5, bounceRate: 0.35,
       }]);
@@ -75,7 +75,7 @@ describe('AnalyticsService', () => {
     });
 
     it('should throw if website not found', async () => {
-      mockWebsiteFindById.mockReturnValue({ lean: jest.fn().mockResolvedValue(null) });
+      mockWebsiteFindById.mockReturnValue({ lean: vi.fn().mockResolvedValue(null) });
 
       await expect(
         service.getWebsiteStats(VALID_ID, { start: new Date(), end: new Date() })
@@ -85,7 +85,7 @@ describe('AnalyticsService', () => {
 
   describe('getDashboardData', () => {
     it('should return dashboard stats with 30d period', async () => {
-      mockWebsiteFindById.mockReturnValue({ lean: jest.fn().mockResolvedValue({ _id: VALID_ID }) });
+      mockWebsiteFindById.mockReturnValue({ lean: vi.fn().mockResolvedValue({ _id: VALID_ID }) });
       mockAnalyticsRepository.getWebsiteAnalytics.mockResolvedValue([{}]);
       mockAnalyticsRepository.getAnalyticsByPage.mockResolvedValue([]);
       mockAnalyticsRepository.getTrafficSources.mockResolvedValue([]);

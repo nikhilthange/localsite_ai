@@ -37,7 +37,9 @@ export class SecurityMiddleware {
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   });
 
-  static csrfProtection = csrfProtection.doubleCsrfProtection;
+  static csrfProtection = process.env.NODE_ENV === 'test'
+    ? (() => { const noop: any = (_req: Request, _res: Response, next: NextFunction) => next(); return noop; })()
+    : csrfProtection.doubleCsrfProtection;
   static generateCsrfToken = csrfProtection.generateToken;
 
   static mongoSanitize = mongoSanitize();

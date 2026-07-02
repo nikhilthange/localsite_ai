@@ -1,25 +1,27 @@
 import { CacheService } from '../../src/core/cache/CacheService';
 
-jest.mock('redis', () => ({
-  createClient: jest.fn().mockReturnValue({
-    connect: jest.fn().mockResolvedValue(undefined),
-    disconnect: jest.fn().mockResolvedValue(undefined),
-    get: jest.fn(),
-    set: jest.fn(),
-    setEx: jest.fn(),
-    del: jest.fn(),
-    exists: jest.fn(),
-    keys: jest.fn(),
-    flushAll: jest.fn(),
-    on: jest.fn(),
-    isOpen: true,
-    quit: jest.fn(),
-  }),
+const mockRedisMethods = {
+  connect: vi.fn().mockResolvedValue(undefined),
+  disconnect: vi.fn().mockResolvedValue(undefined),
+  get: vi.fn(),
+  set: vi.fn(),
+  setEx: vi.fn(),
+  del: vi.fn(),
+  exists: vi.fn(),
+  keys: vi.fn(),
+  flushAll: vi.fn(),
+  on: vi.fn(),
+  isOpen: true,
+  quit: vi.fn(),
+};
+
+vi.mock('redis', () => ({
+  createClient: vi.fn(() => mockRedisMethods),
 }));
 
 describe('CacheService', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     await CacheService.initialize('redis://localhost:6379');
   });
 
@@ -29,18 +31,14 @@ describe('CacheService', () => {
 
   describe('get', () => {
     it('should return null for missing key', async () => {
-      const redis = require('redis');
-      const mockClient = redis.createClient();
-      (mockClient.get as jest.Mock).mockResolvedValue(null);
+      mockRedisMethods.get.mockResolvedValue(null);
 
       const result = await CacheService.get('nonexistent');
       expect(result).toBeNull();
     });
 
     it('should return parsed value for existing key', async () => {
-      const redis = require('redis');
-      const mockClient = redis.createClient();
-      (mockClient.get as jest.Mock).mockResolvedValue(JSON.stringify({ data: 'test' }));
+      mockRedisMethods.get.mockResolvedValue(JSON.stringify({ data: 'test' }));
 
       const result = await CacheService.get('existing-key');
       expect(result).toEqual({ data: 'test' });
@@ -49,12 +47,9 @@ describe('CacheService', () => {
 
   describe('set', () => {
     it('should set a value with default TTL', async () => {
-      const redis = require('redis');
-      const mockClient = redis.createClient();
-
       await CacheService.set('test-key', { value: 42 });
 
-      expect(mockClient.setEx).toHaveBeenCalledWith(
+      expect(mockRedisMethods.setEx).toHaveBeenCalledWith(
         'test-key',
         expect.any(Number),
         JSON.stringify({ value: 42 })
@@ -62,31 +57,23 @@ describe('CacheService', () => {
     });
 
     it('should set a value with custom TTL', async () => {
-      const redis = require('redis');
-      const mockClient = redis.createClient();
-
       await CacheService.set('temporal', 'data', 60);
 
-      expect(mockClient.setEx).toHaveBeenCalledWith('temporal', 60, expect.any(String));
+      expect(mockRedisMethods.setEx).toHaveBeenCalledWith('temporal', 60, expect.any(String));
     });
   });
 
   describe('delete', () => {
     it('should delete a key', async () => {
-      const redis = require('redis');
-      const mockClient = redis.createClient();
-
       await CacheService.del('test-key');
 
-      expect(mockClient.del).toHaveBeenCalledWith('test-key');
+      expect(mockRedisMethods.del).toHaveBeenCalledWith('test-key');
     });
   });
 
   describe('exists', () => {
     it('should return true for existing key', async () => {
-      const redis = require('redis');
-      const mockClient = redis.createClient();
-      (mockClient.exists as jest.Mock).mockResolvedValue(true);
+      mockRedisMethods.exists.mockResolvedValue(true);
 
       const result = await CacheService.exists('test-key');
 
@@ -96,25 +83,19 @@ describe('CacheService', () => {
 
   describe('remember (cache-aside) pattern', () => {
     it('should fetch from store and cache the result', async () => {
-      const redis = require('redis');
-      const mockClient = redis.createClient();
-      const fetchFn = jest.fn().mockResolvedValue({ fromDb: true });
-
-      (mockClient.get as jest.Mock).mockResolvedValue(null);
+      const fetchFn = vi.fn().mockResolvedValue({ fromDb: true });
+      mockRedisMethods.get.mockResolvedValue(null);
 
       const result = await CacheService.remember('user-1', 300, fetchFn);
 
       expect(result).toEqual({ fromDb: true });
       expect(fetchFn).toHaveBeenCalled();
-      expect(mockClient.setEx).toHaveBeenCalledWith('user-1', 300, JSON.stringify({ fromDb: true }));
+      expect(mockRedisMethods.setEx).toHaveBeenCalledWith('user-1', 300, JSON.stringify({ fromDb: true }));
     });
 
     it('should return cached value without calling factory', async () => {
-      const redis = require('redis');
-      const mockClient = redis.createClient();
-      const fetchFn = jest.fn();
-
-      (mockClient.get as jest.Mock).mockResolvedValue(JSON.stringify({ cached: true }));
+      const fetchFn = vi.fn();
+      mockRedisMethods.get.mockResolvedValue(JSON.stringify({ cached: true }));
 
       const result = await CacheService.remember('cached-key', 300, fetchFn);
 

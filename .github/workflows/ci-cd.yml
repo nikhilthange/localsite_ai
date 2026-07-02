@@ -51,7 +51,7 @@ jobs:
 
       - name: Run tests (backend)
         if: matrix.workspace == 'backend'
-        run: npm test -- --ci --coverage
+        run: npm run test:ci
 
       - name: Build project
         run: npm run build

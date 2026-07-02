@@ -7,7 +7,7 @@ describe('EventBus', () => {
 
   describe('on / emit', () => {
     it('should register and trigger event listeners', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       EventBus.on('user:registered', handler);
       EventBus.emit('user:registered', { userId: '123' });
 
@@ -15,8 +15,8 @@ describe('EventBus', () => {
     });
 
     it('should support multiple listeners per event', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
       EventBus.on('payment:completed', handler1);
       EventBus.on('payment:completed', handler2);
       EventBus.emit('payment:completed', { paymentId: 'pay-1' });
@@ -26,7 +26,7 @@ describe('EventBus', () => {
     });
 
     it('should pass event data to handlers', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       EventBus.on('website:published', handler);
       const data = { websiteId: 'web-1', url: 'https://test.localsiteai.com' };
       EventBus.emit('website:published', data);
@@ -37,7 +37,7 @@ describe('EventBus', () => {
 
   describe('off', () => {
     it('should remove a specific listener', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       EventBus.on('test:event', handler);
       EventBus.off('test:event', handler);
       EventBus.emit('test:event', {});
@@ -46,8 +46,8 @@ describe('EventBus', () => {
     });
 
     it('should not affect other listeners', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
       EventBus.on('test:event', handler1);
       EventBus.on('test:event', handler2);
       EventBus.off('test:event', handler1);
@@ -73,20 +73,20 @@ describe('EventBus', () => {
 
   describe('event payloads', () => {
     it('should handle async event handlers', async () => {
-      const handler = jest.fn().mockResolvedValue('done');
+      const handler = vi.fn().mockResolvedValue('done');
       EventBus.on('async:event', handler);
       EventBus.emit('async:event', { data: 'test' });
 
       expect(handler).toHaveBeenCalled();
     });
 
-    it('handler errors propagate through emit', () => {
-      const handler = jest.fn().mockImplementation(() => {
+    it('handler errors do not propagate through emit (caught internally)', () => {
+      const handler = vi.fn().mockImplementation(() => {
         throw new Error('Handler error');
       });
       EventBus.on('error:event', handler);
 
-      expect(() => EventBus.emit('error:event', {})).toThrow('Handler error');
+      expect(() => EventBus.emit('error:event', {})).not.toThrow();
       expect(handler).toHaveBeenCalled();
     });
   });

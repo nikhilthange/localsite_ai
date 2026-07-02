@@ -51,7 +51,7 @@ jobs:
 
       - name: Run backend tests
         working-directory: ./backend
-        run: npm test -- --ci --coverage
+        run: npm run test:ci
         env:
           MONGODB_URI: mongodb://localhost:27017/localsite-ai-test
 
@@ -61,7 +61,7 @@ jobs:
 
       - name: Run frontend tests
         working-directory: ./frontend
-        run: npm test -- --ci --coverage
+        run: npm run test:ci
         continue-on-error: true
 
       - name: Build frontend

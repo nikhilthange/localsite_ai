@@ -2,23 +2,23 @@ import { DeploymentService } from '../../src/modules/deployment/services/Deploym
 
 const VALID_ID = '507f1f77bcf86cd799439011';
 
-jest.mock('../../src/modules/deployment/repositories/DeploymentRepository', () => {
+vi.mock('../../src/modules/deployment/repositories/DeploymentRepository', () => {
   const mock = {
-    findById: jest.fn(),
-    findOne: jest.fn(),
-    findByWebsiteId: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    find: jest.fn(),
-    paginate: jest.fn(),
+    findById: vi.fn(),
+    findOne: vi.fn(),
+    findByWebsiteId: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    find: vi.fn(),
+    paginate: vi.fn(),
   };
   (global as any).__mockDeploymentRepo = mock;
-  return { DeploymentRepository: jest.fn().mockImplementation(() => mock) };
+  return { DeploymentRepository: vi.fn().mockImplementation(() => mock) };
 });
 
-jest.mock('../../src/core/storage/S3Storage', () => ({ S3Storage: { upload: jest.fn() } }));
-jest.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: jest.fn() } }));
-jest.mock('../../src/modules/website/models/Website', () => ({ Website: { findOne: jest.fn(), findByIdAndUpdate: jest.fn() } }));
+vi.mock('../../src/core/storage/S3Storage', () => ({ S3Storage: { upload: vi.fn() } }));
+vi.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: vi.fn() } }));
+vi.mock('../../src/modules/website/models/Website', () => ({ Website: { findOne: vi.fn(), findByIdAndUpdate: vi.fn() } }));
 
 const mockRepo = (global as any).__mockDeploymentRepo;
 
@@ -26,7 +26,7 @@ describe('DeploymentService', () => {
   let service: DeploymentService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new DeploymentService();
   });
 

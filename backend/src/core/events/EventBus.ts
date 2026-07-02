@@ -5,6 +5,7 @@ import { Logger } from '../logging/Logger';
 export class EventBus {
   private static emitter = new EventEmitter();
   private static readonly MAX_LISTENERS = 100;
+  private static readonly wrappedMap = new WeakMap<EventCallback<any>, EventCallback<any>>();
 
   static initialize(): void {
     this.emitter.setMaxListeners(this.MAX_LISTENERS);
@@ -31,6 +32,7 @@ export class EventBus {
         });
       }
     };
+    this.wrappedMap.set(callback, wrapped);
     this.emitter.on(event, wrapped as any);
   }
 
@@ -51,11 +53,16 @@ export class EventBus {
         });
       }
     };
+    this.wrappedMap.set(callback, wrapped);
     this.emitter.once(event, wrapped as any);
   }
 
   static off<T>(event: SystemEvents, callback: EventCallback<T>): void {
-    this.emitter.off(event, callback as any);
+    const wrapped = this.wrappedMap.get(callback);
+    if (wrapped) {
+      this.emitter.off(event, wrapped as any);
+      this.wrappedMap.delete(callback);
+    }
   }
 
   static removeAllListeners(event?: SystemEvents): void {

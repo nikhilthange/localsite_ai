@@ -2,16 +2,16 @@ import { CustomerService } from '../../src/modules/crm/services/CustomerService'
 
 const VALID_ID = '507f1f77bcf86cd799439011';
 
-jest.mock('../../src/modules/crm/repositories/CustomerRepository', () => {
+vi.mock('../../src/modules/crm/repositories/CustomerRepository', () => {
   const mock = {
-    paginate: jest.fn(),
-    findById: jest.fn(),
+    paginate: vi.fn(),
+    findById: vi.fn(),
   };
   (global as any).__mockCrmRepo = mock;
-  return { CustomerRepository: jest.fn().mockImplementation(() => mock) };
+  return { CustomerRepository: vi.fn().mockImplementation(() => mock) };
 });
 
-jest.mock('../../src/utils/AppError', () => {
+vi.mock('../../src/utils/AppError', () => {
   class NotFoundError extends Error {
     statusCode = 404;
     constructor(resource: string) {
@@ -28,7 +28,7 @@ describe('CustomerService', () => {
   let service: CustomerService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new CustomerService();
   });
 

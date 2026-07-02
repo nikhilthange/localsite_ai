@@ -29,7 +29,6 @@ export class DatabaseConnection {
 
       await mongoose.connect(uri, {
         maxPoolSize: 10,
-        minPoolSize: 2,
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
         heartbeatFrequencyMS: 10000,

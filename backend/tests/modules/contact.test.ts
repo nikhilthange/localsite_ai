@@ -1,49 +1,49 @@
 import { ContactService } from '../../src/modules/contact/services/ContactService';
+import { Website } from '../../src/modules/website/models/Website';
 
 const VALID_ID = '507f1f77bcf86cd799439011';
 
-jest.mock('../../src/modules/contact/repositories/ContactRepository', () => {
+vi.mock('../../src/modules/contact/repositories/ContactRepository', () => {
   const mock = {
-    create: jest.fn(),
-    findById: jest.fn(),
-    findByWebsite: jest.fn(),
+    create: vi.fn(),
+    findById: vi.fn(),
+    findByWebsite: vi.fn(),
   };
   (global as any).__mockContactRepo = mock;
-  return { ContactRepository: jest.fn().mockImplementation(() => mock) };
+  return { ContactRepository: vi.fn().mockImplementation(() => mock) };
 });
 
-jest.mock('../../src/modules/website/models/Website', () => ({
+vi.mock('../../src/modules/website/models/Website', () => ({
   Website: {
-    findById: jest.fn(),
-    findOne: jest.fn(),
+    findById: vi.fn(),
+    findOne: vi.fn(),
   },
 }));
 
-jest.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: jest.fn() } }));
+vi.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: vi.fn() } }));
 
-jest.mock('../../src/core/queue/QueueService', () => ({
-  QueueService: { addJob: jest.fn() },
+vi.mock('../../src/core/queue/QueueService', () => ({
+  QueueService: { addJob: vi.fn() },
   QueueNames: { NOTIFICATION: 'notification' },
 }));
 
 const mockRepo = (global as any).__mockContactRepo;
 
 const mockWebsiteDoc = (val: any) => ({
-  lean: jest.fn().mockResolvedValue(val),
+  lean: vi.fn().mockResolvedValue(val),
 });
 
 describe('ContactService', () => {
   let service: ContactService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     service = new ContactService();
   });
 
   describe('submitForm', () => {
     it('should create a contact form submission', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findById as jest.Mock).mockReturnValue(mockWebsiteDoc({
+      (Website.findById as vi.Mock).mockReturnValue(mockWebsiteDoc({
         _id: VALID_ID, userId: VALID_ID, name: 'Test Site',
       }));
 
@@ -61,8 +61,7 @@ describe('ContactService', () => {
     });
 
     it('should throw if website not found', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findById as jest.Mock).mockReturnValue(mockWebsiteDoc(null));
+      (Website.findById as vi.Mock).mockReturnValue(mockWebsiteDoc(null));
 
       await expect(
         service.submitForm({ websiteId: 'nonexistent', name: 'John', email: 'john@example.com', message: 'Hello' })
@@ -72,8 +71,7 @@ describe('ContactService', () => {
 
   describe('getContactsByWebsite', () => {
     it('should return paginated contacts for owned website', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findOne as jest.Mock).mockReturnValue(mockWebsiteDoc({ _id: VALID_ID, userId: VALID_ID }));
+      (Website.findOne as vi.Mock).mockReturnValue(mockWebsiteDoc({ _id: VALID_ID, userId: VALID_ID }));
 
       const paginatedResult = {
         data: [{ _id: 'contact-1', name: 'Jane', email: 'jane@example.com' }],
@@ -88,8 +86,7 @@ describe('ContactService', () => {
     });
 
     it('should throw if website not owned', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findOne as jest.Mock).mockReturnValue(mockWebsiteDoc(null));
+      (Website.findOne as vi.Mock).mockReturnValue(mockWebsiteDoc(null));
 
       await expect(service.getContactsByWebsite(VALID_ID, 'other-user', { page: 1, limit: 20 })).rejects.toThrow('Website not found');
     });
@@ -97,8 +94,7 @@ describe('ContactService', () => {
 
   describe('getContactById', () => {
     it('should return a contact by ID for authorized user', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findOne as jest.Mock).mockReturnValue(mockWebsiteDoc({ _id: VALID_ID, userId: VALID_ID }));
+      (Website.findOne as vi.Mock).mockReturnValue(mockWebsiteDoc({ _id: VALID_ID, userId: VALID_ID }));
 
       const contact = { _id: 'contact-1', name: 'Jane', email: 'jane@example.com', websiteId: VALID_ID };
       mockRepo.findById.mockResolvedValue(contact);
@@ -113,8 +109,7 @@ describe('ContactService', () => {
     });
 
     it('should throw if unauthorized', async () => {
-      const { Website } = require('../../src/modules/website/models/Website');
-      (Website.findOne as jest.Mock).mockReturnValue(mockWebsiteDoc(null));
+      (Website.findOne as vi.Mock).mockReturnValue(mockWebsiteDoc(null));
 
       mockRepo.findById.mockResolvedValue({ _id: 'contact-1', name: 'Jane', websiteId: VALID_ID });
 

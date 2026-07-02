@@ -1,40 +1,41 @@
 import { AuthService } from '../../src/modules/auth/services/AuthService';
 import { User } from '../../src/modules/auth/models/User';
+import bcrypt from 'bcryptjs';
 
 const VALID_ID = '507f1f77bcf86cd799439011';
 
-jest.mock('../../src/modules/auth/repositories/AuthRepository', () => {
+vi.mock('../../src/modules/auth/repositories/AuthRepository', () => {
   const mock = {
-    findByEmail: jest.fn(),
-    findById: jest.fn(),
-    addRefreshToken: jest.fn(),
-    removeRefreshToken: jest.fn(),
-    update: jest.fn(),
-    clearRefreshTokens: jest.fn(),
-    findByIdWithSubscription: jest.fn(),
-    findOne: jest.fn(),
-    create: jest.fn(),
-    find: jest.fn(),
+    findByEmail: vi.fn(),
+    findById: vi.fn(),
+    addRefreshToken: vi.fn(),
+    removeRefreshToken: vi.fn(),
+    update: vi.fn(),
+    clearRefreshTokens: vi.fn(),
+    findByIdWithSubscription: vi.fn(),
+    findOne: vi.fn(),
+    create: vi.fn(),
+    find: vi.fn(),
   };
   (global as any).__mockAuthRepo = mock;
-  return { AuthRepository: jest.fn().mockImplementation(() => mock) };
+  return { AuthRepository: vi.fn().mockImplementation(() => mock) };
 });
 
-jest.mock('../../src/modules/auth/models/User', () => ({
-  User: { create: jest.fn(), findOne: jest.fn() },
+vi.mock('../../src/modules/auth/models/User', () => ({
+  User: { create: vi.fn(), findOne: vi.fn() },
 }));
 
-jest.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: jest.fn() } }));
+vi.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: vi.fn() } }));
 
 const repo = (global as any).__mockAuthRepo;
 
 describe('AuthService', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => { vi.clearAllMocks(); });
 
   describe('register', () => {
     it('should register a new user and return tokens', async () => {
       repo.findByEmail.mockResolvedValue(null);
-      (User.create as jest.Mock).mockResolvedValue({
+      (User.create as vi.Mock).mockResolvedValue({
         _id: { toString: () => VALID_ID }, name: 'Test', email: 'test@example.com', role: 'user',
         toObject: () => ({ _id: VALID_ID, name: 'Test', email: 'test@example.com', role: 'user' }),
       });
@@ -53,13 +54,12 @@ describe('AuthService', () => {
 
   describe('login', () => {
     it('should login with valid credentials', async () => {
-      const bcrypt = require('bcryptjs');
-      (User.findOne as jest.Mock).mockReturnValue({
-        select: jest.fn().mockResolvedValue({
+      (User.findOne as vi.Mock).mockReturnValue({
+        select: vi.fn().mockResolvedValue({
           _id: { toString: () => VALID_ID }, name: 'Test', email: 'test@example.com',
           role: 'user', password: bcrypt.hashSync('P@ssw0rd123', 12), emailVerified: true,
           toObject: () => ({ _id: VALID_ID, name: 'Test', email: 'test@example.com', role: 'user' }),
-          save: jest.fn(),
+          save: vi.fn(),
         }),
       });
       repo.addRefreshToken.mockResolvedValue(null);
@@ -71,7 +71,7 @@ describe('AuthService', () => {
     });
 
     it('should throw on invalid email', async () => {
-      (User.findOne as jest.Mock).mockReturnValue({ select: jest.fn().mockResolvedValue(null) });
+      (User.findOne as vi.Mock).mockReturnValue({ select: vi.fn().mockResolvedValue(null) });
       await expect(AuthService.login('bad@e.com', 'P@ss')).rejects.toThrow('Invalid email or password');
     });
   });

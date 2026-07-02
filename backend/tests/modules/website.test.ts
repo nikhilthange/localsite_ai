@@ -3,17 +3,17 @@ import { WebsiteRepository } from '../../src/modules/website/repositories/Websit
 
 const VALID_ID = '507f1f77bcf86cd799439011';
 
-jest.mock('../../src/modules/website/repositories/WebsiteRepository');
+vi.mock('../../src/modules/website/repositories/WebsiteRepository');
 
-const MockedWebsiteRepository = WebsiteRepository as jest.MockedClass<typeof WebsiteRepository>;
+const MockedWebsiteRepository = WebsiteRepository as vi.MockedClass<typeof WebsiteRepository>;
 
 describe('WebsiteService', () => {
   let service: WebsiteService;
-  let mockRepository: jest.Mocked<WebsiteRepository>;
+  let mockRepository: vi.Mocked<WebsiteRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockRepository = new MockedWebsiteRepository() as jest.Mocked<WebsiteRepository>;
+    vi.clearAllMocks();
+    mockRepository = new MockedWebsiteRepository() as vi.Mocked<WebsiteRepository>;
     service = new WebsiteService();
     (service as any).repository = mockRepository;
   });

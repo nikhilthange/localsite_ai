@@ -3,17 +3,17 @@ import { NotificationRepository } from '../../src/modules/notification/repositor
 
 const VALID_ID = '507f1f77bcf86cd799439011';
 
-jest.mock('../../src/modules/notification/repositories/NotificationRepository');
+vi.mock('../../src/modules/notification/repositories/NotificationRepository');
 
-const MockedNotificationRepository = NotificationRepository as jest.MockedClass<typeof NotificationRepository>;
+const MockedNotificationRepository = NotificationRepository as vi.MockedClass<typeof NotificationRepository>;
 
 describe('NotificationService', () => {
   let service: NotificationService;
-  let mockRepository: jest.Mocked<NotificationRepository>;
+  let mockRepository: vi.Mocked<NotificationRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockRepository = new MockedNotificationRepository() as jest.Mocked<NotificationRepository>;
+    vi.clearAllMocks();
+    mockRepository = new MockedNotificationRepository() as vi.Mocked<NotificationRepository>;
     service = new NotificationService();
     (service as any).repository = mockRepository;
   });

@@ -1,20 +1,20 @@
 import { Appointment } from '../../src/modules/booking/models/Appointment';
 import { BookingRoutes } from '../../src/modules/booking/routes/BookingRoutes';
 
-jest.mock('../../src/modules/booking/models/Appointment', () => ({
+vi.mock('../../src/modules/booking/models/Appointment', () => ({
   Appointment: {
-    create: jest.fn(),
-    find: jest.fn(),
-    findById: jest.fn(),
-    findByIdAndUpdate: jest.fn(),
-    findByIdAndDelete: jest.fn(),
-    countDocuments: jest.fn(),
+    create: vi.fn(),
+    find: vi.fn(),
+    findById: vi.fn(),
+    findByIdAndUpdate: vi.fn(),
+    findByIdAndDelete: vi.fn(),
+    countDocuments: vi.fn(),
   },
 }));
 
 describe('Appointment Model', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create', () => {
@@ -28,7 +28,7 @@ describe('Appointment Model', () => {
         service: 'Consultation',
       };
 
-      (Appointment.create as jest.Mock).mockResolvedValue({
+      (Appointment.create as vi.Mock).mockResolvedValue({
         _id: 'apt-1',
         ...appointmentData,
         status: 'confirmed',
@@ -43,7 +43,7 @@ describe('Appointment Model', () => {
     });
 
     it('should reject missing required fields', async () => {
-      (Appointment.create as jest.Mock).mockRejectedValue(new Error('Validation failed'));
+      (Appointment.create as vi.Mock).mockRejectedValue(new Error('Validation failed'));
 
       await expect(
         Appointment.create({ customerName: 'John' })
@@ -53,7 +53,7 @@ describe('Appointment Model', () => {
 
   describe('findById', () => {
     it('should find appointment by id', async () => {
-      (Appointment.findById as jest.Mock).mockResolvedValue({
+      (Appointment.findById as vi.Mock).mockResolvedValue({
         _id: 'apt-1',
         customerName: 'John Doe',
         status: 'confirmed',
@@ -65,7 +65,7 @@ describe('Appointment Model', () => {
     });
 
     it('should return null for non-existent id', async () => {
-      (Appointment.findById as jest.Mock).mockResolvedValue(null);
+      (Appointment.findById as vi.Mock).mockResolvedValue(null);
 
       const result = await Appointment.findById('nonexistent');
 
@@ -93,8 +93,8 @@ describe('Appointment Model', () => {
 
   describe('find', () => {
     it('should find appointments by websiteId', async () => {
-      (Appointment.find as jest.Mock).mockReturnValue({
-        sort: jest.fn().mockResolvedValue([
+      (Appointment.find as vi.Mock).mockReturnValue({
+        sort: vi.fn().mockResolvedValue([
           { _id: 'apt-1', date: new Date('2025-01-15'), status: 'confirmed' },
         ]),
       });
@@ -108,7 +108,7 @@ describe('Appointment Model', () => {
 
   describe('countDocuments', () => {
     it('should count appointments for a date range', async () => {
-      (Appointment.countDocuments as jest.Mock).mockResolvedValue(5);
+      (Appointment.countDocuments as vi.Mock).mockResolvedValue(5);
 
       const count = await Appointment.countDocuments({
         date: { $gte: new Date('2025-01-01'), $lte: new Date('2025-01-31') },

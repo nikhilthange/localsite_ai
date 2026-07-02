@@ -4,22 +4,22 @@ import { SubscriptionRepository } from '../../src/modules/payment/repositories/S
 
 const VALID_ID = '507f1f77bcf86cd799439011';
 
-jest.mock('../../src/modules/payment/repositories/PaymentRepository');
-jest.mock('../../src/modules/payment/repositories/SubscriptionRepository');
-jest.mock('../../src/core/events/EventBus');
+vi.mock('../../src/modules/payment/repositories/PaymentRepository');
+vi.mock('../../src/modules/payment/repositories/SubscriptionRepository');
+vi.mock('../../src/core/events/EventBus');
 
-const MockedPaymentRepository = PaymentRepository as jest.MockedClass<typeof PaymentRepository>;
-const MockedSubscriptionRepository = SubscriptionRepository as jest.MockedClass<typeof SubscriptionRepository>;
+const MockedPaymentRepository = PaymentRepository as vi.MockedClass<typeof PaymentRepository>;
+const MockedSubscriptionRepository = SubscriptionRepository as vi.MockedClass<typeof SubscriptionRepository>;
 
 describe('PaymentService', () => {
   let service: PaymentService;
-  let mockPaymentRepo: jest.Mocked<PaymentRepository>;
-  let mockSubscriptionRepo: jest.Mocked<SubscriptionRepository>;
+  let mockPaymentRepo: vi.Mocked<PaymentRepository>;
+  let mockSubscriptionRepo: vi.Mocked<SubscriptionRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockPaymentRepo = new MockedPaymentRepository() as jest.Mocked<PaymentRepository>;
-    mockSubscriptionRepo = new MockedSubscriptionRepository() as jest.Mocked<SubscriptionRepository>;
+    vi.clearAllMocks();
+    mockPaymentRepo = new MockedPaymentRepository() as vi.Mocked<PaymentRepository>;
+    mockSubscriptionRepo = new MockedSubscriptionRepository() as vi.Mocked<SubscriptionRepository>;
     service = new PaymentService();
     (service as any).paymentRepository = mockPaymentRepo;
     (service as any).subscriptionRepository = mockSubscriptionRepo;

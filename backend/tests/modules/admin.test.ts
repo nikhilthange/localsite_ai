@@ -1,17 +1,17 @@
 import { AdminService } from '../../src/modules/admin/services/AdminService';
 import { AdminRepository } from '../../src/modules/admin/repositories/AdminRepository';
 
-jest.mock('../../src/modules/admin/repositories/AdminRepository');
+vi.mock('../../src/modules/admin/repositories/AdminRepository');
 
-const MockedAdminRepository = AdminRepository as jest.MockedClass<typeof AdminRepository>;
+const MockedAdminRepository = AdminRepository as vi.MockedClass<typeof AdminRepository>;
 
 describe('AdminService', () => {
   let service: AdminService;
-  let mockRepository: jest.Mocked<AdminRepository>;
+  let mockRepository: vi.Mocked<AdminRepository>;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockRepository = new MockedAdminRepository() as jest.Mocked<AdminRepository>;
+    vi.clearAllMocks();
+    mockRepository = new MockedAdminRepository() as vi.Mocked<AdminRepository>;
     service = new AdminService();
     (service as any).repository = mockRepository;
   });

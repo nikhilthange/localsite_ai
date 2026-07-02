@@ -1,57 +1,57 @@
 import { AIEngineService } from '../../src/modules/ai/services/AIEngineService';
 import { AIClient } from '../../src/modules/ai/services/AIClient';
+import { AICreditService } from '../../src/modules/ai/services/AICreditService';
 import type { AICompletionRequest } from '../../src/modules/ai/types';
 
 const VALID_ID = '507f1f77bcf86cd799439011';
 
-jest.mock('../../src/modules/ai/services/AIClient', () => ({
-  AIClient: { getInstance: jest.fn() },
+vi.mock('../../src/modules/ai/services/AIClient', () => ({
+  AIClient: { getInstance: vi.fn() },
 }));
 
-jest.mock('../../src/modules/ai/services/PromptTemplateService', () => ({
-  PromptTemplateService: jest.fn().mockImplementation(() => ({
-    getPrompt: jest.fn(),
-    compile: jest.fn(),
+vi.mock('../../src/modules/ai/services/PromptTemplateService', () => ({
+  PromptTemplateService: vi.fn().mockImplementation(() => ({
+    getPrompt: vi.fn(),
+    compile: vi.fn(),
   })),
 }));
 
-jest.mock('../../src/modules/ai/services/TokenUsageService', () => ({
-  TokenUsageService: jest.fn().mockImplementation(() => ({
-    recordUsage: jest.fn(),
+vi.mock('../../src/modules/ai/services/TokenUsageService', () => ({
+  TokenUsageService: vi.fn().mockImplementation(() => ({
+    recordUsage: vi.fn(),
   })),
 }));
 
-jest.mock('../../src/modules/ai/services/AICreditService', () => ({
-  AICreditService: jest.fn().mockImplementation(() => ({
-    consumeCredits: jest.fn(),
-    getBalance: jest.fn(),
-    refundCredits: jest.fn(),
+vi.mock('../../src/modules/ai/services/AICreditService', () => ({
+  AICreditService: vi.fn().mockImplementation(() => ({
+    consumeCredits: vi.fn(),
+    getBalance: vi.fn(),
+    refundCredits: vi.fn(),
   })),
 }));
 
-jest.mock('../../src/core/socket/SocketSetup', () => ({
-  emitToUser: jest.fn(),
+vi.mock('../../src/core/socket/SocketSetup', () => ({
+  emitToUser: vi.fn(),
 }));
 
-jest.mock('../../src/modules/ai/models/AiCredit', () => ({
-  AiCredit: { findOne: jest.fn(), create: jest.fn() },
+vi.mock('../../src/modules/ai/models/AiCredit', () => ({
+  AiCredit: { findOne: vi.fn(), create: vi.fn() },
 }));
 
 describe('AIEngineService', () => {
   let service: AIEngineService;
-  let mockAIClient: jest.Mocked<AIClient>;
+  let mockAIClient: vi.Mocked<AIClient>;
   let mockAICreditService: any;
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    mockAIClient = { complete: jest.fn(), completeStream: jest.fn() } as any;
-    (AIClient.getInstance as jest.Mock).mockReturnValue(mockAIClient);
+    mockAIClient = { complete: vi.fn(), completeStream: vi.fn() } as any;
+    (AIClient.getInstance as vi.Mock).mockReturnValue(mockAIClient);
 
     service = new AIEngineService();
 
-    const { AICreditService } = require('../../src/modules/ai/services/AICreditService');
-    mockAICreditService = (AICreditService as jest.Mock).mock.results[0]?.value;
+    mockAICreditService = (AICreditService as vi.Mock).mock.results[0]?.value;
   });
 
   describe('generate', () => {
@@ -100,7 +100,7 @@ describe('AIEngineService', () => {
     it('should handle AI client failure gracefully', async () => {
       const creditsService = (service as any).credits;
       creditsService.consumeCredits.mockResolvedValue({ success: true, remaining: 90, cost: 10 });
-      creditsService.refundCredits = jest.fn().mockResolvedValue(10);
+      creditsService.refundCredits = vi.fn().mockResolvedValue(10);
 
       mockAIClient.complete.mockRejectedValue(new Error('AI API error'));
 

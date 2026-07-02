@@ -2,31 +2,46 @@ import request from 'supertest';
 import app from '../../src/app';
 import { User } from '../../src/modules/auth/models/User';
 
-jest.mock('../../src/modules/auth/models/User', () => ({
-  User: {
-    create: jest.fn(),
-    findOne: jest.fn(),
-    findById: jest.fn(),
-  },
+vi.mock('../../src/modules/auth/models/User', () => {
+  const createQuery = (resolveValue: any = null) => ({
+    lean: vi.fn().mockResolvedValue(resolveValue),
+    select: vi.fn().mockReturnThis(),
+    populate: vi.fn().mockReturnThis(),
+    sort: vi.fn().mockReturnThis(),
+    skip: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    then: (onFulfilled: any) => Promise.resolve(resolveValue).then(onFulfilled),
+    catch: (onRejected: any) => Promise.resolve(resolveValue).catch(onRejected),
+  });
+
+  return {
+    User: {
+      create: vi.fn(),
+      findOne: vi.fn(() => createQuery()),
+      findById: vi.fn(() => createQuery()),
+      findByIdAndUpdate: vi.fn(() => createQuery()),
+      findByIdAndDelete: vi.fn(() => createQuery()),
+    },
+  };
+});
+
+vi.mock('../../src/core/events/EventBus', () => ({
+  EventBus: { emit: vi.fn(), initialize: vi.fn(), on: vi.fn() },
 }));
 
-jest.mock('../../src/core/events/EventBus', () => ({
-  EventBus: { emit: jest.fn(), initialize: jest.fn(), on: jest.fn() },
-}));
-
-jest.mock('../../src/core/database/Connection', () => ({
+vi.mock('../../src/core/database/Connection', () => ({
   DatabaseConnection: {
-    getInstance: jest.fn(() => ({
-      connect: jest.fn(),
-      disconnect: jest.fn(),
-      getConnection: jest.fn(() => ({ readyState: 1 })),
+    getInstance: vi.fn(() => ({
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+      getConnection: vi.fn(() => ({ readyState: 1 })),
     })),
   },
 }));
 
 describe('Auth API', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('POST /api/auth/register', () => {
@@ -52,8 +67,7 @@ describe('Auth API', () => {
     });
 
     it('should return 200 with tokens on successful registration', async () => {
-      (User.findOne as jest.Mock).mockResolvedValue(null);
-      (User.create as jest.Mock).mockResolvedValue({
+      (User.create as vi.Mock).mockResolvedValue({
         _id: { toString: () => '507f1f77bcf86cd799439011' },
         name: 'Test User',
         email: 'test@example.com',
@@ -72,7 +86,7 @@ describe('Auth API', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.data).toHaveProperty('token');
+      expect(res.body.data).toHaveProperty('accessToken');
       expect(res.body.data).toHaveProperty('user');
     });
   });
@@ -86,8 +100,8 @@ describe('Auth API', () => {
     });
 
     it('should return 401 for invalid credentials', async () => {
-      (User.findOne as jest.Mock).mockReturnValue({
-        select: jest.fn().mockResolvedValue(null),
+      (User.findOne as vi.Mock).mockReturnValue({
+        select: vi.fn().mockResolvedValue(null),
       });
 
       const res = await request(app)
@@ -99,11 +113,16 @@ describe('Auth API', () => {
 
   describe('POST /api/auth/forgot-password', () => {
     it('should return 200 for valid email', async () => {
-      (User.findOne as jest.Mock).mockResolvedValue({
-        _id: 'user-1',
-        email: 'exists@example.com',
-        name: 'Exists',
-        save: jest.fn(),
+      (User.findOne as vi.Mock).mockReturnValue({
+        lean: vi.fn().mockResolvedValue({
+          _id: 'user-1',
+          email: 'exists@example.com',
+          name: 'Exists',
+          save: vi.fn(),
+        }),
+        select: vi.fn().mockReturnThis(),
+        then: (fn: any) => Promise.resolve(undefined).then(fn),
+        catch: (fn: any) => Promise.resolve(undefined).catch(fn),
       });
 
       const res = await request(app)
@@ -114,8 +133,6 @@ describe('Auth API', () => {
     });
 
     it('should still return 200 for non-existent email (security)', async () => {
-      (User.findOne as jest.Mock).mockResolvedValue(null);
-
       const res = await request(app)
         .post('/api/auth/forgot-password')
         .send({ email: 'noone@example.com' });

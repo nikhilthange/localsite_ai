@@ -2,13 +2,13 @@ import { SecurityMiddleware } from '../../src/core/security/SecurityMiddleware';
 import { authMiddleware, adminMiddleware } from '../../src/core/security/AuthMiddleware';
 import { AuthService } from '../../src/modules/auth/services/AuthService';
 
-jest.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: jest.fn() } }));
-jest.mock('../../src/modules/auth/repositories/AuthRepository', () => {
-  const mock = { findByEmail: jest.fn(), findById: jest.fn(), addRefreshToken: jest.fn(), removeRefreshToken: jest.fn(), update: jest.fn() };
-  return { AuthRepository: jest.fn().mockImplementation(() => mock) };
+vi.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: vi.fn() } }));
+vi.mock('../../src/modules/auth/repositories/AuthRepository', () => {
+  const mock = { findByEmail: vi.fn(), findById: vi.fn(), addRefreshToken: vi.fn(), removeRefreshToken: vi.fn(), update: vi.fn() };
+  return { AuthRepository: vi.fn().mockImplementation(() => mock) };
 });
-jest.mock('../../src/modules/auth/models/User', () => ({
-  User: { create: jest.fn(), findOne: jest.fn(), findById: jest.fn() },
+vi.mock('../../src/modules/auth/models/User', () => ({
+  User: { create: vi.fn(), findOne: vi.fn(), findById: vi.fn() },
 }));
 
 describe('SecurityMiddleware', () => {
@@ -23,10 +23,10 @@ describe('SecurityMiddleware', () => {
     it('should set security headers on response', () => {
       const req = {} as any;
       const res = {
-        setHeader: jest.fn(),
-        removeHeader: jest.fn(),
+        setHeader: vi.fn(),
+        removeHeader: vi.fn(),
       } as any;
-      const next = jest.fn();
+      const next = vi.fn();
 
       SecurityMiddleware.addSecurityHeaders(req, res, next);
 
@@ -43,8 +43,8 @@ describe('SecurityMiddleware', () => {
     it('should log request details', () => {
       const req = { method: 'GET', path: '/api/test', user: { userId: 'user-1' } } as any;
       const res = {} as any;
-      const next = jest.fn();
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const next = vi.fn();
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
 
       SecurityMiddleware.requestLogger(req, res, next);
 
@@ -56,8 +56,8 @@ describe('SecurityMiddleware', () => {
     it('should use anonymous for unauthenticated users', () => {
       const req = { method: 'POST', path: '/api/health', user: undefined } as any;
       const res = {} as any;
-      const next = jest.fn();
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const next = vi.fn();
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
 
       SecurityMiddleware.requestLogger(req, res, next);
 
@@ -83,7 +83,7 @@ describe('AuthMiddleware', () => {
     it('should reject request without authorization header', () => {
       const req = { headers: {}, cookies: {} } as any;
       const res = {} as any;
-      const next = jest.fn();
+      const next = vi.fn();
 
       authMiddleware(req, res, next);
 
@@ -93,7 +93,7 @@ describe('AuthMiddleware', () => {
     it('should reject malformed token', () => {
       const req = { headers: { authorization: 'Bearer ' }, cookies: {} } as any;
       const res = {} as any;
-      const next = jest.fn();
+      const next = vi.fn();
 
       authMiddleware(req, res, next);
 
@@ -104,7 +104,7 @@ describe('AuthMiddleware', () => {
       const token = AuthService.generateTokenPair('user-1', 'user', 'test@test.com').accessToken;
       const req = { headers: { authorization: `Bearer ${token}` }, cookies: {} } as any;
       const res = {} as any;
-      const next = jest.fn();
+      const next = vi.fn();
 
       authMiddleware(req, res, next);
 
@@ -118,7 +118,7 @@ describe('AuthMiddleware', () => {
     it('should allow admin users', () => {
       const req = { user: { role: 'admin' } } as any;
       const res = {} as any;
-      const next = jest.fn();
+      const next = vi.fn();
 
       adminMiddleware(req, res, next);
 
@@ -128,7 +128,7 @@ describe('AuthMiddleware', () => {
     it('should deny non-admin users', () => {
       const req = { user: { role: 'user' } } as any;
       const res = {} as any;
-      const next = jest.fn();
+      const next = vi.fn();
 
       adminMiddleware(req, res, next);
 
@@ -138,7 +138,7 @@ describe('AuthMiddleware', () => {
     it('should deny unauthenticated requests', () => {
       const req = { user: undefined } as any;
       const res = {} as any;
-      const next = jest.fn();
+      const next = vi.fn();
 
       adminMiddleware(req, res, next);
 

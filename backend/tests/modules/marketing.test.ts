@@ -1,26 +1,26 @@
 import { Campaign } from '../../src/modules/marketing/models/Campaign';
 
-jest.mock('../../src/modules/marketing/models/Campaign', () => ({
+vi.mock('../../src/modules/marketing/models/Campaign', () => ({
   Campaign: {
-    create: jest.fn(),
-    find: jest.fn(),
-    findById: jest.fn(),
-    findByIdAndUpdate: jest.fn(),
-    findByIdAndDelete: jest.fn(),
-    countDocuments: jest.fn(),
-    aggregate: jest.fn(),
+    create: vi.fn(),
+    find: vi.fn(),
+    findById: vi.fn(),
+    findByIdAndUpdate: vi.fn(),
+    findByIdAndDelete: vi.fn(),
+    countDocuments: vi.fn(),
+    aggregate: vi.fn(),
   },
 }));
 
-jest.mock('../../src/modules/website/models/Website', () => ({
-  Website: { findById: jest.fn() },
+vi.mock('../../src/modules/website/models/Website', () => ({
+  Website: { findById: vi.fn() },
 }));
 
-jest.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: jest.fn() } }));
+vi.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: vi.fn() } }));
 
 describe('Marketing Campaign', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('create', () => {
@@ -35,7 +35,7 @@ describe('Marketing Campaign', () => {
         schedule: { startDate: new Date('2025-06-01'), endDate: new Date('2025-06-30') },
       };
 
-      (Campaign.create as jest.Mock).mockResolvedValue({
+      (Campaign.create as vi.Mock).mockResolvedValue({
         _id: 'camp-1',
         ...campaignData,
         stats: { sent: 0, opened: 0, clicked: 0, converted: 0 },
@@ -52,8 +52,8 @@ describe('Marketing Campaign', () => {
 
   describe('findByWebsiteId', () => {
     it('should return campaigns for a website', async () => {
-      (Campaign.find as jest.Mock).mockReturnValue({
-        sort: jest.fn().mockResolvedValue([
+      (Campaign.find as vi.Mock).mockReturnValue({
+        sort: vi.fn().mockResolvedValue([
           { _id: 'camp-1', name: 'Campaign 1', status: 'active' },
           { _id: 'camp-2', name: 'Campaign 2', status: 'draft' },
         ]),
@@ -67,7 +67,7 @@ describe('Marketing Campaign', () => {
 
   describe('update campaign', () => {
     it('should update campaign status', async () => {
-      (Campaign.findByIdAndUpdate as jest.Mock).mockResolvedValue({
+      (Campaign.findByIdAndUpdate as vi.Mock).mockResolvedValue({
         _id: 'camp-1',
         status: 'active',
         launchedAt: new Date(),
@@ -108,7 +108,7 @@ describe('Marketing Campaign', () => {
 
   describe('aggregate campaign stats', () => {
     it('should aggregate campaign performance', async () => {
-      (Campaign.aggregate as jest.Mock).mockResolvedValue([
+      (Campaign.aggregate as vi.Mock).mockResolvedValue([
         {
           _id: 'web-1',
           totalCampaigns: 5,
