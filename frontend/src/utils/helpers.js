@@ -30,10 +30,10 @@ export function truncateText(text, length = 100) {
 }
 
 export function generateAvatar(name) {
-  if (!name) return '';
+  if (!name) return '??';
   const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 export function getStatusColor(status) {
@@ -64,19 +64,18 @@ export function classNames(...classes) {
 }
 
 export function validateEmail(email) {
-  if (!email) return 'Email is required';
+  if (!email) return false;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) return 'Invalid email address';
-  return '';
+  return emailRegex.test(email);
 }
 
 export function validatePassword(password) {
-  if (!password) return 'Password is required';
-  if (password.length < 8) return 'Password must be at least 8 characters';
-  if (!/[A-Z]/.test(password)) return 'Password must contain an uppercase letter';
-  if (!/[a-z]/.test(password)) return 'Password must contain a lowercase letter';
-  if (!/[0-9]/.test(password)) return 'Password must contain a number';
-  return '';
+  if (!password) return false;
+  if (password.length < 8) return false;
+  if (!/[A-Z]/.test(password)) return false;
+  if (!/[a-z]/.test(password)) return false;
+  if (!/[0-9]/.test(password)) return false;
+  return true;
 }
 
 export function validatePhone(phone) {

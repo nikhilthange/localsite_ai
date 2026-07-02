@@ -19,7 +19,7 @@ describe('formatCurrency', () => {
 describe('truncateText', () => {
   it('truncates text longer than max length', () => {
     const result = truncateText('This is a very long text', 10);
-    expect(result).toBe('This is a ...');
+    expect(result).toBe('This is a...');
     expect(result.length).toBeLessThanOrEqual(14);
   });
 

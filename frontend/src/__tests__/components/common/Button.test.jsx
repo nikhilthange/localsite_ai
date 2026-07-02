@@ -20,13 +20,13 @@ describe('Button', () => {
   it('applies variant classes', () => {
     const { rerender } = render(<Button variant="primary">Primary</Button>);
     const btn = screen.getByRole('button');
-    expect(btn.className).toMatch(/bg-primary/);
+    expect(btn.className).toMatch(/bg-violet-600/);
 
-    rerender(<Button variant="secondary">Secondary</Button>);
+    rerender(<Button variant="outline">Outline</Button>);
     expect(screen.getByRole('button').className).toMatch(/border/);
 
     rerender(<Button variant="ghost">Ghost</Button>);
-    expect(screen.getByRole('button').className).toMatch(/ghost/i);
+    expect(screen.getByRole('button').className).toMatch(/text-gray-600/);
 
     rerender(<Button variant="danger">Danger</Button>);
     expect(screen.getByRole('button').className).toMatch(/red/i);
@@ -60,7 +60,8 @@ describe('Button', () => {
   });
 
   it('renders icon when provided', () => {
-    render(<Button icon={<span data-testid="test-icon">*</span>}>With Icon</Button>);
+    const TestIcon = () => <span data-testid="test-icon">*</span>;
+    render(<Button icon={TestIcon}>With Icon</Button>);
     expect(screen.getByTestId('test-icon')).toBeInTheDocument();
   });
 

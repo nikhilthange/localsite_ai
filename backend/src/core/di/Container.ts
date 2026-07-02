@@ -70,7 +70,7 @@ export function Injectable(name?: string): ClassDecorator {
 }
 
 export function Inject(serviceName: string): ParameterDecorator {
-  return (target: Object, propertyKey: string | symbol | undefined, parameterIndex: number) => {
+  return (target: object, propertyKey: string | symbol | undefined, parameterIndex: number) => {
     const existingParams =
       Reflect.getOwnMetadata('di:params', target) || [];
     existingParams[parameterIndex] = serviceName;

@@ -62,6 +62,8 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
 
+    await user.click(screen.getByRole('button', { name: /try again/i }));
+
     expect(screen.getByText('All good')).toBeInTheDocument();
 
     vi.mocked(console.error).mockRestore();

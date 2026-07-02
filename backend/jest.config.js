@@ -16,6 +16,7 @@ module.exports = {
     '^@modules/(.*)$': '<rootDir>/src/modules/$1',
     '^@types/(.*)$': '<rootDir>/src/types/$1',
     '^@config/(.*)$': '<rootDir>/src/config/$1',
+    '^@middleware/(.*)$': '<rootDir>/src/middleware/$1',
   },
   setupFiles: ['<rootDir>/tests/setup.ts'],
   testTimeout: 15000,

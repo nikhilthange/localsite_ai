@@ -46,7 +46,7 @@ describe('NotificationContext', () => {
     await user.click(screen.getByTestId('add'));
     expect(screen.getByTestId('count').textContent).toBe('1');
     expect(screen.getByTestId('total').textContent).toBe('1');
-    expect(screen.getByText('New Alert')).toBeInTheDocument();
+    expect(screen.getByText(/New Alert/)).toBeInTheDocument();
   });
 
   it('marks a notification as read', async () => {

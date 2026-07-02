@@ -1,20 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { authService } from '@/services/authService';
-import api from '@/services/api';
+import api from '@/lib/axios';
 
-vi.mock('@/services/api', () => ({
+vi.mock('@/lib/axios', () => ({
   default: {
     post: vi.fn(),
     get: vi.fn(),
     put: vi.fn(),
+    delete: vi.fn(),
+    interceptors: {
+      request: { use: vi.fn() },
+      response: { use: vi.fn() },
+    },
   },
 }));
 
-describe('authService', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
+describe('authService', () => {
   it('login calls correct endpoint', async () => {
     const mockedPost = vi.mocked(api.post);
     mockedPost.mockResolvedValue({ data: { token: 'test-token', user: { name: 'Test' } } });

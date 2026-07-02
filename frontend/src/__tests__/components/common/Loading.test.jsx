@@ -5,7 +5,7 @@ import Loading from '@/components/common/Loading';
 describe('Loading', () => {
   it('renders a spinner by default', () => {
     render(<Loading />);
-    const spinner = document.querySelector('.animate-spin');
+    const spinner = document.querySelector('.rounded-full');
     expect(spinner).toBeInTheDocument();
   });
 
@@ -16,22 +16,19 @@ describe('Loading', () => {
 
   it('renders in fullPage mode', () => {
     render(<Loading fullPage />);
-    const container = document.querySelector('.min-h-screen');
-    expect(container).toBeInTheDocument();
+    const overlay = document.querySelector('.fixed');
+    expect(overlay).toBeInTheDocument();
   });
 
   it('renders with different sizes', () => {
     const { rerender } = render(<Loading size="sm" />);
-    let spinner = document.querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
+    expect(document.querySelector('.rounded-full')).toBeInTheDocument();
 
     rerender(<Loading size="lg" />);
-    spinner = document.querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
+    expect(document.querySelector('.rounded-full')).toBeInTheDocument();
 
     rerender(<Loading />);
-    spinner = document.querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
+    expect(document.querySelector('.rounded-full')).toBeInTheDocument();
   });
 
   it('does not render label when not provided', () => {

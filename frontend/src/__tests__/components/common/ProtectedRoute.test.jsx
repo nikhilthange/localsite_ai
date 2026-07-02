@@ -3,20 +3,13 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { describe, it, expect, vi } from 'vitest';
 import ProtectedRoute from '@/components/common/ProtectedRoute';
 
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return { ...actual };
-});
-
 describe('ProtectedRoute', () => {
   it('renders children when authenticated', () => {
     render(
-      <MemoryRouter initialEntries={['/dashboard']}>
-        <Routes>
-          <Route element={<ProtectedRoute isAuthenticated={true} />}>
-            <Route path="dashboard" element={<div>Dashboard Content</div>} />
-          </Route>
-        </Routes>
+      <MemoryRouter>
+        <ProtectedRoute isAuthenticated={true}>
+          <div>Dashboard Content</div>
+        </ProtectedRoute>
       </MemoryRouter>
     );
     expect(screen.getByText('Dashboard Content')).toBeInTheDocument();
@@ -27,9 +20,11 @@ describe('ProtectedRoute', () => {
       <MemoryRouter initialEntries={['/dashboard']}>
         <Routes>
           <Route path="/login" element={<div>Login Page</div>} />
-          <Route element={<ProtectedRoute isAuthenticated={false} />}>
-            <Route path="dashboard" element={<div>Dashboard Content</div>} />
-          </Route>
+          <Route path="/dashboard" element={
+            <ProtectedRoute isAuthenticated={false} redirectTo="/login">
+              <div>Dashboard Content</div>
+            </ProtectedRoute>
+          } />
         </Routes>
       </MemoryRouter>
     );
@@ -39,27 +34,21 @@ describe('ProtectedRoute', () => {
 
   it('shows loading state while auth is loading', () => {
     render(
-      <MemoryRouter initialEntries={['/dashboard']}>
-        <Routes>
-          <Route element={<ProtectedRoute isAuthenticated={false} loading={true} />}>
-            <Route path="dashboard" element={<div>Dashboard Content</div>} />
-          </Route>
-        </Routes>
+      <MemoryRouter>
+        <ProtectedRoute isAuthenticated={false} loading={true}>
+          <div>Dashboard Content</div>
+        </ProtectedRoute>
       </MemoryRouter>
     );
-    const spinner = document.querySelector('.animate-spin');
-    expect(spinner).toBeInTheDocument();
+    expect(screen.getByText('Verifying authentication...')).toBeInTheDocument();
   });
 
   it('allows admin users for admin routes', () => {
     render(
-      <MemoryRouter initialEntries={['/admin']}>
-        <Routes>
-          <Route element={<ProtectedRoute isAuthenticated={true} isAdmin={true} />}>
-            <Route path="admin" element={<div>Admin Panel</div>} />
-          </Route>
-          <Route path="/dashboard" element={<div>Dashboard</div>} />
-        </Routes>
+      <MemoryRouter>
+        <ProtectedRoute isAuthenticated={true} isAdmin={true}>
+          <div>Admin Panel</div>
+        </ProtectedRoute>
       </MemoryRouter>
     );
     expect(screen.getByText('Admin Panel')).toBeInTheDocument();
@@ -69,13 +58,16 @@ describe('ProtectedRoute', () => {
     render(
       <MemoryRouter initialEntries={['/admin']}>
         <Routes>
-          <Route element={<ProtectedRoute isAuthenticated={true} isAdmin={false} />}>
-            <Route path="admin" element={<div>Admin Panel</div>} />
-          </Route>
           <Route path="/dashboard" element={<div>Dashboard</div>} />
+          <Route path="/admin" element={
+            <ProtectedRoute isAuthenticated={true} isAdmin={false} requiredRole="admin">
+              <div>Admin Panel</div>
+            </ProtectedRoute>
+          } />
         </Routes>
       </MemoryRouter>
     );
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.queryByText('Admin Panel')).not.toBeInTheDocument();
   });
 });

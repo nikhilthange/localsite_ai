@@ -72,7 +72,8 @@ describe('Input', () => {
   });
 
   it('renders icon when provided', () => {
-    render(<Input icon={<span data-testid="input-icon">@</span>} label="Email" />);
+    const TestIcon = () => <span data-testid="input-icon">@</span>;
+    render(<Input icon={TestIcon} label="Email" />);
     expect(screen.getByTestId('input-icon')).toBeInTheDocument();
   });
 });

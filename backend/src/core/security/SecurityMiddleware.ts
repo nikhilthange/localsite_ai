@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import { doubleCsrf } from 'csrf-csrf';
 import mongoSanitize from 'express-mongo-sanitize';
-import xss from 'xss-clean';
+import { filterXSS } from 'xss';
 import hpp from 'hpp';
 import { AuthenticatedRequest } from '../../types/express';
 
@@ -41,7 +41,21 @@ export class SecurityMiddleware {
   static generateCsrfToken = csrfProtection.generateToken;
 
   static mongoSanitize = mongoSanitize();
-  static xssClean = xss();
+  static xssClean(req: Request, _res: Response, next: NextFunction): void {
+    const sanitize = (obj: Record<string, unknown>) => {
+      for (const key of Object.keys(obj)) {
+        if (typeof obj[key] === 'string') {
+          obj[key] = filterXSS(obj[key] as string);
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+          sanitize(obj[key] as Record<string, unknown>);
+        }
+      }
+    };
+    if (req.body) sanitize(req.body);
+    if (req.query) sanitize(req.query as Record<string, unknown>);
+    if (req.params) sanitize(req.params);
+    next();
+  }
   static hppProtection = hpp({
     whitelist: ['price', 'rating', 'createdAt', 'page', 'limit', 'sort'],
   });
