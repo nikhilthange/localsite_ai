@@ -52,7 +52,7 @@ const chatbotSchema = new Schema<IChatbot>(
         textColor: { type: String, default: '#FFFFFF' },
         showBranding: { type: Boolean, default: true },
       },
-      aiModel: { type: String, default: 'gpt-4o-mini' },
+      aiModel: { type: String, default: 'meta/llama-3.1-8b-instruct' },
       temperature: { type: Number, default: 0.7, min: 0, max: 2 },
       maxTokens: { type: Number, default: 300, min: 50, max: 2000 },
     },

@@ -6,7 +6,6 @@ import {
   AICompletionRequest,
   AICompletionResponse,
   AIModel,
-  AITaskType,
   MODEL_COSTS,
   TASK_MODEL_MAP,
   TASK_DEFAULT_MAX_TOKENS,
@@ -21,7 +20,8 @@ export class AIClient {
 
   private constructor() {
     this.client = new OpenAI({
-      apiKey: config.openai.apiKey,
+      apiKey: config.nvidia.apiKey,
+      baseURL: config.nvidia.baseUrl,
       maxRetries: 0,
       timeout: 60000,
     });
@@ -55,15 +55,11 @@ export class AIClient {
       }
     }
 
-    if (request.taskType === AITaskType.LOGO_GENERATION) {
-      return this.generateImage(request, model);
-    }
-
     let lastError: Error | null = null;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
-        const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+        const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
         if (request.systemPrompt) {
           messages.push({ role: 'system', content: request.systemPrompt });
         }
@@ -73,7 +69,7 @@ export class AIClient {
           model,
           messages,
           max_tokens: maxTokens,
-          temperature: request.temperature ?? config.openai.temperature,
+          temperature: request.temperature ?? config.nvidia.temperature,
           ...(request.responseFormat === 'json_object' ? { response_format: { type: 'json_object' } as const } : {}),
           stream: false,
         });
@@ -138,7 +134,7 @@ export class AIClient {
     const model = request.model || TASK_MODEL_MAP[request.taskType];
     const maxTokens = request.maxTokens || TASK_DEFAULT_MAX_TOKENS[request.taskType];
 
-    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
     if (request.systemPrompt) {
       messages.push({ role: 'system', content: request.systemPrompt });
     }
@@ -149,7 +145,7 @@ export class AIClient {
         model,
         messages,
         max_tokens: maxTokens,
-        temperature: request.temperature ?? config.openai.temperature,
+        temperature: request.temperature ?? config.nvidia.temperature,
         stream: true,
       });
 
@@ -190,33 +186,6 @@ export class AIClient {
     }
   }
 
-  private async generateImage(request: AICompletionRequest, _model: AIModel): Promise<AICompletionResponse> {
-    const startTime = Date.now();
-
-    const response = await this.client.images.generate({
-      model: 'dall-e-3',
-      prompt: request.userPrompt,
-      n: 1,
-      size: '1024x1024',
-      quality: 'standard',
-    });
-
-    const content = JSON.stringify({
-      url: response.data?.[0]?.url,
-      revisedPrompt: response.data?.[0]?.revised_prompt,
-    });
-
-    return {
-      content,
-      model: AIModel.Dalle3,
-      taskType: request.taskType,
-      usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
-      cost: MODEL_COSTS[AIModel.Dalle3].output,
-      cached: false,
-      latency: Date.now() - startTime,
-    };
-  }
-
   private calculateCost(model: AIModel, promptTokens: number, completionTokens: number): number {
     const rates = MODEL_COSTS[model];
     if (!rates) return 0;
@@ -224,13 +193,9 @@ export class AIClient {
   }
 
   private isRetryableError(error: any): boolean {
-    if (error instanceof OpenAI.APIError) {
-      const status = error.status;
-      return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
-    }
     if (error instanceof Error) {
       const msg = error.message.toLowerCase();
-      return msg.includes('timeout') || msg.includes('rate limit') || msg.includes('internal server error') || msg.includes('service unavailable') || msg.includes('network error') || msg.includes('econnrefused') || msg.includes('econnreset') || msg.includes('etimedout') || msg.includes('429');
+      return msg.includes('429') || msg.includes('500') || msg.includes('502') || msg.includes('503') || msg.includes('504') || msg.includes('timeout') || msg.includes('rate limit') || msg.includes('internal server error') || msg.includes('service unavailable') || msg.includes('network error') || msg.includes('econnrefused') || msg.includes('econnreset') || msg.includes('etimedout');
     }
     return false;
   }

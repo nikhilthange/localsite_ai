@@ -12,7 +12,10 @@ import { AppError } from '../../../utils/AppError';
 import OpenAI from 'openai';
 import { Types } from 'mongoose';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const nvidia = new OpenAI({
+  apiKey: process.env.NVIDIA_API_KEY,
+  baseURL: process.env.NVIDIA_BASE_URL || 'https://integrate.api.nvidia.com/v1',
+});
 
 export class GrowthService {
   private repository: GrowthRepository;
@@ -116,8 +119,8 @@ export class GrowthService {
 
     let aiResult: any;
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+      const response = await nvidia.chat.completions.create({
+        model: process.env.NVIDIA_MODEL || 'meta/llama-3.3-70b-instruct',
         messages: [
           {
             role: 'system',

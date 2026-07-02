@@ -60,7 +60,9 @@ services:
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       CLIENT_URL: https://app.localsiteai.com
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY}
+      NVIDIA_BASE_URL: ${NVIDIA_BASE_URL:-https://integrate.api.nvidia.com/v1}
+      NVIDIA_MODEL: ${NVIDIA_MODEL:-meta/llama-3.3-70b-instruct}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
       RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
@@ -96,7 +98,7 @@ services:
       NODE_ENV: production
       MONGODB_URI: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD:-password}@mongodb:27017/localsite_ai?authSource=admin
       REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}

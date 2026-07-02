@@ -3,7 +3,10 @@ import { config } from '../../../config';
 import { WebsiteRepository } from '../repositories/WebsiteRepository';
 import { Logger } from '../../../core/logging/Logger';
 
-const openai = new OpenAI({ apiKey: config.openai.apiKey });
+const nvidia = new OpenAI({
+  apiKey: config.nvidia.apiKey,
+  baseURL: config.nvidia.baseUrl,
+});
 const repository = new WebsiteRepository();
 
 const SYSTEM_PROMPT = `You are an expert website content writer. Generate comprehensive website content for a business.
@@ -24,14 +27,14 @@ export class WebsiteContentService {
 
     const userPrompt = `Generate website content for a business named "${website.businessName}" in the "${website.category}" category located in "${website.location}". Make the content professional, engaging, and relevant to ${website.category} businesses.`;
 
-    const response = await openai.chat.completions.create({
-      model: config.openai.model,
+    const response = await nvidia.chat.completions.create({
+      model: config.nvidia.model,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: userPrompt },
       ],
-      max_tokens: config.openai.maxTokens,
-      temperature: config.openai.temperature,
+      max_tokens: config.nvidia.maxTokens,
+      temperature: config.nvidia.temperature,
       response_format: { type: 'json_object' },
     });
 

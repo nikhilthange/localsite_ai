@@ -42,8 +42,8 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 RAZORPAY_KEY_ID=rzp_test_...
 RAZORPAY_KEY_SECRET=...
 
-# OpenAI
-OPENAI_API_KEY=sk-...
+# NVIDIA NIM
+NVIDIA_API_KEY=nvapi-...
 
 # SendGrid
 SENDGRID_API_KEY=SG....
@@ -232,8 +232,8 @@ docker exec redis redis-cli ping
    - Ensure JWT_SECRET is set
    - Check token expiry
 
-3. **OpenAI API errors**
-   - Verify OPENAI_API_KEY is valid
+3. **NVIDIA NIM API errors**
+   - Verify NVIDIA_API_KEY is valid
    - Check API quota limits
 
 4. **Email not sending**

@@ -121,8 +121,9 @@ services:
       CSRF_SECRET: ${CSRF_SECRET:?CSRF secret required}
       CLIENT_URL: https://${APP_DOMAIN:-app.localsiteai.com}
       APP_URL: https://api.${APP_DOMAIN:-localsiteai.com}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY}
+      NVIDIA_BASE_URL: ${NVIDIA_BASE_URL:-https://integrate.api.nvidia.com/v1}
+      NVIDIA_MODEL: ${NVIDIA_MODEL:-meta/llama-3.3-70b-instruct}
       EMAIL_PROVIDER: ${EMAIL_PROVIDER:-sendgrid}
       SENDGRID_API_KEY: ${SENDGRID_API_KEY}
       SMTP_HOST: ${SMTP_HOST}
@@ -180,7 +181,7 @@ services:
       MONGODB_URI: mongodb://${MONGO_USER:-admin}:${MONGO_PASSWORD}@mongodb:27017/localsite_ai?authSource=admin
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       REDIS_PREFIX: localsite:
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       AWS_REGION: ${AWS_REGION:-us-east-1}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}

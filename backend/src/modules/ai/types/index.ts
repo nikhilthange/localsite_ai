@@ -10,26 +10,24 @@ export enum AITaskType {
 }
 
 export enum AIModel {
-  GPT4o = 'gpt-4o',
-  GPT4oMini = 'gpt-4o-mini',
-  Dalle3 = 'dall-e-3',
+  Llama70B = 'meta/llama-3.3-70b-instruct',
+  Llama8B = 'meta/llama-3.1-8b-instruct',
 }
 
 export const MODEL_COSTS: Record<AIModel, { input: number; output: number }> = {
-  [AIModel.GPT4o]: { input: 0.0000025, output: 0.00001 },
-  [AIModel.GPT4oMini]: { input: 0.00000015, output: 0.0000006 },
-  [AIModel.Dalle3]: { input: 0, output: 0.04 },
+  [AIModel.Llama70B]: { input: 0.0000009, output: 0.0000009 },
+  [AIModel.Llama8B]: { input: 0.0000001, output: 0.0000001 },
 };
 
 export const TASK_MODEL_MAP: Record<AITaskType, AIModel> = {
-  [AITaskType.WEBSITE_GENERATION]: AIModel.GPT4o,
-  [AITaskType.SEO_METADATA]: AIModel.GPT4oMini,
-  [AITaskType.LOGO_GENERATION]: AIModel.Dalle3,
-  [AITaskType.BLOG_GENERATION]: AIModel.GPT4o,
-  [AITaskType.FAQ_GENERATION]: AIModel.GPT4oMini,
-  [AITaskType.MARKETING_COPY]: AIModel.GPT4o,
-  [AITaskType.CHATBOT_RESPONSE]: AIModel.GPT4oMini,
-  [AITaskType.GROWTH_ANALYSIS]: AIModel.GPT4oMini,
+  [AITaskType.WEBSITE_GENERATION]: AIModel.Llama70B,
+  [AITaskType.SEO_METADATA]: AIModel.Llama8B,
+  [AITaskType.LOGO_GENERATION]: AIModel.Llama70B,
+  [AITaskType.BLOG_GENERATION]: AIModel.Llama70B,
+  [AITaskType.FAQ_GENERATION]: AIModel.Llama8B,
+  [AITaskType.MARKETING_COPY]: AIModel.Llama70B,
+  [AITaskType.CHATBOT_RESPONSE]: AIModel.Llama8B,
+  [AITaskType.GROWTH_ANALYSIS]: AIModel.Llama8B,
 };
 
 export const TASK_CREDIT_COSTS: Record<AITaskType, number> = {

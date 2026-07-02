@@ -8,7 +8,7 @@ function assertSecureConfig(): void {
     JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
     COOKIE_SECRET: process.env.COOKIE_SECRET,
     CSRF_SECRET: process.env.CSRF_SECRET,
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    NVIDIA_API_KEY: process.env.NVIDIA_API_KEY,
   };
   for (const [key, value] of Object.entries(secrets)) {
     if (!value || value.length < 16 || value.includes('change-in-production') || value.includes('your-')) {
@@ -54,11 +54,12 @@ export const config = {
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
   },
 
-  openai: {
-    apiKey: process.env.OPENAI_API_KEY || '',
-    model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
-    maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS || '2000', 10),
-    temperature: parseFloat(process.env.OPENAI_TEMPERATURE || '0.7'),
+  nvidia: {
+    apiKey: process.env.NVIDIA_API_KEY || '',
+    baseUrl: process.env.NVIDIA_BASE_URL || 'https://integrate.api.nvidia.com/v1',
+    model: process.env.NVIDIA_MODEL || 'meta/llama-3.3-70b-instruct',
+    maxTokens: parseInt(process.env.NVIDIA_MAX_TOKENS || '2000', 10),
+    temperature: parseFloat(process.env.NVIDIA_TEMPERATURE || '0.7'),
   },
 
   email: {

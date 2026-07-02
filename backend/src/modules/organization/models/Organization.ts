@@ -41,7 +41,7 @@ const organizationSchema = new Schema<IOrganization>(
       theme: { type: String, enum: ['light', 'dark'], default: 'light' },
       timezone: { type: String, default: 'UTC' },
       locale: { type: String, default: 'en-US' },
-      aiModel: { type: String, default: 'gpt-4o' },
+      aiModel: { type: String, default: 'meta/llama-3.3-70b-instruct' },
       maxWebsites: { type: Number, default: 5, min: 1, max: 1000 },
       maxTeamMembers: { type: Number, default: 1, min: 1, max: 500 },
       branding: {

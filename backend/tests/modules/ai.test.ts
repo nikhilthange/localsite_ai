@@ -61,7 +61,7 @@ describe('AIEngineService', () => {
 
       const expectedResponse = {
         content: 'Generated content',
-        model: 'gpt-4o-mini',
+        model: 'meta/llama-3.1-8b-instruct',
         usage: { promptTokens: 50, completionTokens: 100, totalTokens: 150 },
         cost: 0.002,
         latency: 500,
@@ -79,7 +79,7 @@ describe('AIEngineService', () => {
       const result = await service.generate(request, false);
 
       expect(result.content).toBe('Generated content');
-      expect(result.model).toBe('gpt-4o-mini');
+      expect(result.model).toBe('meta/llama-3.1-8b-instruct');
       expect(result.usage.totalTokens).toBe(150);
     });
 

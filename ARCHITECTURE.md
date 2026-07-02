@@ -85,9 +85,9 @@
         │  │  (BullMQ Consumers, separate process) │ │
         │  └──────────────────────────────────────┘ │
         │                                           │
-        │  ┌──────────┐ ┌──────────┐ ┌───────────┐ │
-        │  │  OpenAI  │ │  Stripe  │ │AWS S3/R2 │ │
-        │  │  GPT-4o  │ │Razorpay  │ │  Assets   │ │
+         │  ┌────────────┐ ┌──────────┐ ┌───────────┐ │
+         │  │ NVIDIA NIM │ │  Stripe  │ │AWS S3/R2 │ │
+         │  │ Llama 70B  │ │Razorpay  │ │  Assets   │ │
         │  └──────────┘ └──────────┘ └───────────┘ │
         └───────────────────────────────────────────┘
 ```
@@ -601,7 +601,7 @@ When MongoDB must be sharded (>2TB data):
 | 1 | **MongoDB single primary** | ~2TB data, ~10k ops/s | Slow queries, high CPU | Read replicas → Sharding → Time-series DB for analytics |
 | 2 | **Redis memory** | ~8GB instance | OOM, evictions, latency | Split Redis: Cache + Queue + Socket.IO → Redis Cluster |
 | 3 | **Express single process** | ~2,500 req/s (single) | High CPU, connection queuing | PM2 cluster (4 instances) → Horizontal pod autoscaler |
-| 4 | **AI Generation (OpenAI)** | ~3 RPM (GPT-4o-mini) | Queue backpressure | Rate-limit queuing, cached responses, priority lanes |
+| 4 | **AI Generation (NVIDIA NIM)** | ~3 RPM (Llama 70B) | Queue backpressure | Rate-limit queuing, cached responses, priority lanes |
 | 5 | **MongoDB text search** | ~100k docs searched | Slow `$regex` queries | Atlas Search → Meilisearch → Elasticsearch |
 | 6 | **Socket.IO sticky sessions** | Connection distribution | Nginx `ip_hash` uneven | Redis Cluster adapter, consistent hashing |
 | 7 | **Analytics write throughput** | 1k events/s | Writes slow down reads | Buffer in Redis → batch write → Time-series DB |
@@ -615,7 +615,7 @@ When MongoDB must be sharded (>2TB data):
 | Redis ElastiCache (cache.m6g.large x2) | ~$400 | 2 × 8GB, separate for cache + queue |
 | Backend (4 × t3.medium ECS) | ~$600 | ~200 req/s each |
 | Workers (2 × t3.small ECS) | ~$200 | AI + Email + Notification processing |
-| OpenAI API | ~$5,000–10,000 | 100k sites × 1 gen/month × $0.05–0.10 |
+| NVIDIA NIM API | ~$1,000–2,000 | 100k sites × 1 gen/month × $0.01–0.02 |
 | SendGrid | ~$150 | 100k emails/month |
 | AWS S3 | ~$100 | Assets, deployments, backups |
 | Cloudflare Pro | ~$200 | CDN, WAF, DNS |
@@ -685,9 +685,9 @@ When MongoDB must be sharded (>2TB data):
 ### 10.2 AI Website Generation Flow
 
 ```
-┌──────┐   ┌──────────┐   ┌──────────┐   ┌────────┐   ┌────────┐   ┌──────────┐   ┌────────┐
-│Client │   │ Express  │   │Website   │   │ BullMQ │   │Worker  │   │  OpenAI   │   │MongoDB │
-│(React)│   │ Server   │   │Service   │   │(Queue) │   │(AI)    │   │  GPT-4o   │   │        │
+┌──────┐   ┌──────────┐   ┌──────────┐   ┌────────┐   ┌────────┐   ┌──────────────┐   ┌────────┐
+│Client │   │ Express  │   │Website   │   │ BullMQ │   │Worker  │   │  NVIDIA NIM  │   │MongoDB │
+│(React)│   │ Server   │   │Service   │   │(Queue) │   │(AI)    │   │  Llama 70B   │   │        │
 └──┬────┘   └────┬─────┘   └────┬─────┘   └───┬────┘   └───┬────┘   └─────┬─────┘   └───┬────┘
    │              │              │              │            │              │              │
    │ POST /websites/:id/generate │              │            │              │              │
@@ -713,7 +713,7 @@ When MongoDB must be sharded (>2TB data):
    │ Socket: ai:progress {20%}  │              │            │              │              │
    │◄───────────────────────────│              │            │              │              │
    │              │              │              │            │              │              │
-   │              │              │              │            │ 2. Call OpenAI API           │              │
+    │              │              │              │            │ 2. Call NVIDIA NIM API       │              │
    │              │              │              │            │──────────────►              │              │
    │              │              │              │            │              │              │              │
    │              │              │              │            │ 3. Stream sections           │              │
@@ -1173,7 +1173,7 @@ backend/
 | Metric | Target | Method |
 |---|---|---|
 | API response time (p95) | < 300ms | APM monitoring, CDN cache, query optimization |
-| AI generation time (p95) | < 30s | OpenAI streaming, parallel section generation |
+| AI generation time (p95) | < 30s | NVIDIA NIM streaming, parallel section generation |
 | Socket.IO connect time | < 500ms | WebSocket transport preferred, sticky sessions |
 | Queue processing latency | < 5s (email), < 1s (notification) | Dedicated workers, rate limiting |
 | Uptime | 99.9% | Multi-AZ deployment, health checks, auto-healing |
