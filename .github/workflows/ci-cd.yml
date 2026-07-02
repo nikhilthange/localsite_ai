@@ -1,106 +1,104 @@
-name: CI/CD Pipeline
+name: CI/CD
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
     branches: [main]
 
 env:
-  NODE_VERSION: "22"
+  NODE_VERSION: '22'
+  NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
 
 jobs:
-  test:
-    name: Test & Build
+  backend:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        workspace: [backend, frontend]
-
     defaults:
       run:
-        working-directory: ${{ matrix.workspace }}
+        working-directory: ./backend
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ${{ matrix.workspace }}/package-lock.json
+          cache: 'npm'
+          cache-dependency-path: ./backend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run lint
-        run: npm run lint
-        continue-on-error: false
-
-      - name: Run typecheck (backend)
-        if: matrix.workspace == 'backend'
+      - name: Type check
         run: npm run typecheck
 
-      - name: Run tests (frontend)
-        if: matrix.workspace == 'frontend'
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests
         run: npm run test:ci
+        env:
+          MONGODB_URI: mongodb://localhost:27017/localsite_ai_test
+          REDIS_URL: redis://localhost:6379
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NVIDIA_BASE_URL: https://integrate.api.nvidia.com/v1
+          NVIDIA_MODEL: meta/llama-3.3-70b-instruct
+          JWT_ACCESS_SECRET: test-jwt-access-secret
+          JWT_REFRESH_SECRET: test-jwt-refresh-secret
+          COOKIE_SECRET: test-cookie-secret
+          CSRF_SECRET: test-csrf-secret
 
-      - name: Run tests (backend)
-        if: matrix.workspace == 'backend'
-        run: npm run test:ci
-
-      - name: Build project
-        run: npm run build
-
-  deploy:
-    name: Deploy to Production
-    needs: test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  frontend:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Check deployment secrets availability
-        id: check_secrets
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-        run: |
-          if [ -n "$SSH_PRIVATE_KEY" ] && [ -n "$SSH_KNOWN_HOSTS" ] && [ -n "$EC2_HOST" ]; then
-            echo "available=true" >> $GITHUB_OUTPUT
-          else
-            echo "available=false" >> $GITHUB_OUTPUT
-          fi
-        shell: bash
-
-      - name: Install SSH key
-        if: steps.check_secrets.outputs.available == 'true'
-        uses: shimataro/ssh-key-action@v2
+      - uses: actions/setup-node@v4
         with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./frontend/package-lock.json
 
-      - name: Deploy via SSH
-        if: steps.check_secrets.outputs.available == 'true'
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.EC2_PORT || 22 }}
-          script: |
-            set -e
-            cd ${{ secrets.DEPLOY_PATH }}
-            export COMPOSE_PROJECT_NAME=saas
-            docker compose -f docker/docker-compose.yml pull
-            docker compose -f docker/docker-compose.yml up --build -d --remove-orphans
-            docker image prune -f
-            docker container prune -f
-            echo "Deployment completed."
-            docker compose -f docker/docker-compose.yml ps
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
+
+  docker:
+    if: github.ref == 'refs/heads/main'
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t localsite-ai-backend -f backend/Dockerfile ./backend
+
+      - name: Build frontend image
+        run: docker build -t localsite-ai-frontend -f infra/docker/Dockerfile.frontend .
+
+      - name: Build worker image
+        run: docker build -t localsite-ai-worker -f infra/docker/Dockerfile.worker ./backend

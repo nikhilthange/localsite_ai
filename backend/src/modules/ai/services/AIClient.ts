@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import NvidiaAI from 'openai';
 import { config } from '../../../config';
 import { Logger } from '../../../core/logging/Logger';
 import { CacheService } from '../../../core/cache/CacheService';
@@ -16,10 +16,10 @@ const MAX_RETRIES = 4;
 
 export class AIClient {
   private static instance: AIClient;
-  private client: OpenAI;
+  private client: NvidiaAI;
 
   private constructor() {
-    this.client = new OpenAI({
+    this.client = new NvidiaAI({
       apiKey: config.nvidia.apiKey,
       baseURL: config.nvidia.baseUrl,
       maxRetries: 0,
@@ -59,7 +59,7 @@ export class AIClient {
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
-        const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
+        const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
         if (request.systemPrompt) {
           messages.push({ role: 'system', content: request.systemPrompt });
         }
@@ -134,7 +134,7 @@ export class AIClient {
     const model = request.model || TASK_MODEL_MAP[request.taskType];
     const maxTokens = request.maxTokens || TASK_DEFAULT_MAX_TOKENS[request.taskType];
 
-    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
+    const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
     if (request.systemPrompt) {
       messages.push({ role: 'system', content: request.systemPrompt });
     }
@@ -200,7 +200,7 @@ export class AIClient {
     return false;
   }
 
-  getClient(): OpenAI {
+  getClient(): NvidiaAI {
     return this.client;
   }
 }

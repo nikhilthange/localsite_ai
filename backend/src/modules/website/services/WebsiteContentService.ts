@@ -1,9 +1,9 @@
-import OpenAI from 'openai';
+import NvidiaAI from 'openai';
 import { config } from '../../../config';
 import { WebsiteRepository } from '../repositories/WebsiteRepository';
 import { Logger } from '../../../core/logging/Logger';
 
-const nvidia = new OpenAI({
+const nvidia = new NvidiaAI({
   apiKey: config.nvidia.apiKey,
   baseURL: config.nvidia.baseUrl,
 });

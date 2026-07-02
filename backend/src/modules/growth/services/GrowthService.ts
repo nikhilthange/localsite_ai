@@ -9,10 +9,10 @@ import { EventBus } from '../../../core/events/EventBus';
 import { SystemEvents } from '../../../types/events';
 import type { PaginationParams } from '../../../types/services';
 import { AppError } from '../../../utils/AppError';
-import OpenAI from 'openai';
+import NvidiaAI from 'openai';
 import { Types } from 'mongoose';
 
-const nvidia = new OpenAI({
+const nvidia = new NvidiaAI({
   apiKey: process.env.NVIDIA_API_KEY,
   baseURL: process.env.NVIDIA_BASE_URL || 'https://integrate.api.nvidia.com/v1',
 });
