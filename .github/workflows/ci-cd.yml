@@ -66,12 +66,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install SSH key
+        if: ${{ secrets.SSH_PRIVATE_KEY != '' && secrets.SSH_KNOWN_HOSTS != '' }}
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 
       - name: Deploy via SSH
+        if: ${{ secrets.SSH_PRIVATE_KEY != '' && secrets.EC2_HOST != '' }}
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -80,22 +82,11 @@ jobs:
           port: ${{ secrets.EC2_PORT || 22 }}
           script: |
             set -e
-
             cd ${{ secrets.DEPLOY_PATH }}
-
-            # Load environment
             export COMPOSE_PROJECT_NAME=saas
-
-            # Pull latest images
             docker compose -f docker/docker-compose.yml pull
-
-            # Rebuild and restart changed services
             docker compose -f docker/docker-compose.yml up --build -d --remove-orphans
-
-            # Clean up unused images, containers, and volumes
             docker image prune -f
             docker container prune -f
-
-            # Verify services are healthy
-            echo "Deployment completed. Checking service status..."
+            echo "Deployment completed."
             docker compose -f docker/docker-compose.yml ps
