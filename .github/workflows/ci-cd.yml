@@ -45,7 +45,12 @@ jobs:
         run: npm run typecheck
         continue-on-error: true
 
-      - name: Run tests
+      - name: Run tests (frontend)
+        if: matrix.workspace == 'frontend'
+        run: npm run test:ci
+
+      - name: Run tests (backend)
+        if: matrix.workspace == 'backend'
         run: npm test -- --ci --coverage
 
       - name: Build project
