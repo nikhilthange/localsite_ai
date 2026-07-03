@@ -37,8 +37,8 @@ export default function Contact() {
   };
 
   const contactInfo = [
-    { icon: HiMail, label: 'Email', value: 'hello@localsite.ai' },
-    { icon: HiPhone, label: 'Phone', value: '+1 (555) 123-4567' },
+    { icon: HiMail, label: 'Email', value: 'nikhilthange75@gmail.com' },
+    { icon: HiPhone, label: 'Phone', value: '+91 98200 78156' },
     { icon: HiLocationMarker, label: 'Location', value: 'San Francisco, CA' },
     { icon: HiClock, label: 'Hours', value: 'Mon-Fri 9AM-6PM PST' },
   ];

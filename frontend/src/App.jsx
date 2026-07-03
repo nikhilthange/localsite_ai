@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
+import { motion } from 'framer-motion';
 import Loader from '@/components/ui/Loader';
 import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -29,6 +30,13 @@ const Leads = lazy(() => import('@/pages/crm/Leads'));
 const Billing = lazy(() => import('@/pages/billing/Billing'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
+const pageTransition = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -8 },
+  transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
+};
+
 function PageLoader() {
   return (
     <div className="flex min-h-screen items-center justify-center">
@@ -40,11 +48,15 @@ function PageLoader() {
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-8">
-      <h2 className="text-2xl font-bold text-red-600">Something went wrong</h2>
-      <pre className="max-w-lg overflow-auto rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950 dark:text-red-200">
+      <div className="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mb-2">
+        <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+      </div>
+      <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Something went wrong</h2>
+      <pre className="max-w-lg overflow-auto rounded-xl bg-red-50 dark:bg-red-950 p-4 text-sm text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800">
         {error.message}
       </pre>
-      <button onClick={resetErrorBoundary} className="rounded-lg bg-primary-600 px-6 py-2 text-white transition-colors hover:bg-primary-700">
+      <button onClick={resetErrorBoundary} className="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-primary-700 shadow-lg shadow-primary-500/25">
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
         Try again
       </button>
     </div>
@@ -70,13 +82,28 @@ function AppRoutes() {
   return (
     <Routes>
       <Route element={<PublicLayout />}>
-        <Route index element={<Home />} />
-        <Route path="login" element={<Login />} />
-        <Route path="signup" element={<Signup />} />
-        <Route path="forgot-password" element={<ForgotPassword />} />
-        <Route path="reset-password/:token" element={<ResetPassword />} />
-        <Route path="pricing" element={<Pricing />} />
-        <Route path="contact" element={<Contact />} />
+        {['/', '/login', '/signup', '/forgot-password', '/reset-password/:token', '/pricing', '/contact', '*'].map((path) => null)}
+        <Route index element={
+          <motion.div {...pageTransition}><Home /></motion.div>
+        } />
+        <Route path="login" element={
+          <motion.div {...pageTransition}><Login /></motion.div>
+        } />
+        <Route path="signup" element={
+          <motion.div {...pageTransition}><Signup /></motion.div>
+        } />
+        <Route path="forgot-password" element={
+          <motion.div {...pageTransition}><ForgotPassword /></motion.div>
+        } />
+        <Route path="reset-password/:token" element={
+          <motion.div {...pageTransition}><ResetPassword /></motion.div>
+        } />
+        <Route path="pricing" element={
+          <motion.div {...pageTransition}><Pricing /></motion.div>
+        } />
+        <Route path="contact" element={
+          <motion.div {...pageTransition}><Contact /></motion.div>
+        } />
       </Route>
 
       <Route
@@ -85,18 +112,42 @@ function AppRoutes() {
             <DashboardLayout user={user} isAdmin={user?.role === 'admin' || user?.role === 'super_admin'} onLogout={logout} isDark={isDark} onToggleDark={toggleTheme}>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="websites" element={<Websites />} />
-                  <Route path="websites/generate" element={<GenerateWebsite />} />
-                  <Route path="websites/:id" element={<WebsiteDetail />} />
-                  <Route path="websites/:id/edit" element={<EditWebsite />} />
-                  <Route path="settings" element={<Settings />} />
-                  <Route path="analytics" element={<Analytics />} />
-                  <Route path="leads" element={<Leads />} />
-                  <Route path="billing" element={<Billing />} />
-                  <Route path="admin" element={<AdminDashboard />} />
-                  <Route path="admin/users" element={<AdminUsers />} />
-                  <Route path="growth" element={<GrowthAssistant />} />
+                  <Route path="dashboard" element={
+                    <motion.div {...pageTransition}><Dashboard /></motion.div>
+                  } />
+                  <Route path="websites" element={
+                    <motion.div {...pageTransition}><Websites /></motion.div>
+                  } />
+                  <Route path="websites/generate" element={
+                    <motion.div {...pageTransition}><GenerateWebsite /></motion.div>
+                  } />
+                  <Route path="websites/:id" element={
+                    <motion.div {...pageTransition}><WebsiteDetail /></motion.div>
+                  } />
+                  <Route path="websites/:id/edit" element={
+                    <motion.div {...pageTransition}><EditWebsite /></motion.div>
+                  } />
+                  <Route path="settings" element={
+                    <motion.div {...pageTransition}><Settings /></motion.div>
+                  } />
+                  <Route path="analytics" element={
+                    <motion.div {...pageTransition}><Analytics /></motion.div>
+                  } />
+                  <Route path="leads" element={
+                    <motion.div {...pageTransition}><Leads /></motion.div>
+                  } />
+                  <Route path="billing" element={
+                    <motion.div {...pageTransition}><Billing /></motion.div>
+                  } />
+                  <Route path="admin" element={
+                    <motion.div {...pageTransition}><AdminDashboard /></motion.div>
+                  } />
+                  <Route path="admin/users" element={
+                    <motion.div {...pageTransition}><AdminUsers /></motion.div>
+                  } />
+                  <Route path="growth" element={
+                    <motion.div {...pageTransition}><GrowthAssistant /></motion.div>
+                  } />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
               </Suspense>
@@ -105,7 +156,9 @@ function AppRoutes() {
         }
       />
 
-      <Route path="*" element={<NotFound />} />
+      <Route path="*" element={
+        <motion.div {...pageTransition}><NotFound /></motion.div>
+      } />
     </Routes>
   );
 }

@@ -18,14 +18,6 @@
     --color-error: 239 68 68;
     --sidebar-width: 16rem;
     --header-height: 4rem;
-    --radius-sm: 0.375rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
-    --radius-xl: 1rem;
-    --radius-2xl: 1.25rem;
-    --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
-    --shadow-dropdown: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-    --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
   }
 
   .dark {
@@ -44,12 +36,12 @@
   }
 
   body {
-    @apply bg-[rgb(var(--color-bg))] text-[rgb(var(--color-text))] transition-colors duration-300;
+    @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   * {
-    @apply border-[rgb(var(--color-border))];
+    @apply border-slate-200 dark:border-slate-800;
   }
 
   ::selection {
@@ -65,7 +57,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-[rgb(var(--color-border))] hover:bg-[rgb(var(--color-text-muted))] transition-colors;
+    @apply rounded-full bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors;
   }
 
   input,
@@ -87,23 +79,23 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none;
   }
 
   .btn-primary {
-    @apply btn bg-primary-600 text-white shadow-sm hover:bg-primary-700 active:bg-primary-800 dark:shadow-primary-500/10;
+    @apply btn bg-primary-600 text-white shadow-sm hover:bg-primary-700 active:bg-primary-800 dark:shadow-primary-500/10 shadow-primary-500/15;
   }
 
   .btn-secondary {
-    @apply btn bg-surface-100 text-surface-900 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-100 dark:hover:bg-surface-700;
+    @apply btn bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700;
   }
 
   .btn-outline {
-    @apply btn border border-[rgb(var(--color-border))] bg-transparent text-[rgb(var(--color-text))] hover:bg-[rgb(var(--color-surface))] active:bg-surface-100 dark:active:bg-surface-800;
+    @apply btn border border-slate-200 dark:border-slate-700 bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 active:bg-slate-100 dark:active:bg-slate-800;
   }
 
   .btn-ghost {
-    @apply btn bg-transparent text-[rgb(var(--color-text-secondary))] hover:bg-[rgb(var(--color-surface))] hover:text-[rgb(var(--color-text))];
+    @apply btn bg-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200;
   }
 
   .btn-danger {
@@ -123,19 +115,19 @@
   }
 
   .card {
-    @apply rounded-2xl border border-[rgb(var(--color-border))] bg-white dark:bg-surface-800 p-6 shadow-[var(--shadow-card)] transition-all duration-200;
+    @apply rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-premium transition-all duration-200;
   }
 
   .card-hover {
-    @apply card hover:shadow-md hover:border-primary-200 dark:hover:border-primary-800;
+    @apply card hover:shadow-premium-lg hover:border-primary-200 dark:hover:border-primary-800;
   }
 
   .card-glass {
-    @apply card bg-white/80 dark:bg-surface-800/80 backdrop-blur-xl;
+    @apply card bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl;
   }
 
   .input-field {
-    @apply w-full rounded-xl border border-[rgb(var(--color-border))] bg-transparent px-4 py-2.5 text-sm text-[rgb(var(--color-text))] placeholder:text-[rgb(var(--color-text-muted))] transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20;
+    @apply w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20;
   }
 
   .input-error {
@@ -147,11 +139,11 @@
   }
 
   .section-heading {
-    @apply text-3xl font-bold tracking-tight text-[rgb(var(--color-text))] sm:text-4xl lg:text-5xl;
+    @apply text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl lg:text-5xl;
   }
 
   .section-subheading {
-    @apply text-lg text-[rgb(var(--color-text-secondary))] max-w-2xl;
+    @apply text-lg text-slate-500 dark:text-slate-400 max-w-2xl;
   }
 
   .gradient-text {
@@ -187,11 +179,11 @@
   }
 
   .badge-neutral {
-    @apply badge bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-300;
+    @apply badge bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300;
   }
 
   .kbd {
-    @apply inline-flex items-center justify-center rounded-md border border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] px-1.5 py-0.5 text-xs font-medium text-[rgb(var(--color-text-muted))] shadow-sm;
+    @apply inline-flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 text-xs font-medium text-slate-400 dark:text-slate-500 shadow-sm;
   }
 }
 
