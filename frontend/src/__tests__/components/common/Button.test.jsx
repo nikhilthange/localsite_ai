@@ -20,13 +20,13 @@ describe('Button', () => {
   it('applies variant classes', () => {
     const { rerender } = render(<Button variant="primary">Primary</Button>);
     const btn = screen.getByRole('button');
-    expect(btn.className).toMatch(/bg-violet-600/);
+    expect(btn.className).toMatch(/bg-primary-600/);
 
     rerender(<Button variant="outline">Outline</Button>);
     expect(screen.getByRole('button').className).toMatch(/border/);
 
     rerender(<Button variant="ghost">Ghost</Button>);
-    expect(screen.getByRole('button').className).toMatch(/text-gray-600/);
+    expect(screen.getByRole('button').className).toMatch(/color-text-secondary/);
 
     rerender(<Button variant="danger">Danger</Button>);
     expect(screen.getByRole('button').className).toMatch(/red/i);

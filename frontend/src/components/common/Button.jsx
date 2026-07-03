@@ -25,6 +25,7 @@ const Button = forwardRef(({
   loading,
   disabled,
   className,
+  icon: Icon,
   type = 'button',
   ...props
 }, ref) => {
@@ -53,7 +54,10 @@ const Button = forwardRef(({
           {children && <span className="opacity-70">{children}</span>}
         </>
       ) : (
-        children
+        <>
+          {Icon && <Icon className="w-4 h-4 shrink-0" />}
+          {children}
+        </>
       )}
     </motion.button>
   );
