@@ -54,12 +54,13 @@ export class WebsiteController {
   static generateComplete: ControllerMethod = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const overallStart = Date.now();
     try {
-      const { businessName, category, location, description, phone = '', email = '', website: websiteUrl = '', address = '', socialLinks = [], theme = 'modern' } = req.body;
+      const { businessName, category, location, description, phone = '', email = '', website: websiteUrl = '', address = '', socialLinks = [], theme = 'modern', primaryColor, secondaryColor, targetAudience, tone, websiteStyle } = req.body;
 
       Logger.info('Generation started', { businessName, category, location });
 
       const website = await websiteService.generateComplete(req.user!.userId, {
         businessName, category, location, description, phone, email, website: websiteUrl, address, socialLinks, theme,
+        primaryColor, secondaryColor, targetAudience, tone, websiteStyle,
       });
 
       const totalElapsed = Date.now() - overallStart;

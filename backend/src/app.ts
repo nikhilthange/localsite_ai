@@ -8,7 +8,7 @@ import { RateLimiter } from './core/security/RateLimiter';
 import { errorHandler } from './core/security/ErrorHandler';
 import { AppError } from './utils/AppError';
 
-import { authMiddleware } from './core/security/AuthMiddleware';
+import { authMiddleware, optionalAuth } from './core/security/AuthMiddleware';
 import { setupSwagger } from './core/docs/Swagger';
 
 import authRoutes from './modules/auth/routes/AuthRoutes';
@@ -52,6 +52,7 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(SecurityMiddleware.mongoSanitize);
 app.use(SecurityMiddleware.xssClean);
 app.use(SecurityMiddleware.hppProtection);
+app.use(optionalAuth);
 app.use(SecurityMiddleware.requestLogger);
 app.use('/api', SecurityMiddleware.csrfProtection);
 app.use('/api', RateLimiter.global);

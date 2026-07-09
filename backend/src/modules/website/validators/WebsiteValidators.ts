@@ -24,6 +24,11 @@ const generateCompleteSchema = Joi.object({
     platform: Joi.string(), url: Joi.string().uri(),
   })).optional().default([]),
   theme: Joi.string().optional().default('modern'),
+  primaryColor: Joi.string().pattern(/^#([0-9a-fA-F]{6})$/).optional(),
+  secondaryColor: Joi.string().pattern(/^#([0-9a-fA-F]{6})$/).optional(),
+  targetAudience: Joi.string().max(200).optional(),
+  tone: Joi.string().valid('Professional', 'Friendly', 'Luxury', 'Energetic', 'Minimal', 'Bold').optional(),
+  websiteStyle: Joi.string().valid('Modern', 'Classic', 'Minimal', 'Bold', 'Luxury', 'Playful', 'Corporate').optional(),
 });
 
 const updateWebsiteSchema = Joi.object({

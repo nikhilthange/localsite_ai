@@ -90,7 +90,7 @@ export function AuthProvider({ children }) {
 
   const updateProfile = useCallback(
     async (updates) => {
-      const { data } = await axios.put('/api/user/profile', updates, {
+      const { data } = await axios.put('/user/profile', updates, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const updatedUser = data.data?.user || data.user || data.data;

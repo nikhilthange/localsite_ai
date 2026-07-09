@@ -5,6 +5,7 @@ import mongoSanitize from 'express-mongo-sanitize';
 import { filterXSS } from 'xss';
 import hpp from 'hpp';
 import { AuthenticatedRequest } from '../../types/express';
+import { Logger } from '../../core/logging/Logger';
 
 const csrfProtection = doubleCsrf({
   getSecret: () => process.env.CSRF_SECRET || 'dev-csrf-secret',
@@ -64,7 +65,9 @@ export class SecurityMiddleware {
 
   static requestLogger(req: AuthenticatedRequest, _res: Response, next: NextFunction): void {
     const userId = req.user?.userId || 'anonymous';
-    console.log('[' + new Date().toISOString() + '] ' + req.method + ' ' + req.path + ' - User: ' + userId);
+    const method = req.method;
+    const path = req.originalUrl || req.url;
+    Logger.info(`${method} ${path} - User: ${userId}`);
     next();
   }
 

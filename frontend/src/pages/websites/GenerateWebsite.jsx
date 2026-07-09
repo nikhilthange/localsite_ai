@@ -81,30 +81,26 @@ export default function GenerateWebsite() {
   const [customDomain, setCustomDomain] = useState('');
   const [errors, setErrors] = useState({});
   const [generationError, setGenerationError] = useState(null);
-  const socket = useSocket();
+  const { on: socketOn } = useSocket();
 
   useEffect(() => {
     if (!isGenerating) return;
-    const unsub = socket.on('ai:progress', (data) => {
+    const unsubProgress = socketOn('ai:progress', (data) => {
       if (data.progress != null) setGenerationProgress(data.progress);
       if (data.step) {
-        const idx = generationStatuses.findIndex(s => data.step.toLowerCase().includes(s.message.toLowerCase().slice(0, 10)));
+        const msg = data.step.toLowerCase();
+        const idx = generationStatuses.findIndex(s => msg.includes(s.message.toLowerCase().slice(0, 10)));
         if (idx >= 0) setGenStatusIndex(idx);
       }
     });
-    return unsub;
-  }, [isGenerating, socket, generationStatuses]);
-
-  useEffect(() => {
-    if (!isGenerating) return;
-    const unsub = socket.on('ai:error', (data) => {
+    const unsubError = socketOn('ai:error', (data) => {
       if (data.error) {
         setGenerationError(data.error);
         setIsGenerating(false);
       }
     });
-    return unsub;
-  }, [isGenerating, socket]);
+    return () => { unsubProgress(); unsubError(); };
+  }, [isGenerating, socketOn, generationStatuses]);
 
   const validateStep1 = () => {
     const errs = {};

@@ -43,20 +43,23 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) throw new Error('No refresh token');
-        const { data } = await axios.post(`${API_BASE_URL}/auth/refresh-token`, { refreshToken });
-        localStorage.setItem('token', data.token);
-        if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
-        originalRequest.headers.Authorization = `Bearer ${data.token}`;
-        return api(originalRequest);
-      } catch {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (refreshToken) {
+        try {
+          const { data } = await axios.post(`${API_BASE_URL}/auth/refresh-token`, { refreshToken });
+          localStorage.setItem('token', data.token);
+          if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+          originalRequest.headers.Authorization = `Bearer ${data.token}`;
+          return api(originalRequest);
+        } catch {
+          // Refresh failed, fall through to logout
+        }
       }
+      // Token expired and cannot be refreshed — redirect to login
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

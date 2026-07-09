@@ -122,6 +122,11 @@ export class WebsiteService {
     address?: string;
     socialLinks?: Array<{ platform: string; url: string }>;
     theme?: string;
+    primaryColor?: string;
+    secondaryColor?: string;
+    targetAudience?: string;
+    tone?: string;
+    websiteStyle?: string;
   }): Promise<IWebsite> {
     const t0 = Date.now();
     const industryKey = this.templateEngine.resolveIndustry(data.category);
@@ -146,7 +151,12 @@ export class WebsiteService {
         data.description,
         data.theme,
         userId,
-        existingWebsite._id.toString()
+        existingWebsite._id.toString(),
+        data.primaryColor,
+        data.secondaryColor,
+        data.targetAudience,
+        data.tone,
+        data.websiteStyle
       );
       Logger.info('AI response received', { businessName: data.businessName, aiElapsedMs: Date.now() - tAiStart, totalElapsedMs: Date.now() - t0 });
 
@@ -176,7 +186,12 @@ export class WebsiteService {
       data.description,
       data.theme,
       userId,
-      website._id.toString()
+      website._id.toString(),
+      data.primaryColor,
+      data.secondaryColor,
+      data.targetAudience,
+      data.tone,
+      data.websiteStyle
     );
     Logger.info('AI response received', { businessName: data.businessName, aiElapsedMs: Date.now() - tAiStart, totalElapsedMs: Date.now() - t0 });
 
