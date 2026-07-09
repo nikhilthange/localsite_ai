@@ -151,6 +151,7 @@ function DonutCenter({ label, value, sublabel }) {
 
 export default function Analytics() {
   const { websites, fetchWebsites } = useWebsites();
+  const websiteList = Array.isArray(websites) ? websites : [];
   const [selectedWebsite, setSelectedWebsite] = useState('');
   const [range, setRange] = useState('7d');
   const [data, setData] = useState(null);
@@ -271,7 +272,7 @@ export default function Analytics() {
               className="input-field appearance-none pr-8 min-w-[160px] cursor-pointer"
             >
               <option value="">All Websites</option>
-              {(websites || []).map((w) => (
+              {websiteList.map((w) => (
                 <option key={w._id || w.id} value={w._id || w.id}>
                   {w.name || w.businessName}
                 </option>

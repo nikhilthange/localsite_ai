@@ -9,17 +9,24 @@ export function WebsiteProvider({ children }) {
   const [currentWebsite, setCurrentWebsite] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const normalizeWebsites = useCallback((data) => {
+    if (Array.isArray(data)) return data;
+    if (data?.data && Array.isArray(data.data)) return data.data;
+    if (data?.websites && Array.isArray(data.websites)) return data.websites;
+    return [];
+  }, []);
+
   const fetchWebsites = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await websiteService.getWebsites();
-      setWebsites(data.websites || data.data || []);
+      setWebsites(normalizeWebsites(data.data || data));
     } catch (err) {
       toast.error('Failed to fetch websites');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [normalizeWebsites]);
 
   const createWebsite = useCallback(async (websiteData) => {
     setLoading(true);
@@ -38,7 +45,10 @@ export function WebsiteProvider({ children }) {
   const updateWebsite = useCallback(async (id, updates) => {
     try {
       const { data } = await websiteService.updateWebsite(id, updates);
-      setWebsites((prev) => prev.map((w) => (w._id === id || w.id === id ? data.website || data.data : w)));
+      setWebsites((prev) => {
+        if (!Array.isArray(prev)) return prev;
+        return prev.map((w) => (w._id === id || w.id === id ? data.website || data.data || data : w));
+      });
       toast.success('Website updated');
       return data;
     } catch (err) {
@@ -50,7 +60,10 @@ export function WebsiteProvider({ children }) {
   const deleteWebsite = useCallback(async (id) => {
     try {
       await websiteService.deleteWebsite(id);
-      setWebsites((prev) => prev.filter((w) => w._id !== id && w.id !== id));
+      setWebsites((prev) => {
+        if (!Array.isArray(prev)) return prev;
+        return prev.filter((w) => w._id !== id && w.id !== id);
+      });
       toast.success('Website deleted');
     } catch (err) {
       toast.error('Failed to delete website');

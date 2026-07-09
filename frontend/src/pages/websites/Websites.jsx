@@ -32,9 +32,11 @@ export default function Websites() {
   const [filter, setFilter] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
 
+  const websiteList = Array.isArray(websites) ? websites : [];
+
   useEffect(() => { fetchWebsites(); }, [fetchWebsites]);
 
-  const filtered = (websites || []).filter((site) => {
+  const filtered = websiteList.filter((site) => {
     const name = (site.name || site.businessName || '').toLowerCase();
     const matchesSearch = name.includes(search.toLowerCase());
     const matchesFilter = filter === 'all' || site.status === filter;

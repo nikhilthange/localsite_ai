@@ -56,16 +56,18 @@ export default function Dashboard() {
   const { websites, fetchWebsites } = useWebsites();
   const navigate = useNavigate();
 
+  const websiteList = Array.isArray(websites) ? websites : [];
+
   useEffect(() => { fetchWebsites(); }, [fetchWebsites]);
 
   const stats = [
-    { label: 'Websites', value: websites?.length || 0, icon: HiGlobe, change: '+2', color: 'from-violet-500 to-indigo-600' },
+    { label: 'Websites', value: websiteList.length, icon: HiGlobe, change: '+2', color: 'from-violet-500 to-indigo-600' },
     { label: 'Total Views', value: '12,847', icon: HiEye, change: '+18%', color: 'from-emerald-500 to-teal-600' },
     { label: 'Leads', value: '342', icon: HiUserGroup, change: '+12%', color: 'from-blue-500 to-cyan-600' },
     { label: 'AI Credits', value: '850', icon: HiSparkles, change: '150 used', color: 'from-amber-500 to-orange-600' },
   ];
 
-  const recentWebsites = (websites || []).slice(0, 4);
+  const recentWebsites = websiteList.slice(0, 4);
 
   return (
     <div className="space-y-8">

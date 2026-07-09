@@ -120,6 +120,7 @@ function LeadDetail({ lead, onClose, onStatusChange }) {
 
 export default function Leads() {
   const { websites, fetchWebsites } = useWebsites();
+  const websiteList = Array.isArray(websites) ? websites : [];
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -221,7 +222,7 @@ export default function Leads() {
         <select value={websiteFilter} onChange={(e) => setWebsiteFilter(e.target.value)}
           className="input-field w-auto min-w-[140px]">
           <option value="">All Websites</option>
-          {(websites || []).map((w) => (
+          {websiteList.map((w) => (
             <option key={w._id || w.id} value={w._id || w.id}>{w.name || w.businessName}</option>
           ))}
         </select>

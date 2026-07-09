@@ -107,6 +107,7 @@ function AnalysisTab({ icon: Icon, label, analysis, trend }) {
 export default function GrowthAssistant() {
   const { dashboard, insights, loading, fetchDashboard, fetchInsights, markInsightRead, dismissInsight, generateReport, reports } = useGrowth();
   const { websites, fetchWebsites } = useWebsites();
+  const websiteList = Array.isArray(websites) ? websites : [];
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedWebsite, setSelectedWebsite] = useState('');
   const [generating, setGenerating] = useState(false);
@@ -164,7 +165,7 @@ export default function GrowthAssistant() {
           <select value={selectedWebsite} onChange={(e) => setSelectedWebsite(e.target.value)}
             className="input-field w-auto min-w-[160px]">
             <option value="">Select website</option>
-            {(websites || []).map((w) => (
+            {websiteList.map((w) => (
               <option key={w._id || w.id} value={w._id || w.id}>{w.name || w.businessName}</option>
             ))}
           </select>
