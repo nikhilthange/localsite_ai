@@ -1,14 +1,8 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback } from 'react';
 import { growthService } from '@/services/growthService';
 import toast from 'react-hot-toast';
 
-const GrowthContext = createContext(null);
-
-export function useGrowth() {
-  const ctx = useContext(GrowthContext);
-  if (!ctx) throw new Error('useGrowth must be used within GrowthProvider');
-  return ctx;
-}
+export const GrowthContext = createContext(null);
 
 export function GrowthProvider({ children }) {
   const [dashboard, setDashboard] = useState(null);

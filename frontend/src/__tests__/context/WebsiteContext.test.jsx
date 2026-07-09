@@ -1,7 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { WebsiteProvider, useWebsites } from '@/context/WebsiteContext';
+import { WebsiteProvider } from '@/context/WebsiteContext';
+import { useWebsites } from '@/hooks/useWebsite';
 import { websiteService } from '@/services/websiteService';
 
 vi.mock('@/services/websiteService', () => ({

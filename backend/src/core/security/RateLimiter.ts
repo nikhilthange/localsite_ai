@@ -1,6 +1,4 @@
 import rateLimit from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis';
-import { createClient } from 'redis';
 
 export class RateLimiter {
   static global = rateLimit({
@@ -49,14 +47,28 @@ export class RateLimiter {
   });
 
   static async createRedisStore(): Promise<any> {
-    const client = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-    });
-    await client.connect();
-
-    return new RedisStore({
-      sendCommand: (...args: string[]) => client.sendCommand(args),
-      prefix: 'rate-limit:',
-    });
+    const redis = await import('redis');
+    const RedisStore = (await import('rate-limit-redis')).default;
+    let client: any;
+    try {
+      client = redis.createClient({
+        url: process.env.REDIS_URL || 'redis://localhost:6379',
+        socket: {
+          connectTimeout: 5000,
+          reconnectStrategy: () => false,
+        },
+      });
+      await client.connect();
+      return new RedisStore({
+        sendCommand: (...args: string[]) => client.sendCommand(args),
+        prefix: 'rate-limit:',
+      });
+    } catch {
+      if (client) {
+        try { await client.quit(); } catch { /* ignore */ }
+      }
+      console.warn('Redis unavailable for rate limiter store. Using in-memory store.');
+      return undefined;
+    }
   }
 }

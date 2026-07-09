@@ -5,8 +5,8 @@ import { twMerge } from 'tailwind-merge';
 import { HiGlobe, HiEye, HiUserGroup, HiSparkles, HiPlus, HiChartBar, HiArrowUp, HiTrendingUp } from 'react-icons/hi';
 import { FiArrowRight, FiActivity } from 'react-icons/fi';
 import Button from '@/components/common/Button';
-import { useAuth } from '@/context/AuthContext';
-import { useWebsites } from '@/context/WebsiteContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useWebsites } from '@/hooks/useWebsite';
 
 const statusColors = {
   published: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',

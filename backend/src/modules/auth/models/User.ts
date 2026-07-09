@@ -46,12 +46,12 @@ const userSchema = new Schema<IUser>(
     resetPasswordToken: { type: String },
     resetPasswordExpires: { type: Date },
     refreshTokens: [{ type: String }],
-    googleId: { type: String, sparse: true },
+    googleId: { type: String },
     organizationId: { type: Schema.Types.ObjectId, ref: 'Organization' },
     agencyId: { type: Schema.Types.ObjectId, ref: 'User' },
     subscriptionId: { type: Schema.Types.ObjectId, ref: 'Subscription' },
-    stripeCustomerId: { type: String, sparse: true },
-    razorpayCustomerId: { type: String, sparse: true },
+    stripeCustomerId: { type: String },
+    razorpayCustomerId: { type: String },
     aiUsage: {
       requests: { type: Number, default: 0, min: 0 },
       tokens: { type: Number, default: 0, min: 0 },
@@ -86,7 +86,6 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ googleId: 1 }, { sparse: true });
 userSchema.index({ stripeCustomerId: 1 }, { sparse: true });
 userSchema.index({ razorpayCustomerId: 1 }, { sparse: true });

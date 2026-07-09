@@ -5,8 +5,14 @@ import { Logger } from '../../../core/logging/Logger';
 
 export class EmailService {
   private static transporter: nodemailer.Transporter;
+  private static initialized = false;
 
   static initialize(): void {
+    if (!config.email.enabled) {
+      Logger.warn('Email service disabled: no email credentials configured');
+      return;
+    }
+
     if (config.email.provider === 'sendgrid') {
       sgMail.setApiKey(config.email.sendgridApiKey);
     } else {
@@ -20,6 +26,7 @@ export class EmailService {
         },
       });
     }
+    this.initialized = true;
   }
 
   static async send(options: {
@@ -28,6 +35,11 @@ export class EmailService {
     html: string;
     from?: string;
   }): Promise<void> {
+    if (!this.initialized) {
+      Logger.warn('Email not sent: email service not configured', { to: options.to, subject: options.subject });
+      return;
+    }
+
     const from = options.from || config.email.from;
 
     try {
@@ -39,11 +51,11 @@ export class EmailService {
       Logger.info('Email sent', { to: options.to, subject: options.subject });
     } catch (err) {
       Logger.error('Email send failed', { to: options.to, subject: options.subject, error: (err as Error).message });
-      throw err;
     }
   }
 
   static async sendWelcomeEmail(email: string, name: string): Promise<void> {
+    if (!this.initialized) return;
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; text-align: center; border-radius: 12px 12px 0 0;">
@@ -68,6 +80,7 @@ export class EmailService {
   }
 
   static async sendVerificationEmail(email: string, token: string): Promise<void> {
+    if (!this.initialized) return;
     const link = config.client.url + '/verify-email?token=' + token;
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -82,6 +95,7 @@ export class EmailService {
   }
 
   static async sendPasswordResetEmail(email: string, token: string): Promise<void> {
+    if (!this.initialized) return;
     const link = config.client.url + '/reset-password?token=' + token;
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -96,6 +110,7 @@ export class EmailService {
   }
 
   static async sendPaymentReceipt(data: { email: string; name: string; amount: number; plan: string }): Promise<void> {
+    if (!this.initialized) return;
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Payment Receipt</h2>
@@ -106,6 +121,7 @@ export class EmailService {
   }
 
   static async sendWeeklyReport(data: { email: string; name: string; reportUrl: string; scores: any }): Promise<void> {
+    if (!this.initialized) return;
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; text-align: center; border-radius: 12px 12px 0 0;">

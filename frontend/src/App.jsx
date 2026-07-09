@@ -6,14 +6,16 @@ import Loader from '@/components/ui/Loader';
 import PublicLayout from '@/components/layout/PublicLayout';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import { useAuth } from '@/context/AuthContext';
-import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
+import { ROUTES } from '@/utils/constants';
 
 const Home = lazy(() => import('@/pages/Home'));
 const Login = lazy(() => import('@/pages/auth/Login'));
 const Signup = lazy(() => import('@/pages/auth/Signup'));
 const ForgotPassword = lazy(() => import('@/pages/auth/ForgotPassword'));
 const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'));
+const VerifyEmail = lazy(() => import('@/pages/auth/VerifyEmail'));
 const Pricing = lazy(() => import('@/pages/Pricing'));
 const Contact = lazy(() => import('@/pages/Contact'));
 const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
@@ -28,7 +30,6 @@ const GrowthAssistant = lazy(() => import('@/pages/GrowthAssistant'));
 const Analytics = lazy(() => import('@/pages/analytics/Analytics'));
 const Leads = lazy(() => import('@/pages/crm/Leads'));
 const Billing = lazy(() => import('@/pages/billing/Billing'));
-const NotFound = lazy(() => import('@/pages/NotFound'));
 
 const pageTransition = {
   initial: { opacity: 0, y: 8 },
@@ -82,83 +83,84 @@ function AppRoutes() {
   return (
     <Routes>
       <Route element={<PublicLayout />}>
-        {['/', '/login', '/signup', '/forgot-password', '/reset-password/:token', '/pricing', '/contact', '*'].map((path) => null)}
         <Route index element={
           <motion.div {...pageTransition}><Home /></motion.div>
         } />
-        <Route path="login" element={
+        <Route path={ROUTES.LOGIN.replace('/', '')} element={
           <motion.div {...pageTransition}><Login /></motion.div>
         } />
-        <Route path="signup" element={
+        <Route path={ROUTES.SIGNUP.replace('/', '')} element={
           <motion.div {...pageTransition}><Signup /></motion.div>
         } />
-        <Route path="forgot-password" element={
+        <Route path={ROUTES.FORGOT_PASSWORD.replace('/', '')} element={
           <motion.div {...pageTransition}><ForgotPassword /></motion.div>
         } />
-        <Route path="reset-password/:token" element={
+        <Route path={ROUTES.RESET_PASSWORD.replace('/', '')} element={
           <motion.div {...pageTransition}><ResetPassword /></motion.div>
         } />
-        <Route path="pricing" element={
+        <Route path={ROUTES.VERIFY_EMAIL.replace('/', '')} element={
+          <motion.div {...pageTransition}><VerifyEmail /></motion.div>
+        } />
+        <Route path={ROUTES.VERIFY_EMAIL_TOKEN.replace('/', '')} element={
+          <motion.div {...pageTransition}><VerifyEmail /></motion.div>
+        } />
+        <Route path={ROUTES.PRICING.replace('/', '')} element={
           <motion.div {...pageTransition}><Pricing /></motion.div>
         } />
-        <Route path="contact" element={
+        <Route path={ROUTES.CONTACT.replace('/', '')} element={
           <motion.div {...pageTransition}><Contact /></motion.div>
         } />
       </Route>
 
-      <Route
+      <Route path="*"
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated} loading={loading} isAdmin={user?.role === 'admin' || user?.role === 'super_admin'}>
             <DashboardLayout user={user} isAdmin={user?.role === 'admin' || user?.role === 'super_admin'} onLogout={logout} isDark={isDark} onToggleDark={toggleTheme}>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
-                  <Route path="dashboard" element={
+                  <Route path={ROUTES.DASHBOARD.replace('/', '')} element={
                     <motion.div {...pageTransition}><Dashboard /></motion.div>
                   } />
-                  <Route path="websites" element={
+                  <Route path={ROUTES.WEBSITES.replace('/', '')} element={
                     <motion.div {...pageTransition}><Websites /></motion.div>
                   } />
-                  <Route path="websites/generate" element={
+                  <Route path={ROUTES.WEBSITES_GENERATE.replace('/', '')} element={
                     <motion.div {...pageTransition}><GenerateWebsite /></motion.div>
                   } />
-                  <Route path="websites/:id" element={
+                  <Route path={ROUTES.WEBSITES_DETAIL.replace('/', '')} element={
                     <motion.div {...pageTransition}><WebsiteDetail /></motion.div>
                   } />
-                  <Route path="websites/:id/edit" element={
+                  <Route path={ROUTES.WEBSITES_EDIT.replace('/', '')} element={
                     <motion.div {...pageTransition}><EditWebsite /></motion.div>
                   } />
-                  <Route path="settings" element={
+                  <Route path={ROUTES.SETTINGS.replace('/', '')} element={
                     <motion.div {...pageTransition}><Settings /></motion.div>
                   } />
-                  <Route path="analytics" element={
+                  <Route path={ROUTES.ANALYTICS.replace('/', '')} element={
                     <motion.div {...pageTransition}><Analytics /></motion.div>
                   } />
-                  <Route path="leads" element={
+                  <Route path={ROUTES.LEADS.replace('/', '')} element={
                     <motion.div {...pageTransition}><Leads /></motion.div>
                   } />
-                  <Route path="billing" element={
+                  <Route path={ROUTES.BILLING.replace('/', '')} element={
                     <motion.div {...pageTransition}><Billing /></motion.div>
                   } />
-                  <Route path="admin" element={
+                  <Route path={ROUTES.ADMIN.replace('/', '')} element={
                     <motion.div {...pageTransition}><AdminDashboard /></motion.div>
                   } />
-                  <Route path="admin/users" element={
+                  <Route path={ROUTES.ADMIN_USERS.replace('/', '')} element={
                     <motion.div {...pageTransition}><AdminUsers /></motion.div>
                   } />
-                  <Route path="growth" element={
+                  <Route path={ROUTES.GROWTH.replace('/', '')} element={
                     <motion.div {...pageTransition}><GrowthAssistant /></motion.div>
                   } />
-                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                  <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
                 </Routes>
               </Suspense>
             </DashboardLayout>
           </ProtectedRoute>
         }
       />
-
-      <Route path="*" element={
-        <motion.div {...pageTransition}><NotFound /></motion.div>
-      } />
     </Routes>
   );
 }

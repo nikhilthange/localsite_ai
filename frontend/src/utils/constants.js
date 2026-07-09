@@ -135,6 +135,30 @@ export const PAYMENT_STATUSES = [
   { value: 'refunded', label: 'Refunded', color: 'gray' },
 ];
 
+export const ROUTES = {
+  HOME: '/',
+  LOGIN: '/login',
+  SIGNUP: '/signup',
+  FORGOT_PASSWORD: '/forgot-password',
+  RESET_PASSWORD: '/reset-password/:token',
+  VERIFY_EMAIL: '/verify-email',
+  VERIFY_EMAIL_TOKEN: '/verify-email/:token',
+  PRICING: '/pricing',
+  CONTACT: '/contact',
+  DASHBOARD: '/dashboard',
+  WEBSITES: '/websites',
+  WEBSITES_GENERATE: '/websites/generate',
+  WEBSITES_DETAIL: '/websites/:id',
+  WEBSITES_EDIT: '/websites/:id/edit',
+  SETTINGS: '/settings',
+  ANALYTICS: '/analytics',
+  LEADS: '/leads',
+  BILLING: '/billing',
+  ADMIN: '/admin',
+  ADMIN_USERS: '/admin/users',
+  GROWTH: '/growth',
+};
+
 export const ROLES = {
   USER: 'user',
   ADMIN: 'admin',

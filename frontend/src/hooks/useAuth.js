@@ -10,6 +10,7 @@ export function useAuth() {
 
   const {
     user,
+    token,
     isAuthenticated,
     loading,
     login,
@@ -18,12 +19,14 @@ export function useAuth() {
     forgotPassword,
     resetPassword,
     updateProfile,
+    verifyEmail,
     googleLogin,
   } = context;
 
   return useMemo(
     () => ({
       user,
+      token,
       isAuthenticated,
       loading,
       login,
@@ -32,10 +35,12 @@ export function useAuth() {
       forgotPassword,
       resetPassword,
       updateProfile,
+      verifyEmail,
       googleLogin,
     }),
     [
       user,
+      token,
       isAuthenticated,
       loading,
       login,
@@ -44,6 +49,7 @@ export function useAuth() {
       forgotPassword,
       resetPassword,
       updateProfile,
+      verifyEmail,
       googleLogin,
     ]
   );

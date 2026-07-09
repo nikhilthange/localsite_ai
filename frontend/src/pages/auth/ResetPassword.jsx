@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { HiLockClosed, HiEye, HiEyeOff, HiCheckCircle } from 'react-icons/hi';
 import Button from '@/components/common/Button';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 const strengthConfig = [
   { label: 'Weak', color: 'bg-red-500', width: '25%' },

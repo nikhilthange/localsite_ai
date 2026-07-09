@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { HiMail, HiArrowLeft, HiCheckCircle } from 'react-icons/hi';
 import Button from '@/components/common/Button';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function ForgotPassword() {
   const { forgotPassword } = useAuth();

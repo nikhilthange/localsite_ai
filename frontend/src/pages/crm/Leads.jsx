@@ -5,7 +5,7 @@ import { HiSearch, HiFilter, HiMail, HiPhone, HiStar, HiTag, HiChevronDown, HiCh
 import { FiUsers, FiPlus, FiMessageSquare, FiUserPlus } from 'react-icons/fi';
 import Button from '@/components/common/Button';
 import { leadService } from '@/services/leadService';
-import { useWebsites } from '@/context/WebsiteContext';
+import { useWebsites } from '@/hooks/useWebsite';
 import toast from 'react-hot-toast';
 
 const STATUS_CONFIG = {

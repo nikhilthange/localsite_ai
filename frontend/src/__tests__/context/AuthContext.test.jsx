@@ -3,16 +3,22 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { AuthProvider } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import axios from '@/lib/axios';
 
-vi.mock('@/lib/axios', () => ({
-  default: {
+vi.mock('@/lib/axios', () => {
+  const mockAxios = {
     get: vi.fn(),
     post: vi.fn(),
     put: vi.fn(),
-  },
-}));
+  };
+  return {
+    default: mockAxios,
+    fetchCsrfToken: vi.fn().mockResolvedValue(undefined),
+    getCsrfToken: vi.fn().mockReturnValue(null),
+  };
+});
 
 function TestComponent() {
   const auth = useAuth();

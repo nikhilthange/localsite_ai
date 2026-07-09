@@ -6,7 +6,7 @@ import {
   HiTrendingUp, HiArrowUp, HiArrowDown, HiOutlineExclamationCircle,
 } from 'react-icons/hi';
 import { FiUsers, FiBarChart2, FiActivity, FiChevronDown, FiExternalLink } from 'react-icons/fi';
-import { useWebsites } from '@/context/WebsiteContext';
+import { useWebsites } from '@/hooks/useWebsite';
 import { analyticsService } from '@/services/analyticsService';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,

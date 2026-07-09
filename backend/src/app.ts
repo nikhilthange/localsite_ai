@@ -9,7 +9,6 @@ import { errorHandler } from './core/security/ErrorHandler';
 import { AppError } from './utils/AppError';
 
 import { authMiddleware } from './core/security/AuthMiddleware';
-import { mountBullBoard } from './core/queue/BullBoard';
 import { setupSwagger } from './core/docs/Swagger';
 
 import authRoutes from './modules/auth/routes/AuthRoutes';
@@ -90,7 +89,7 @@ app.use('/admin/queues', authMiddleware, (req, _res, next) => {
   }
   next();
 });
-mountBullBoard(app);
+// BullBoard is mounted in server.ts after Redis check
 
 app.get('/api/csrf-token', (req, res) => {
   res.json({ csrfToken: SecurityMiddleware.generateCsrfToken(req, res) });

@@ -5,7 +5,8 @@ import { HiMail, HiLockClosed, HiUser, HiEye, HiEyeOff, HiSparkles } from 'react
 import { FcGoogle } from 'react-icons/fc';
 import { FiArrowRight } from 'react-icons/fi';
 import Button from '@/components/common/Button';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
+import { ROUTES } from '@/utils/constants';
 
 const strengthConfig = [
   { label: 'Weak', color: 'bg-red-500', width: '25%' },
@@ -55,7 +56,7 @@ export default function Signup() {
     setLoading(true);
     try {
       await register({ name: form.name, email: form.email, password: form.password });
-      navigate('/dashboard', { replace: true });
+      navigate(ROUTES.VERIFY_EMAIL, { state: { email: form.email }, replace: true });
     } catch (err) {
       setErrors({ form: err.response?.data?.message || 'Registration failed' });
     } finally {
@@ -210,7 +211,7 @@ export default function Signup() {
 
           <p className="text-center mt-6 text-sm text-[rgb(var(--color-text-muted))]">
             Already have an account?{' '}
-            <Link to="/login" className="font-semibold text-primary-600 dark:text-primary-400 hover:underline">Sign in</Link>
+            <Link to={ROUTES.LOGIN} className="font-semibold text-primary-600 dark:text-primary-400 hover:underline">Sign in</Link>
           </p>
 
           <p className="text-center mt-4 text-xs text-[rgb(var(--color-text-muted))]">

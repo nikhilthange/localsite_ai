@@ -5,7 +5,8 @@ import { HiMail, HiLockClosed, HiEye, HiEyeOff, HiSparkles } from 'react-icons/h
 import { FcGoogle } from 'react-icons/fc';
 import { FiArrowRight } from 'react-icons/fi';
 import Button from '@/components/common/Button';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
+import { ROUTES } from '@/utils/constants';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const from = location.state?.from?.pathname || '/dashboard';
+  const from = location.state?.from?.pathname || ROUTES.DASHBOARD;
 
   const validate = () => {
     const errs = {};
@@ -34,7 +35,12 @@ export default function Login() {
       await login(form.email, form.password);
       navigate(from, { replace: true });
     } catch (err) {
-      setErrors({ form: err.response?.data?.message || 'Invalid email or password' });
+      const message = err.response?.data?.message || err.response?.data?.data?.message || 'Invalid email or password';
+      if (message.toLowerCase().includes('verify your email')) {
+        navigate(ROUTES.VERIFY_EMAIL, { state: { email: form.email }, replace: true });
+        return;
+      }
+      setErrors({ form: message });
     } finally {
       setLoading(false);
     }
@@ -153,7 +159,7 @@ export default function Login() {
                 <input type="checkbox" className="w-4 h-4 rounded border-[rgb(var(--color-border))] text-primary-600 focus:ring-primary-500" />
                 <span className="text-sm text-[rgb(var(--color-text-secondary))]">Remember me</span>
               </label>
-              <Link to="/forgot-password" className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline">
+              <Link to={ROUTES.FORGOT_PASSWORD} className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -182,7 +188,7 @@ export default function Login() {
 
           <p className="text-center mt-8 text-sm text-[rgb(var(--color-text-muted))]">
             Don't have an account?{' '}
-            <Link to="/signup" className="font-semibold text-primary-600 dark:text-primary-400 hover:underline">
+            <Link to={ROUTES.SIGNUP} className="font-semibold text-primary-600 dark:text-primary-400 hover:underline">
               Create one
             </Link>
           </p>

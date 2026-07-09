@@ -85,7 +85,6 @@ paymentSchema.index({ providerPaymentId: 1 }, { unique: true });
 paymentSchema.index({ providerOrderId: 1 }, { sparse: true });
 paymentSchema.index({ status: 1, createdAt: -1 });
 paymentSchema.index({ subscriptionId: 1, createdAt: -1 });
-paymentSchema.index({ invoiceNumber: 1 }, { unique: true, sparse: true });
 paymentSchema.index({ paidAt: -1 });
 paymentSchema.index({ plan: 1, status: 1 });
 

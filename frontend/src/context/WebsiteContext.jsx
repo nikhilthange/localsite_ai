@@ -1,14 +1,8 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback } from 'react';
 import { websiteService } from '@/services/websiteService';
 import toast from 'react-hot-toast';
 
-const WebsiteContext = createContext(null);
-
-export function useWebsites() {
-  const ctx = useContext(WebsiteContext);
-  if (!ctx) throw new Error('useWebsites must be used within WebsiteProvider');
-  return ctx;
-}
+export const WebsiteContext = createContext(null);
 
 export function WebsiteProvider({ children }) {
   const [websites, setWebsites] = useState([]);

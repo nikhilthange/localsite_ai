@@ -87,7 +87,6 @@ const organizationSchema = new Schema<IOrganization>(
   }
 );
 
-organizationSchema.index({ slug: 1 }, { unique: true });
 organizationSchema.index({ owner: 1, isActive: 1 });
 organizationSchema.index({ 'members.user': 1 });
 organizationSchema.index({ 'billing.stripeCustomerId': 1 }, { sparse: true });

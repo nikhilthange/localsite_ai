@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { twMerge } from 'tailwind-merge';
 import { HiUser, HiMail, HiLockClosed, HiKey, HiBell, HiCreditCard, HiGlobe, HiColorSwatch, HiEye, HiEyeOff } from 'react-icons/hi';
 import Button from '@/components/common/Button';
-import { useAuth } from '@/context/AuthContext';
-import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/hooks/useTheme';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 

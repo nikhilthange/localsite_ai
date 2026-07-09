@@ -9,7 +9,7 @@ import {
 } from 'react-icons/hi';
 import { FiArrowRight, FiCheck } from 'react-icons/fi';
 import Button from '@/components/common/Button';
-import { useWebsites } from '@/context/WebsiteContext';
+import { useWebsites } from '@/hooks/useWebsite';
 
 const categories = [
   'Restaurant & Cafe', 'Portfolio', 'E-Commerce', 'SaaS / Tech',

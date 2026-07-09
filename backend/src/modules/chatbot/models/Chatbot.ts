@@ -8,7 +8,6 @@ const chatbotSchema = new Schema<IChatbot>(
       type: Schema.Types.ObjectId,
       ref: 'Website',
       required: [true, 'Website ID is required'],
-      index: true,
     },
     organizationId: { type: Schema.Types.ObjectId, ref: 'Organization' },
     name: {

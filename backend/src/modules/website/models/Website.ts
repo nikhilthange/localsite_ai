@@ -37,7 +37,7 @@ const websiteSchema = new Schema<IWebsite>(
       lowercase: true,
       trim: true,
     },
-    domain: { type: String, sparse: true, lowercase: true },
+    domain: { type: String, lowercase: true },
     subdomain: {
       type: String,
       required: [true, 'Subdomain is required'],
@@ -137,7 +137,6 @@ const websiteSchema = new Schema<IWebsite>(
 
 websiteSchema.index({ userId: 1, status: 1 });
 websiteSchema.index({ organizationId: 1, status: 1 });
-websiteSchema.index({ subdomain: 1 }, { unique: true });
 websiteSchema.index({ domain: 1 }, { sparse: true });
 websiteSchema.index({ status: 1, publishedAt: -1 });
 websiteSchema.index({ category: 1, status: 1 });

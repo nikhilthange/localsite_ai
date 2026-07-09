@@ -65,7 +65,6 @@ const templateSchema = new Schema<ITemplate>(
   }
 );
 
-templateSchema.index({ slug: 1 }, { unique: true });
 templateSchema.index({ category: 1, isActive: 1 });
 templateSchema.index({ isPremium: 1, isActive: 1 });
 templateSchema.index({ popularity: -1 });

@@ -1,6 +1,5 @@
 import { Queue, Worker, Job } from 'bullmq';
 import type { ConnectionOptions, JobsOptions } from 'bullmq';
-import { redisConfig } from '../../config/redis';
 
 export enum QueueNames {
   AI_GENERATION = 'ai-generation',
@@ -17,16 +16,65 @@ export interface JobHandler {
   (job: Job): Promise<any>;
 }
 
+function createDisabledQueueStub(name: QueueNames): Queue {
+  const stub: any = {
+    name,
+    add: async <T>(_name: string, _data: T, _opts?: JobsOptions) =>
+      ({ id: 'disabled', data: _data, name: _name, timestamp: Date.now(), attemptsMade: 0, opts: {} }) as Job<T>,
+    addBulk: async () => [],
+    close: async () => {},
+    pause: async () => {},
+    resume: async () => {},
+    getWaitingCount: async () => 0,
+    getActiveCount: async () => 0,
+    getCompletedCount: async () => 0,
+    getFailedCount: async () => 0,
+    getDelayedCount: async () => 0,
+    isPaused: async () => false,
+    obliterate: async () => {},
+    on: () => stub,
+    off: () => stub,
+    removeAllListeners: () => stub,
+  };
+  return stub as Queue;
+}
+
+function createDisabledWorkerStub(): Worker {
+  const stub: any = {
+    close: async () => {},
+    removeAllListeners: () => stub,
+    on: () => stub,
+    off: () => stub,
+  };
+  return stub as Worker;
+}
+
 export class QueueService {
   private static queues = new Map<string, Queue>();
   private static workers = new Map<string, Worker>();
   private static connection: ConnectionOptions;
+  private static _enabled = true;
+
+  static get enabled(): boolean {
+    return this._enabled;
+  }
+
+  static setEnabled(enabled: boolean): void {
+    this._enabled = enabled;
+  }
 
   static initialize(connection: ConnectionOptions): void {
     this.connection = connection;
   }
 
   static getQueue(name: QueueNames): Queue {
+    if (!this._enabled) {
+      if (!this.queues.has(name)) {
+        this.queues.set(name, createDisabledQueueStub(name));
+      }
+      return this.queues.get(name)!;
+    }
+
     if (!this.queues.has(name)) {
       const queue = new Queue(name, {
         connection: this.connection,
@@ -77,6 +125,12 @@ export class QueueService {
     handler: JobHandler,
     concurrency: number = 5
   ): Worker {
+    if (!this._enabled) {
+      const stub = createDisabledWorkerStub();
+      this.workers.set(queueName, stub);
+      return stub;
+    }
+
     if (this.workers.has(queueName)) {
       this.workers.get(queueName)!.close();
     }
@@ -127,7 +181,7 @@ export class QueueService {
   static async closeAll(): Promise<void> {
     const closeWorkers = Array.from(this.workers.values()).map((w) => w.close());
     const closeQueues = Array.from(this.queues.values()).map((q) => q.close());
-    await Promise.all([...closeWorkers, ...closeQueues]);
+    await Promise.all([...closeWorkers, ...closeQueues].map((p) => p.catch(() => {})));
     this.workers.clear();
     this.queues.clear();
   }

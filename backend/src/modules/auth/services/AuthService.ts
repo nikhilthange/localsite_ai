@@ -61,7 +61,8 @@ export class AuthService {
       throw new UnauthorizedError('Invalid email or password');
     }
 
-    if (!user.emailVerified) {
+    const skipVerification = process.env.SKIP_EMAIL_VERIFICATION === 'true' && config.isDevelopment;
+    if (!user.emailVerified && !skipVerification) {
       throw new UnauthorizedError('Please verify your email before logging in');
     }
 

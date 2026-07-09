@@ -11,8 +11,8 @@ import ScoreCard from '@/components/growth/ScoreCard';
 import InsightCard from '@/components/growth/InsightCard';
 import TrendChart from '@/components/growth/TrendChart';
 import Button from '@/components/common/Button';
-import { useGrowth } from '@/context/GrowthContext';
-import { useWebsites } from '@/context/WebsiteContext';
+import { useGrowth } from '@/hooks/useGrowth';
+import { useWebsites } from '@/hooks/useWebsite';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell, Legend,

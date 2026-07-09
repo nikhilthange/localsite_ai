@@ -22,7 +22,7 @@ export const config = {
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '5000', 10),
   isProduction: process.env.NODE_ENV === 'production',
-  isDevelopment: process.env.NODE_ENV === 'development',
+  isDevelopment: process.env.NODE_ENV === 'development' || !process.env.NODE_ENV,
   isTest: process.env.NODE_ENV === 'test',
 
   mongodb: {
@@ -42,15 +42,15 @@ export const config = {
   },
 
   jwt: {
-    accessSecret: process.env.JWT_ACCESS_SECRET || 'dev-jwt-access-secret',
-    refreshSecret: process.env.JWT_REFRESH_SECRET || 'dev-jwt-refresh-secret',
+    accessSecret: process.env.JWT_ACCESS_SECRET || 'dev-jwt-access-secret-localsite-ai',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || 'dev-jwt-refresh-secret-localsite-ai',
     accessExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
     refreshExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
   },
 
   auth: {
-    cookieSecret: process.env.COOKIE_SECRET || 'dev-cookie-secret',
-    csrfSecret: process.env.CSRF_SECRET || 'dev-csrf-secret',
+    cookieSecret: process.env.COOKIE_SECRET || 'dev-cookie-secret-localsite-ai',
+    csrfSecret: process.env.CSRF_SECRET || 'dev-csrf-secret-localsite-ai',
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
   },
 
@@ -60,6 +60,7 @@ export const config = {
     model: process.env.NVIDIA_MODEL || 'meta/llama-3.3-70b-instruct',
     maxTokens: parseInt(process.env.NVIDIA_MAX_TOKENS || '2000', 10),
     temperature: parseFloat(process.env.NVIDIA_TEMPERATURE || '0.7'),
+    enabled: !!(process.env.NVIDIA_API_KEY && process.env.NVIDIA_API_KEY.length > 0),
   },
 
   email: {
@@ -73,25 +74,29 @@ export const config = {
     },
     from: process.env.EMAIL_FROM || 'noreply@localsiteai.com',
     fromName: process.env.EMAIL_FROM_NAME || 'LocalSite AI',
+    enabled: !!(process.env.SENDGRID_API_KEY || (process.env.SMTP_HOST && process.env.SMTP_USER)),
   },
 
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY || '',
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
     publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
+    enabled: !!(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY.startsWith('sk_')),
   },
 
   razorpay: {
     keyId: process.env.RAZORPAY_KEY_ID || '',
     keySecret: process.env.RAZORPAY_KEY_SECRET || '',
     webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
+    enabled: !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_ID.startsWith('rzp_')),
   },
 
   aws: {
     region: process.env.AWS_REGION || 'us-east-1',
     accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-    s3Bucket: process.env.AWS_S3_BUCKET || 'localsite-ai-assets',
+    s3Bucket: process.env.AWS_S3_BUCKET || '',
+    enabled: !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_S3_BUCKET),
   },
 
   cloudflare: {
@@ -100,6 +105,7 @@ export const config = {
     zoneId: process.env.CLOUDFLARE_ZONE_ID || '',
     domain: process.env.CLOUDFLARE_DOMAIN || '',
     r2Bucket: process.env.CLOUDFLARE_R2_BUCKET || '',
+    enabled: !!(process.env.CLOUDFLARE_API_TOKEN && process.env.CLOUDFLARE_ZONE_ID),
   },
 
   client: {
@@ -116,6 +122,7 @@ export const config = {
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       callbackUrl: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback',
+      enabled: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
     },
   },
 
@@ -127,5 +134,15 @@ export const config = {
     },
   },
 };
+
+export function validateEnvironment(): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  if (!config.mongodb.uri) {
+    errors.push('MONGODB_URI is not set. Set it in .env or use the default mongodb://localhost:27017/localsite_ai');
+  }
+
+  return { valid: errors.length === 0, errors };
+}
 
 export default config;
