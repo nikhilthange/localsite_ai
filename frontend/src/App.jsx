@@ -21,6 +21,7 @@ const Dashboard = lazy(() => import('@/pages/dashboard/Dashboard'));
 const Websites = lazy(() => import('@/pages/websites/Websites'));
 const GenerateWebsite = lazy(() => import('@/pages/websites/GenerateWebsite'));
 const WebsiteDetail = lazy(() => import('@/pages/websites/WebsiteDetail'));
+const WebsitePreview = lazy(() => import('@/pages/websites/WebsitePreview'));
 const EditWebsite = lazy(() => import('@/pages/websites/EditWebsite'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
@@ -129,6 +130,9 @@ function AppRoutes() {
                   } />
                   <Route path="websites/:id" element={
                     <motion.div {...pageTransition}><WebsiteDetail /></motion.div>
+                  } />
+                  <Route path="websites/:id/preview" element={
+                    <motion.div {...pageTransition}><WebsitePreview /></motion.div>
                   } />
                   <Route path="websites/:id/edit" element={
                     <motion.div {...pageTransition}><EditWebsite /></motion.div>

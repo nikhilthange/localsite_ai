@@ -107,10 +107,10 @@ export class GrowthService {
       (conversionRate > 5 ? 30 : (conversionRate / 5) * 30)
     ));
     const seoScore = Math.min(100, Math.round(
-      (website.content?.seo?.metaTitle ? 30 : 0) +
-      (website.content?.seo?.metaDescription ? 30 : 0) +
-      ((website.content?.seo?.keywords?.length || 0) > 0 ? 20 : 0) +
-      (website.content?.seo?.structuredData ? 20 : 0)
+      (website.seo?.metaTitle ? 30 : 0) +
+      (website.seo?.metaDescription ? 30 : 0) +
+      ((website.seo?.keywords?.length || 0) > 0 ? 20 : 0) +
+      (website.seo?.structuredData ? 20 : 0)
     ));
     const leadScore = Math.min(100, Math.round(
       (leadsTotal > 10 ? 50 : (leadsTotal / 10) * 50) +

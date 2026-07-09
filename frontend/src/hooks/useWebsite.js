@@ -6,3 +6,9 @@ export function useWebsites() {
   if (!ctx) throw new Error('useWebsites must be used within WebsiteProvider');
   return ctx;
 }
+
+export function useWebsite() {
+  const ctx = useContext(WebsiteContext);
+  if (!ctx) throw new Error('useWebsite must be used within WebsiteProvider');
+  return ctx;
+}

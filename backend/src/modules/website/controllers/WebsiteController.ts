@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest, ControllerMethod } from '../../../types/express';
 import { WebsiteService } from '../services/WebsiteService';
+import { Logger } from '../../../core/logging/Logger';
 
 const websiteService = new WebsiteService();
 
@@ -50,6 +51,35 @@ export class WebsiteController {
     }
   };
 
+  static generateComplete: ControllerMethod = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const overallStart = Date.now();
+    try {
+      const { businessName, category, location, description, phone = '', email = '', website: websiteUrl = '', address = '', socialLinks = [], theme = 'modern' } = req.body;
+
+      Logger.info('Generation started', { businessName, category, location });
+
+      const website = await websiteService.generateComplete(req.user!.userId, {
+        businessName, category, location, description, phone, email, website: websiteUrl, address, socialLinks, theme,
+      });
+
+      const totalElapsed = Date.now() - overallStart;
+      Logger.info('Generation completed', { businessName, websiteId: website._id.toString(), totalElapsedMs: totalElapsed });
+      res.status(201).json({ success: true, data: website, message: 'Website created with AI-generated content successfully' });
+    } catch (error) {
+      const totalElapsed = Date.now() - overallStart;
+      const err = error as any;
+      Logger.error('Generation failed', {
+        error: err.message,
+        errorName: err.name,
+        errorCode: err.code,
+        errorStatus: err.status,
+        errorBody: err.response?.data || err.response?.body,
+        totalElapsedMs: totalElapsed,
+      });
+      next(error);
+    }
+  };
+
   static generate: ControllerMethod = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       await websiteService.generateWebsiteContent(req.params.id, req.user!.userId);
@@ -73,6 +103,26 @@ export class WebsiteController {
       const query = (req.query.q as string) || '';
       const websites = await websiteService.searchWebsites(query);
       res.status(200).json({ success: true, data: websites, message: 'Search results retrieved successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  static updateSection: ControllerMethod = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const { sectionId, data } = req.body;
+      const website = await websiteService.updateSection(req.params.id, req.user!.userId, sectionId, data);
+      res.status(200).json({ success: true, data: website, message: 'Section updated successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  static reorderSections: ControllerMethod = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const { sectionIds } = req.body;
+      const website = await websiteService.reorderSections(req.params.id, req.user!.userId, sectionIds);
+      res.status(200).json({ success: true, data: website, message: 'Sections reordered successfully' });
     } catch (error) {
       next(error);
     }

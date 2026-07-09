@@ -27,33 +27,6 @@ export function registerAIWorker(): void {
 
           const { WebsiteRepository } = await import('../modules/website/repositories/WebsiteRepository');
           const repo = new WebsiteRepository();
-          const content = JSON.parse(result.content);
-          await repo.updateContent(websiteId, {
-            headline: content.headline || `Welcome to ${businessName}`,
-            subheadline: content.subheadline || `Your trusted ${category} partner`,
-            about: content.about || '',
-            services: (content.services || []).map((s: any) => ({
-              title: s.title,
-              description: s.description,
-            })),
-            gallery: [],
-            testimonials: (content.testimonials || []).map((t: any) => ({
-              name: t.name || 'Client',
-              role: t.role || '',
-              content: t.content || '',
-            })),
-            faq: (content.faq || []).map((f: any) => ({
-              question: f.question,
-              answer: f.answer,
-            })),
-            seo: {
-              metaTitle: `${businessName} | ${category}`,
-              metaDescription: `Professional ${category} services by ${businessName}`,
-              keywords: [],
-              sitemapIncluded: true,
-            },
-          });
-
           emitToUser(userId, 'ai:progress', { websiteId, step: 'Website content ready', progress: 100 });
           Logger.info('Website content generated via AI Engine', { websiteId, tokens: result.usage.totalTokens, cost: result.cost });
         } catch (err) {
@@ -81,13 +54,48 @@ export function registerAIWorker(): void {
 
           await repo.updateBranding(websiteId, {
             logo: logoData.url || '',
-            logoVariations: [],
             favicon: '',
-            primaryColor: '#3B82F6',
-            secondaryColor: '#1E40AF',
-            accentColor: '#F59E0B',
-            font: 'Inter',
+            colors: {
+              primary: '#3B82F6',
+              primaryLight: '#60A5FA',
+              primaryDark: '#2563EB',
+              secondary: '#1E40AF',
+              secondaryLight: '#3B82F6',
+              accent: '#F59E0B',
+              accentLight: '#FBBF24',
+              background: '#FFFFFF',
+              surface: '#F8FAFC',
+              surfaceAlt: '#F1F5F9',
+              text: '#0F172A',
+              textSecondary: '#64748B',
+              textInverse: '#FFFFFF',
+              border: '#E2E8F0',
+              success: '#22C55E',
+              warning: '#F59E0B',
+              error: '#EF4444',
+              darkMode: {
+                background: '#09090B',
+                surface: '#18181B',
+                surfaceAlt: '#27272A',
+                text: '#FAFAFA',
+                textSecondary: '#A1A1AA',
+                border: '#27272A',
+              },
+              gradients: {
+                primary: 'linear-gradient(135deg, #3B82F6, #1E40AF)',
+                secondary: 'linear-gradient(135deg, #1E40AF, #F59E0B)',
+                accent: 'linear-gradient(135deg, #F59E0B, #EF4444)',
+              },
+            },
+            fonts: { heading: 'Inter', body: 'Inter' },
+            spacing: { sectionPadding: '5rem', sectionMargin: '0', elementGap: '1.5rem', containerWidth: '1200px' },
             borderRadius: '0.5rem',
+            shadows: { small: '0 1px 2px rgba(0,0,0,0.05)', medium: '0 4px 6px rgba(0,0,0,0.1)', large: '0 10px 15px rgba(0,0,0,0.1)', focus: '0 20px 25px rgba(0,0,0,0.15)' },
+            animations: { section: 'fade-up', card: 'fade-up', hover: 'scale(1.05)', hero: 'fade-up', duration: 300 },
+            logoStyle: 'modern',
+            brandVoice: 'professional',
+            tagline: '',
+            mission: '',
           });
 
           emitToUser(userId, 'ai:progress', { websiteId, step: 'Logo ready', progress: 100 });
@@ -125,30 +133,6 @@ export function registerAIWorker(): void {
             userPrompt: { businessName, category, location, template } as unknown as string,
             responseFormat: 'json_object',
           }, false);
-
-          const { WebsiteRepository } = await import('../modules/website/repositories/WebsiteRepository');
-          const repo = new WebsiteRepository();
-          const content = JSON.parse(result.content);
-
-          await repo.updateContent(websiteId, {
-            headline: content.headline || `Welcome to ${businessName}`,
-            subheadline: content.subheadline || '',
-            about: content.about || '',
-            services: (content.services || []).map((s: any) => ({ title: s.title, description: s.description })),
-            gallery: [],
-            testimonials: (content.testimonials || []).map((t: any) => ({
-              name: t.name || 'Client',
-              role: t.role || '',
-              content: t.content || '',
-            })),
-            faq: (content.faq || []).map((f: any) => ({ question: f.question, answer: f.answer })),
-            seo: {
-              metaTitle: `${businessName} | ${category}`,
-              metaDescription: `Professional ${category} services by ${businessName}`,
-              keywords: [],
-              sitemapIncluded: true,
-            },
-          });
 
           emitToUser(userId, 'ai:progress', { websiteId, step: 'Website generation complete', progress: 100 });
           Logger.info('Website content generated', { websiteId, tokens: result.usage.totalTokens, cost: result.cost });

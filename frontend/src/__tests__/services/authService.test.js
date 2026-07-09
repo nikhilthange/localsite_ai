@@ -82,7 +82,7 @@ describe('authService', () => {
 
     const result = await authService.getProfile();
 
-    expect(mockedGet).toHaveBeenCalledWith('/auth/profile');
+    expect(mockedGet).toHaveBeenCalledWith('/user/profile');
     expect(result.data.user.name).toBe('Profile');
   });
 
@@ -91,7 +91,7 @@ describe('authService', () => {
 
     await authService.updateProfile({ name: 'Updated' });
 
-    expect(mockedPut).toHaveBeenCalledWith('/auth/profile', { name: 'Updated' });
+    expect(mockedPut).toHaveBeenCalledWith('/user/profile', { name: 'Updated' });
   });
 
   it('updatePassword calls correct endpoint', async () => {

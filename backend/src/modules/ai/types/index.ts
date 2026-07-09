@@ -42,7 +42,7 @@ export const TASK_CREDIT_COSTS: Record<AITaskType, number> = {
 };
 
 export const TASK_DEFAULT_MAX_TOKENS: Record<AITaskType, number> = {
-  [AITaskType.WEBSITE_GENERATION]: 4000,
+  [AITaskType.WEBSITE_GENERATION]: 8000,
   [AITaskType.SEO_METADATA]: 500,
   [AITaskType.LOGO_GENERATION]: 1000,
   [AITaskType.BLOG_GENERATION]: 2000,

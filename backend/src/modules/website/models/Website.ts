@@ -27,13 +27,14 @@ const websiteSchema = new Schema<IWebsite>(
       type: String,
       required: [true, 'Location is required'],
     },
+    description: { type: String, maxlength: 2000 },
     phone: {
       type: String,
-      required: [true, 'Phone number is required'],
+      default: '',
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
+      default: '',
       lowercase: true,
       trim: true,
     },
@@ -52,63 +53,101 @@ const websiteSchema = new Schema<IWebsite>(
       index: true,
     },
     template: { type: String, required: [true, 'Template is required'] },
-    content: {
-      headline: { type: String, default: '', maxlength: 500 },
-      subheadline: { type: String, default: '', maxlength: 500 },
-      about: { type: String, default: '', maxlength: 10000 },
-      services: [{
-        _id: false,
-        title: { type: String, required: true },
-        description: { type: String, required: true },
-        icon: { type: String },
-        price: { type: String },
-      }],
-      gallery: [{ type: String }],
-      testimonials: [{
-        _id: false,
-        name: { type: String, required: true },
-        role: { type: String },
-        content: { type: String, required: true, maxlength: 2000 },
-        rating: { type: Number, min: 1, max: 5 },
-        avatar: { type: String },
-      }],
-      faq: [{
-        _id: false,
-        question: { type: String, required: true },
-        answer: { type: String, required: true },
-      }],
-      hours: {
-        monday: { open: String, close: String },
-        tuesday: { open: String, close: String },
-        wednesday: { open: String, close: String },
-        thursday: { open: String, close: String },
-        friday: { open: String, close: String },
-        saturday: { open: String, close: String },
-        sunday: { open: String, close: String },
-        notes: { type: String },
+    sections: [{
+      id: { type: String, required: true },
+      type: { type: String, required: true },
+      variant: { type: String, default: 'default' },
+      visible: { type: Boolean, default: true },
+      order: { type: Number, required: true },
+      data: { type: Schema.Types.Mixed, default: {} },
+      background: {
+        type: { type: String, enum: ['color', 'gradient', 'image', 'video', 'none'] },
+        value: String,
+        overlay: String,
+        parallax: Boolean,
       },
-      seo: {
-        metaTitle: { type: String, default: '', maxlength: 70 },
-        metaDescription: { type: String, default: '', maxlength: 160 },
-        ogImage: { type: String },
-        ogTitle: { type: String },
-        ogDescription: { type: String },
-        canonicalUrl: { type: String },
-        structuredData: { type: Schema.Types.Mixed },
-        keywords: [{ type: String }],
-        sitemapIncluded: { type: Boolean, default: true },
-      },
-    },
+      padding: { type: String },
+      animation: { type: String },
+    }],
     branding: {
       logo: { type: String },
-      logoVariations: [{ type: String }],
+      logoPrompt: { type: String },
       favicon: { type: String },
-      primaryColor: { type: String, default: '#3B82F6', match: /^#[0-9a-fA-F]{6}$/ },
-      secondaryColor: { type: String, default: '#1E40AF', match: /^#[0-9a-fA-F]{6}$/ },
-      accentColor: { type: String, default: '#F59E0B', match: /^#[0-9a-fA-F]{6}$/ },
-      font: { type: String, default: 'Inter' },
-      fontHeading: { type: String },
-      borderRadius: { type: String, default: '0.5rem' },
+      colors: {
+        primary: { type: String, default: '#6366F1' },
+        primaryLight: { type: String, default: '#818CF8' },
+        primaryDark: { type: String, default: '#4F46E5' },
+        secondary: { type: String, default: '#14B8A6' },
+        secondaryLight: { type: String, default: '#2DD4BF' },
+        accent: { type: String, default: '#F59E0B' },
+        accentLight: { type: String, default: '#FBBF24' },
+        background: { type: String, default: '#FAFAFA' },
+        surface: { type: String, default: '#FFFFFF' },
+        surfaceAlt: { type: String, default: '#F4F4F5' },
+        text: { type: String, default: '#18181B' },
+        textSecondary: { type: String, default: '#71717A' },
+        textInverse: { type: String, default: '#FFFFFF' },
+        border: { type: String, default: '#E4E4E7' },
+        success: { type: String, default: '#22C55E' },
+        warning: { type: String, default: '#F59E0B' },
+        error: { type: String, default: '#EF4444' },
+        darkMode: {
+          background: { type: String, default: '#09090B' },
+          surface: { type: String, default: '#18181B' },
+          surfaceAlt: { type: String, default: '#27272A' },
+          text: { type: String, default: '#FAFAFA' },
+          textSecondary: { type: String, default: '#A1A1AA' },
+          border: { type: String, default: '#27272A' },
+        },
+        gradients: {
+          primary: { type: String, default: 'linear-gradient(135deg, #6366F1, #8B5CF6)' },
+          secondary: { type: String, default: 'linear-gradient(135deg, #14B8A6, #06B6D4)' },
+          accent: { type: String, default: 'linear-gradient(135deg, #F59E0B, #F97316)' },
+        },
+      },
+      fonts: {
+        heading: { type: String, default: 'Inter' },
+        body: { type: String, default: 'Inter' },
+        headingWeight: { type: Number, default: 700 },
+        bodyWeight: { type: Number, default: 400 },
+      },
+      spacing: {
+        sectionPadding: { type: String, default: 'py-16 md:py-24' },
+        sectionMargin: { type: String, default: 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8' },
+        elementGap: { type: String, default: 'gap-6 md:gap-8' },
+        containerWidth: { type: String, default: 'max-w-7xl' },
+      },
+      shadows: {
+        small: { type: String, default: '0 1px 2px 0 rgb(0 0 0 / 0.05)' },
+        medium: { type: String, default: '0 4px 6px -1px rgb(0 0 0 / 0.1)' },
+        large: { type: String, default: '0 10px 15px -3px rgb(0 0 0 / 0.1)' },
+        focus: { type: String, default: '0 0 0 2px #6366F1' },
+      },
+      animations: {
+        section: { type: String, default: 'fade-up' },
+        card: { type: String, default: 'stagger' },
+        hover: { type: String, default: 'lift' },
+        hero: { type: String, default: 'parallax' },
+        duration: { type: Number, default: 0.6 },
+      },
+      logoStyle: { type: String, default: 'wordmark' },
+      brandVoice: { type: String, default: 'professional' },
+      tagline: { type: String, default: '' },
+      mission: { type: String, default: '' },
+    },
+    seo: {
+      metaTitle: { type: String, default: '', maxlength: 70 },
+      metaDescription: { type: String, default: '', maxlength: 160 },
+      ogImage: { type: String },
+      ogTitle: { type: String },
+      ogDescription: { type: String },
+      canonicalUrl: { type: String },
+      structuredData: { type: Schema.Types.Mixed },
+      keywords: [{ type: String }],
+      sitemapIncluded: { type: Boolean, default: true },
+      robotsTxt: { type: String },
+      twitterCard: { type: String },
+      twitterSite: { type: String },
     },
     analytics: {
       pageViews: { type: Number, default: 0, min: 0 },
@@ -141,7 +180,22 @@ websiteSchema.index({ domain: 1 }, { sparse: true });
 websiteSchema.index({ status: 1, publishedAt: -1 });
 websiteSchema.index({ category: 1, status: 1 });
 websiteSchema.index({ userId: 1, updatedAt: -1 });
-websiteSchema.index({ businessName: 'text', 'content.seo.metaDescription': 'text' });
+websiteSchema.index({ businessName: 'text', 'seo.metaDescription': 'text' });
+
+websiteSchema.pre<IWebsite>('validate', function (next) {
+  if (this.status === 'published') {
+    if (!this.phone) {
+      this.invalidate('phone', 'Phone number is required before publishing');
+    }
+    if (!this.email) {
+      this.invalidate('email', 'Email is required before publishing');
+    }
+    if (!this.businessName) {
+      this.invalidate('businessName', 'Business name is required before publishing');
+    }
+  }
+  next();
+});
 
 websiteSchema.pre<IWebsite>('save', function (next) {
   if (this.isModified('status') && this.status === 'published' && !this.publishedAt) {

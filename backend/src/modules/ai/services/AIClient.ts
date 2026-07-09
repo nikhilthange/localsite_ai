@@ -23,7 +23,7 @@ export class AIClient {
       apiKey: config.nvidia.apiKey,
       baseURL: config.nvidia.baseUrl,
       maxRetries: 0,
-      timeout: 60000,
+      timeout: 180000,
     });
   }
 
@@ -38,6 +38,14 @@ export class AIClient {
     const startTime = Date.now();
     const model = request.model || TASK_MODEL_MAP[request.taskType];
     const maxTokens = request.maxTokens || TASK_DEFAULT_MAX_TOKENS[request.taskType];
+
+    Logger.info('AI request starting', {
+      model,
+      taskType: request.taskType,
+      maxTokens,
+      temperature: request.temperature,
+      endpoint: config.nvidia.baseUrl,
+    });
 
     if (request.cacheKey) {
       const cached = await CacheService.get<{ content: string; usage: { promptTokens: number; completionTokens: number; totalTokens: number } }>(request.cacheKey);
@@ -75,7 +83,17 @@ export class AIClient {
         });
 
         const choice = completion.choices[0];
+        const elapsed = Date.now() - startTime;
         const content = choice?.message?.content || '';
+
+        Logger.info('AI response received', {
+          model,
+          taskType: request.taskType,
+          elapsedMs: elapsed,
+          finishReason: choice?.finish_reason,
+          status: completion.object ? 'success' : 'unknown',
+        });
+
         const usage = completion.usage
           ? {
               promptTokens: completion.usage.prompt_tokens ?? 0,
@@ -101,6 +119,20 @@ export class AIClient {
         };
       } catch (error) {
         lastError = error as Error;
+        const elapsed = Date.now() - startTime;
+
+        Logger.error('AI request failed', {
+          model,
+          taskType: request.taskType,
+          attempt: attempt + 1,
+          elapsedMs: elapsed,
+          error: lastError.message,
+          errorName: lastError.name,
+          errorCode: (error as any).code,
+          errorStatus: (error as any).status,
+          errorBody: (error as any).response?.data || (error as any).response?.body,
+        });
+
         const isRetryable = this.isRetryableError(error);
 
         if (!isRetryable || attempt === MAX_RETRIES) {

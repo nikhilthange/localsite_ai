@@ -8,6 +8,7 @@ export function WebsiteProvider({ children }) {
   const [websites, setWebsites] = useState([]);
   const [currentWebsite, setCurrentWebsite] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -39,17 +40,35 @@ export function WebsiteProvider({ children }) {
     }
   }, [normalizeWebsites]);
 
-  const createWebsite = useCallback(async (websiteData) => {
+  const generateWebsite = useCallback(async (websiteData) => {
+    setGenerating(true);
     setLoading(true);
     try {
-      const { data } = await websiteService.generateWebsite(websiteData);
-      toast.success('Website created successfully!');
-      return data;
+      const payload = {
+        businessName: websiteData.businessName || websiteData.name,
+        category: websiteData.category,
+      };
+      if (websiteData.location) payload.location = websiteData.location;
+      if (websiteData.description) payload.description = websiteData.description;
+      if (websiteData.phone) payload.phone = websiteData.phone;
+      if (websiteData.email) payload.email = websiteData.email;
+      if (websiteData.theme) payload.theme = websiteData.theme;
+      const { data } = await websiteService.generateComplete(payload);
+      const website = data?.website || data?.data || data;
+      if (mountedRef.current) {
+        setCurrentWebsite(website);
+      }
+      toast.success('Website generated successfully!');
+      return website;
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to create website');
+      const msg = err.response?.data?.message || 'Failed to generate website';
+      toast.error(msg);
       throw err;
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setGenerating(false);
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -88,8 +107,9 @@ export function WebsiteProvider({ children }) {
     currentWebsite,
     setCurrentWebsite,
     loading,
+    generating,
     fetchWebsites,
-    createWebsite,
+    generateWebsite,
     updateWebsite,
     deleteWebsite,
   };

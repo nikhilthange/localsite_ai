@@ -30,14 +30,14 @@ export const authService = {
   },
 
   getProfile() {
-    return api.get('/auth/profile');
+    return api.get('/user/profile');
   },
 
   updateProfile(data) {
-    return api.put('/auth/profile', data);
+    return api.put('/user/profile', data);
   },
 
   updatePassword(data) {
-    return api.put('/auth/password', data);
+    return api.put('/user/password', data);
   },
 };

@@ -35,10 +35,6 @@ export class WebsiteRepository extends BaseRepository<IWebsite> {
       .lean() as unknown as Promise<IWebsite | null>;
   }
 
-  async updateContent(id: string | Types.ObjectId, content: IWebsite['content']): Promise<IWebsite | null> {
-    return this.update(id, { content } as any);
-  }
-
   async updateBranding(id: string | Types.ObjectId, branding: IWebsite['branding']): Promise<IWebsite | null> {
     return this.update(id, { branding } as any);
   }
