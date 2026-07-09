@@ -52,6 +52,19 @@ export default function AdminDashboard() {
     { label: 'AI Generations', value: stats?.aiGenerations || '8,947', icon: FiActivity, change: '+31%', color: 'from-amber-500 to-orange-600' },
   ];
 
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="h-8 w-64 bg-[rgb(var(--color-border))] rounded animate-pulse" />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1,2,3,4].map((i) => (
+            <div key={i} className="card h-32 animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>

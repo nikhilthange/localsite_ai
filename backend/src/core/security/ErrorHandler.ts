@@ -57,7 +57,7 @@ export function errorHandler(
     const field = Object.keys((err as any).keyValue || {})[0];
     res.status(409).json({
       success: false,
-      message: 'Duplicate value for ' + (field || 'field'),
+      message: 'Duplicate value',
     });
     return;
   }

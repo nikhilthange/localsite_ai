@@ -24,6 +24,7 @@ MONGO_CONTAINER="${MONGO_CONTAINER:-localsite-mongodb}"
 MONGO_USER="${MONGO_USER:-admin}"
 MONGO_PASSWORD="${MONGO_PASSWORD:-}"
 MONGO_DB="${MONGO_DB:-localsite_ai}"
+MONGO_URI="${MONGO_URI:-mongodb://$MONGO_USER:$MONGO_PASSWORD@localhost:27017/$MONGO_DB?authSource=admin}"
 DOCKER_COMPOSE_DIR="${DOCKER_COMPOSE_DIR:-/home/localsite/app/infra/docker}"
 
 # -------------------------------------------
@@ -47,15 +48,12 @@ backup_mongodb() {
 
     if command -v mongosh &>/dev/null; then
         mongodump \
-            --uri="mongodb://$MONGO_USER:$MONGO_PASSWORD@localhost:27017/$MONGO_DB?authSource=admin" \
+            --uri="$MONGO_URI" \
             --out="$dump_path" \
             --gzip
     else
         docker exec "$MONGO_CONTAINER" mongodump \
-            --username="$MONGO_USER" \
-            --password="$MONGO_PASSWORD" \
-            --authenticationDatabase=admin \
-            --db="$MONGO_DB" \
+            --uri="$MONGO_URI" \
             --gzip \
             --archive > "$dump_path/dump.archive"
     fi

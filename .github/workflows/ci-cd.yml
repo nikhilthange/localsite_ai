@@ -8,7 +8,6 @@ on:
 
 env:
   NODE_VERSION: '22'
-  NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
 
 jobs:
   backend:
@@ -72,6 +71,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -91,14 +98,27 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [backend, frontend]
     runs-on: ubuntu-latest
+    env:
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
       - name: Build backend image
-        run: docker build -t localsite-ai-backend -f backend/Dockerfile ./backend
+        run: docker build -t localsite-ai-backend:${{ github.sha }} -t localsite-ai-backend:latest -f backend/Dockerfile ./backend
 
       - name: Build frontend image
-        run: docker build -t localsite-ai-frontend -f infra/docker/Dockerfile.frontend .
+        run: docker build -t localsite-ai-frontend:${{ github.sha }} -t localsite-ai-frontend:latest -f infra/docker/Dockerfile.frontend .
 
       - name: Build worker image
-        run: docker build -t localsite-ai-worker -f infra/docker/Dockerfile.worker ./backend
+        run: docker build -t localsite-ai-worker:${{ github.sha }} -t localsite-ai-worker:latest -f infra/docker/Dockerfile.worker ./backend

@@ -9,12 +9,14 @@ import { EventBus } from '../../../core/events/EventBus';
 import { SystemEvents } from '../../../types/events';
 import type { PaginationParams } from '../../../types/services';
 import { AppError } from '../../../utils/AppError';
+import { Logger } from '../../../core/logging/Logger';
 import NvidiaAI from 'openai';
 import { Types } from 'mongoose';
+import config from '../../../config';
 
 const nvidia = new NvidiaAI({
-  apiKey: process.env.NVIDIA_API_KEY,
-  baseURL: process.env.NVIDIA_BASE_URL || 'https://integrate.api.nvidia.com/v1',
+  apiKey: config.nvidia.apiKey,
+  baseURL: config.nvidia.baseUrl,
 });
 
 export class GrowthService {
@@ -120,7 +122,7 @@ export class GrowthService {
     let aiResult: any;
     try {
       const response = await nvidia.chat.completions.create({
-        model: process.env.NVIDIA_MODEL || 'meta/llama-3.3-70b-instruct',
+        model: config.nvidia.model,
         messages: [
           {
             role: 'system',
@@ -240,7 +242,7 @@ export class GrowthService {
       try {
         await this.generateReport(website._id.toString(), website.userId.toString());
       } catch (err) {
-        console.error(`Weekly report failed for website ${website._id}:`, (err as Error).message);
+        Logger.error(`Weekly report failed for website ${website._id}:`, { error: (err as Error).message });
       }
     }
   }
@@ -285,7 +287,7 @@ export class GrowthService {
           });
         }
       } catch (err) {
-        console.error(`Daily insight failed for website ${website._id}:`, (err as Error).message);
+        Logger.error(`Daily insight failed for website ${website._id}:`, { error: (err as Error).message });
       }
     }
   }

@@ -145,15 +145,7 @@ export default function Leads() {
         });
         setLeads(data.leads || data.data || []);
       } catch {
-        setLeads([
-          { _id: '1', name: 'Alice Johnson', email: 'alice@example.com', phone: '+1-555-0123', company: 'Tech Corp', source: 'website', status: 'new', score: 85, message: 'Interested in your services!', createdAt: '2026-06-11T10:30:00Z' },
-          { _id: '2', name: 'Bob Smith', email: 'bob@example.com', phone: '+1-555-0456', company: 'Design Studio', source: 'referral', status: 'contacted', score: 62, message: 'Would like a quote for redesign', createdAt: '2026-06-10T14:20:00Z' },
-          { _id: '3', name: 'Carol White', email: 'carol@example.com', company: 'Local Bakery', source: 'website', status: 'qualified', score: 78, message: 'Need a website for my new bakery', createdAt: '2026-06-09T09:15:00Z' },
-          { _id: '4', name: 'David Brown', email: 'david@example.com', phone: '+1-555-0789', company: 'Realty Group', source: 'social', status: 'converted', score: 92, message: 'Looking for a real estate platform', createdAt: '2026-06-08T16:45:00Z' },
-          { _id: '5', name: 'Emma Davis', email: 'emma@example.com', company: 'Fitness Hub', source: 'website', status: 'lost', score: 25, message: 'Budget too high', createdAt: '2026-06-07T11:00:00Z' },
-          { _id: '6', name: 'Frank Wilson', email: 'frank@example.com', source: 'direct', status: 'new', score: 45, message: 'Quick question about pricing', createdAt: '2026-06-06T08:30:00Z' },
-          { _id: '7', name: 'Grace Lee', email: 'grace@example.com', phone: '+1-555-0321', company: 'Health Clinic', source: 'referral', status: 'contacted', score: 71, message: 'Interested in the Professional plan', createdAt: '2026-06-05T13:10:00Z' },
-        ]);
+        toast.error('Failed to load leads');
       } finally {
         setLoading(false);
       }

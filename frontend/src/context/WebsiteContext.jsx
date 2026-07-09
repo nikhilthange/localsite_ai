@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback, useRef, useEffect } from 'react';
 import { websiteService } from '@/services/websiteService';
 import toast from 'react-hot-toast';
 
@@ -8,6 +8,11 @@ export function WebsiteProvider({ children }) {
   const [websites, setWebsites] = useState([]);
   const [currentWebsite, setCurrentWebsite] = useState(null);
   const [loading, setLoading] = useState(false);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => { mountedRef.current = false; };
+  }, []);
 
   const normalizeWebsites = useCallback((data) => {
     if (Array.isArray(data)) return data;
@@ -20,11 +25,17 @@ export function WebsiteProvider({ children }) {
     setLoading(true);
     try {
       const { data } = await websiteService.getWebsites();
-      setWebsites(normalizeWebsites(data.data || data));
+      if (mountedRef.current) {
+        setWebsites(normalizeWebsites(data.data || data));
+      }
     } catch (err) {
-      toast.error('Failed to fetch websites');
+      if (mountedRef.current) {
+        toast.error('Failed to fetch websites');
+      }
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
   }, [normalizeWebsites]);
 

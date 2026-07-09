@@ -17,6 +17,6 @@ export class TemplateRepository extends BaseRepository<ITemplate> {
   }
 
   async getAllActive(): Promise<ITemplate[]> {
-    return this.find({} as any);
+    return this.find({ isActive: true } as any);
   }
 }

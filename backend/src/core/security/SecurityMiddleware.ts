@@ -24,7 +24,7 @@ export class SecurityMiddleware {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "cdnjs.cloudflare.com"],
+        scriptSrc: ["'self'", "cdnjs.cloudflare.com"], // TODO: replace with nonce-based strict CSP
         styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
         fontSrc: ["'self'", "fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "blob:", "*.s3.amazonaws.com", "*.cloudflare.com"],
@@ -37,7 +37,7 @@ export class SecurityMiddleware {
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   });
 
-  static csrfProtection = (process.env.NODE_ENV === 'test' || process.env.DISABLE_CSRF === 'true')
+  static csrfProtection = (process.env.NODE_ENV === 'test' || (process.env.DISABLE_CSRF === 'true' && process.env.NODE_ENV !== 'production'))
     ? (() => { const noop: any = (_req: Request, _res: Response, next: NextFunction) => next(); return noop; })()
     : csrfProtection.doubleCsrfProtection;
   static generateCsrfToken = csrfProtection.generateToken;
@@ -71,7 +71,7 @@ export class SecurityMiddleware {
   static addSecurityHeaders(req: Request, res: Response, next: NextFunction): void {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
+    
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');

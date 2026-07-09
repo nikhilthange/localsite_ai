@@ -21,7 +21,6 @@ export class RateLimiter {
       success: false,
       message: 'Too many authentication attempts, please try again later',
     },
-    skipSuccessfulRequests: true,
   });
 
   static api = rateLimit({

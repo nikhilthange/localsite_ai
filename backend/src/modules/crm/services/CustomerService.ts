@@ -1,5 +1,5 @@
 import { CustomerRepository } from '../repositories/CustomerRepository';
-import { NotFoundError } from '../../../utils/AppError';
+import { NotFoundError, ForbiddenError } from '../../../utils/AppError';
 import type { ICustomer } from '../../../types/models';
 
 const repository = new CustomerRepository();
@@ -9,9 +9,10 @@ export class CustomerService {
     return repository.paginate({ websiteId }, params);
   }
 
-  async getCustomerById(customerId: string): Promise<ICustomer> {
+  async getCustomerById(customerId: string, userId: string): Promise<ICustomer> {
     const customer = await repository.findById(customerId);
     if (!customer) throw new NotFoundError('Customer');
+    if (customer.userId?.toString() !== userId) throw new ForbiddenError('You do not have access to this customer');
     return customer;
   }
 }

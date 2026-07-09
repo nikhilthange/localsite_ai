@@ -11,7 +11,7 @@ function assertSecureConfig(): void {
     NVIDIA_API_KEY: process.env.NVIDIA_API_KEY,
   };
   for (const [key, value] of Object.entries(secrets)) {
-    if (!value || value.length < 16 || value.includes('change-in-production') || value.includes('your-')) {
+    if (!value || value.length < 16 || value.includes('change-in-production') || value.includes('your-') || value.includes('dev-')) {
       throw new Error(`Insecure/missing secret: ${key}. Set a strong, unique value (min 16 chars) in production.`);
     }
   }
@@ -42,15 +42,15 @@ export const config = {
   },
 
   jwt: {
-    accessSecret: process.env.JWT_ACCESS_SECRET || 'dev-jwt-access-secret-localsite-ai',
-    refreshSecret: process.env.JWT_REFRESH_SECRET || 'dev-jwt-refresh-secret-localsite-ai',
+    accessSecret: process.env.JWT_ACCESS_SECRET || '',
+    refreshSecret: process.env.JWT_REFRESH_SECRET || '',
     accessExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
     refreshExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
   },
 
   auth: {
-    cookieSecret: process.env.COOKIE_SECRET || 'dev-cookie-secret-localsite-ai',
-    csrfSecret: process.env.CSRF_SECRET || 'dev-csrf-secret-localsite-ai',
+    cookieSecret: process.env.COOKIE_SECRET || '',
+    csrfSecret: process.env.CSRF_SECRET || '',
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
   },
 

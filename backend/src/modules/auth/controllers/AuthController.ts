@@ -52,7 +52,7 @@ export class AuthController {
 
   static async refreshToken(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+      const refreshToken = req.cookies?.refreshToken;
       if (!refreshToken) {
         res.status(401).json({ success: false, message: 'Refresh token required' });
         return;
@@ -75,7 +75,7 @@ export class AuthController {
 
   static async logout(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+      const refreshToken = req.cookies?.refreshToken;
       const userId = req.user?.userId;
 
       if (refreshToken && userId) {

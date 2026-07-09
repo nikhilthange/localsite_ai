@@ -89,7 +89,7 @@ export class AuthService {
   }
 
   static async refreshAccessToken(refreshToken: string): Promise<TokenPair> {
-    const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret) as { userId: string };
+    const decoded = jwt.verify(refreshToken, config.jwt.refreshSecret, { algorithms: ['HS256'] }) as { userId: string };
     const user = await authRepository.findById(decoded.userId);
     if (!user) {
       throw new UnauthorizedError('Invalid refresh token');
@@ -159,13 +159,18 @@ export class AuthService {
       throw new AppError('Invalid verification token', 400);
     }
 
+    if (user.verificationTokenExpires && user.verificationTokenExpires < new Date()) {
+      throw new AppError('Verification token has expired', 400);
+    }
+
     user.emailVerified = true;
     user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
     await user.save();
   }
 
   static verifyAccessToken(token: string): AuthPayload {
-    const decoded = jwt.verify(token, config.jwt.accessSecret) as AuthPayload;
+    const decoded = jwt.verify(token, config.jwt.accessSecret, { algorithms: ['HS256'] }) as AuthPayload;
     return decoded;
   }
 

@@ -20,7 +20,7 @@ export const getCustomers = async (req: AuthenticatedRequest, res: Response, nex
 
 export const getCustomerById = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const customer = await customerService.getCustomerById(req.params.id);
+    const customer = await customerService.getCustomerById(req.params.id, req.user!.userId);
     res.json({ success: true, data: customer });
   } catch (err) {
     next(err);

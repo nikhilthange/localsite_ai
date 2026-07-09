@@ -17,7 +17,7 @@ export abstract class BaseRepository<T extends Document> {
   }
 
   async find(filter: FilterQuery<T> = {}): Promise<T[]> {
-    return this.model.find(filter).lean() as unknown as T[];
+    return this.model.find(filter).limit(100).lean() as unknown as T[];
   }
 
   async create(data: Partial<T>): Promise<T> {
@@ -57,11 +57,12 @@ export abstract class BaseRepository<T extends Document> {
   ): Promise<PaginatedResult<T>> {
     const {
       page = 1,
-      limit = 10,
+      limit: rawLimit = 10,
       sort = 'createdAt',
       order = 'desc',
     } = params;
 
+    const limit = Math.min(rawLimit, 100);
     const skip = (page - 1) * limit;
     const sortObj: Record<string, 1 | -1> = { [sort]: order === 'desc' ? -1 : 1 };
 

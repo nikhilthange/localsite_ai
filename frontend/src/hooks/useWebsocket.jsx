@@ -48,8 +48,7 @@ export function useWebsocket() {
       }
     });
 
-    socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error.message);
+    socket.on('connect_error', () => {
       setIsConnected(false);
     });
 
@@ -57,9 +56,7 @@ export function useWebsocket() {
       setIsConnected(true);
     });
 
-    socket.on('reconnect_error', (error) => {
-      console.error('Socket reconnect error:', error.message);
-    });
+    socket.on('reconnect_error', () => {});
 
     socket.on('reconnect_failed', () => {
       setIsConnected(false);

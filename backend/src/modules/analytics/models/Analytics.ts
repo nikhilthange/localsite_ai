@@ -73,6 +73,7 @@ analyticsSchema.index({ country: 1, websiteId: 1 });
 analyticsSchema.index({ referrerDomain: 1, websiteId: 1 });
 analyticsSchema.index({ device: 1, websiteId: 1 });
 analyticsSchema.index({ browser: 1, websiteId: 1 });
+analyticsSchema.index({ timestamp: 1 }, { expireAfterSeconds: 2592000 });
 
 softDeletePlugin(analyticsSchema);
 auditPlugin(analyticsSchema);

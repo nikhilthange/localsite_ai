@@ -63,6 +63,24 @@ export default function Billing() {
 
   const currentPlan = SUBSCRIPTION_PLANS.find((p) => p.id === subscription?.plan);
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 w-48 bg-[rgb(var(--color-border))] rounded animate-pulse" />
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="card h-48 animate-pulse" />
+            <div className="card h-64 animate-pulse" />
+          </div>
+          <div className="space-y-6">
+            <div className="card h-64 animate-pulse" />
+            <div className="card h-48 animate-pulse" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

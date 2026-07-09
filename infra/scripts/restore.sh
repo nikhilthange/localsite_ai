@@ -15,6 +15,7 @@ MONGO_CONTAINER="${MONGO_CONTAINER:-localsite-mongodb}"
 MONGO_USER="${MONGO_USER:-admin}"
 MONGO_PASSWORD="${MONGO_PASSWORD:-}"
 MONGO_DB="${MONGO_DB:-localsite_ai}"
+MONGO_URI="${MONGO_URI:-mongodb://$MONGO_USER:$MONGO_PASSWORD@localhost:27017/$MONGO_DB?authSource=admin}"
 RESTORE_DIR="/tmp/localsite-restore-$(date +%s)"
 
 # Validate
@@ -51,16 +52,13 @@ if [ -d "$EXTRACTED_DIR/mongodb" ]; then
     if [ -n "$MONGODUMP_DIR" ] && [ -d "$MONGODUMP_DIR" ]; then
         if command -v mongorestore &>/dev/null; then
             mongorestore \
-                --uri="mongodb://$MONGO_USER:$MONGO_PASSWORD@localhost:27017/$MONGO_DB?authSource=admin" \
+                --uri="$MONGO_URI" \
                 --dir="$MONGODUMP_DIR" \
                 --drop \
                 --gzip
         else
             docker exec -i "$MONGO_CONTAINER" mongorestore \
-                --username="$MONGO_USER" \
-                --password="$MONGO_PASSWORD" \
-                --authenticationDatabase=admin \
-                --nsInclude="$MONGO_DB.*" \
+                --uri="$MONGO_URI" \
                 --drop \
                 --gzip \
                 --archive < "$EXTRACTED_DIR/mongodb/dump.archive"

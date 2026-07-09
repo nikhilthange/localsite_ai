@@ -6,12 +6,13 @@ const User = require('../models/User');
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET,
+  algorithms: ['HS256'],
 };
 
 passport.use(
   new JwtStrategy(jwtOptions, async (payload, done) => {
     try {
-      const user = await User.findById(payload.id).select('-password');
+      const user = await User.findById(payload.userId).select('-password');
 
       if (!user) {
         return done(null, false, { message: 'User not found' });
@@ -43,11 +44,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               email: profile.emails[0].value,
               googleId: profile.id,
               avatar: profile.photos[0]?.value,
-              isVerified: true,
+              emailVerified: true,
             });
           } else if (!user.googleId) {
             user.googleId = profile.id;
-            user.isVerified = true;
+            user.emailVerified = true;
             if (profile.photos[0]?.value && !user.avatar) {
               user.avatar = profile.photos[0].value;
             }

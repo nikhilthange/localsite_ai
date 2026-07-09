@@ -40,7 +40,7 @@ export function setupSocketIO(httpServer: HttpServer): Server {
     }
 
     try {
-      const decoded = jwt.verify(token, config.jwt.accessSecret) as {
+      const decoded = jwt.verify(token, config.jwt.accessSecret, { algorithms: ['HS256'] }) as {
         userId: string;
         role: UserRole;
         email: string;

@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { twMerge } from 'tailwind-merge';
 import {
   HiSparkles, HiTrendingUp, HiChartBar, HiSearch, HiStar,
-  HiUserGroup, HiLightBulb, HiRefresh, HiChevronRight,
-  HiCalendar, HiCheck, HiExclamation, HiArrowUp, HiArrowDown,
+  HiUserGroup, HiLightBulb, HiRefresh,
+  HiCalendar, HiCheck, HiArrowUp, HiArrowDown, HiExclamation,
 } from 'react-icons/hi';
 import { FiZap, FiTarget, FiTrendingUp, FiBarChart2, FiActivity } from 'react-icons/fi';
 import ScoreCard from '@/components/growth/ScoreCard';
@@ -37,13 +37,26 @@ function StatusBadge({ status }) {
   return <span className={c.bg}>{c.label}</span>;
 }
 
+const colorMap = {
+  blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+  green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400',
+  purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
+  orange: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
+  red: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400',
+  indigo: 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400',
+  emerald: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400',
+  amber: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
+};
+
 function MetricCard({ label, value, change, icon: Icon, color }) {
+  const colorClasses = colorMap[color] || colorMap.blue;
+  const [bgClass, textClass] = [colorClasses.split(' text-')[0], 'text-' + colorClasses.split('text-')[1]];
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
       className="card">
       <div className="flex items-start justify-between mb-3">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-${color}-50 dark:bg-${color}-900/20`}>
-          <Icon className={`w-5 h-5 text-${color}-600 dark:text-${color}-400`} />
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${bgClass}`}>
+          <Icon className={`w-5 h-5 ${textClass}`} />
         </div>
         {change != null && (
           <span className={twMerge('flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full',

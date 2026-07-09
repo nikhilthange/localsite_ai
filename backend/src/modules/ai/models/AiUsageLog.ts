@@ -45,5 +45,6 @@ aiUsageLogSchema.index({ taskType: 1, createdAt: -1 });
 aiUsageLogSchema.index({ model: 1, createdAt: -1 });
 aiUsageLogSchema.index({ websiteId: 1, createdAt: -1 });
 aiUsageLogSchema.index({ createdAt: -1 });
+aiUsageLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 7776000 });
 
 export const AiUsageLog = mongoose.model('AiUsageLog', aiUsageLogSchema);

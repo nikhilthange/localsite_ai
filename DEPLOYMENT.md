@@ -1,10 +1,10 @@
 # LocalSite AI - Deployment Guide
 
 ## Prerequisites
-- Node.js 18+
-- MongoDB 6+
+- Node.js 22+
+- MongoDB 7+
 - Redis 7+
-- Docker & Docker Compose
+- Docker & docker compose
 - Git
 - AWS Account (for production)
 - Vercel Account (for frontend)
@@ -24,7 +24,7 @@ MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/localsite?retryWrites=tr
 REDIS_URL=redis://:password@localhost:6379
 
 # JWT
-JWT_SECRET=your-super-secret-jwt-key
+JWT_ACCESS_SECRET=your-super-secret-jwt-key
 JWT_REFRESH_SECRET=your-refresh-token-secret
 JWT_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
@@ -93,7 +93,7 @@ npm run dev
 ### Build & Run
 ```bash
 cd docker
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ### Services
@@ -126,7 +126,7 @@ cp docker/.env.example docker/.env
 ### 3. Deploy
 ```bash
 cd docker
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
 ### 4. SSL Certificate
@@ -169,7 +169,7 @@ frontend/dist
 
 ### Backend Logs
 ```bash
-docker-compose logs -f backend
+docker compose logs -f backend
 ```
 
 ### Nginx Access Logs
@@ -188,7 +188,7 @@ sudo tail -f /var/log/nginx/access.log
 ### Database
 ```bash
 # Automated daily backup via cron
-0 2 * * * docker exec mongodb mongodump --out /backups/$(date +\%Y-\%m-\%d)
+0 2 * * * docker exec localsite-mongodb mongodump --out /backups/$(date +\%Y-\%m-\%d)
 ```
 
 ### File Storage
@@ -214,7 +214,7 @@ sudo tail -f /var/log/nginx/access.log
 curl http://localhost:5000/api/health
 
 # MongoDB connection
-docker exec mongodb mongosh --eval "db.adminCommand('ping')"
+docker exec localsite-mongodb mongosh --eval "db.adminCommand('ping')"
 
 # Redis connection
 docker exec redis redis-cli ping
@@ -229,7 +229,7 @@ docker exec redis redis-cli ping
    - Verify connection string in .env
 
 2. **JWT errors**
-   - Ensure JWT_SECRET is set
+   - Ensure JWT_ACCESS_SECRET is set
    - Check token expiry
 
 3. **NVIDIA NIM API errors**
@@ -243,5 +243,5 @@ docker exec redis redis-cli ping
 5. **Docker container crashes**
    ```bash
    docker logs <container-name>
-   docker-compose restart <service>
+   docker compose restart <service>
    ```

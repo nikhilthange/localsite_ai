@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback, useRef, useEffect } from 'react';
 import { growthService } from '@/services/growthService';
 import toast from 'react-hot-toast';
 
@@ -9,17 +9,23 @@ export function GrowthProvider({ children }) {
   const [reports, setReports] = useState([]);
   const [insights, setInsights] = useState([]);
   const [loading, setLoading] = useState(false);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => { mountedRef.current = false; };
+  }, []);
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
     try {
       const { data } = await growthService.getDashboard();
-      setDashboard(data.data);
+      if (mountedRef.current) setDashboard(data.data);
       return data.data;
     } catch (err) {
+      if (mountedRef.current) toast.error('Failed to load dashboard');
       return null;
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
   }, []);
 
@@ -27,13 +33,13 @@ export function GrowthProvider({ children }) {
     setLoading(true);
     try {
       const { data } = await growthService.getReports(params);
-      setReports(data.data || []);
+      if (mountedRef.current) setReports(data.data || []);
       return data;
     } catch (err) {
-      toast.error('Failed to load reports');
+      if (mountedRef.current) toast.error('Failed to load reports');
       return null;
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
   }, []);
 
@@ -51,9 +57,10 @@ export function GrowthProvider({ children }) {
   const fetchInsights = useCallback(async () => {
     try {
       const { data } = await growthService.getInsights();
-      setInsights(data.data || []);
+      if (mountedRef.current) setInsights(data.data || []);
       return data;
     } catch (err) {
+      if (mountedRef.current) toast.error('Failed to load insights');
       return null;
     }
   }, []);

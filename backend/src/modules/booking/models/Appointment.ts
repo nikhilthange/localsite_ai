@@ -16,11 +16,24 @@ const appointmentSchema = new Schema<IAppointment>(
       enum: ['scheduled', 'confirmed', 'completed', 'cancelled'],
       default: 'scheduled',
     },
-    email: { type: String, required: true },
+    email: { type: String, required: true, match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Invalid email format'] },
     phone: { type: String },
     remindersSent: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
+
+appointmentSchema.index({ websiteId: 1, startTime: -1 });
+appointmentSchema.index({ userId: 1, status: 1 });
+appointmentSchema.index({ staffId: 1, startTime: -1 });
+appointmentSchema.index({ email: 1 });
+appointmentSchema.index({ status: 1, startTime: -1 });
+
+appointmentSchema.pre('validate', function(next) {
+  if (this.endTime && this.startTime && this.endTime <= this.startTime) {
+    next(new Error('End time must be after start time'));
+  }
+  next();
+});
 
 export const Appointment = mongoose.model<IAppointment>('Appointment', appointmentSchema);

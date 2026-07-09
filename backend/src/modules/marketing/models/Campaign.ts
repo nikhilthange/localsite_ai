@@ -63,4 +63,10 @@ const campaignSchema = new Schema<ICampaign>(
   { timestamps: true }
 );
 
+campaignSchema.index({ userId: 1, status: 1 });
+campaignSchema.index({ websiteId: 1, status: 1 });
+campaignSchema.index({ organizationId: 1, status: 1 });
+campaignSchema.index({ type: 1, status: 1 });
+campaignSchema.index({ 'schedule.scheduledFor': 1 });
+
 export const Campaign = mongoose.model<ICampaign>('Campaign', campaignSchema);

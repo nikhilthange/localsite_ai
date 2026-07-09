@@ -4,10 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { twMerge } from 'tailwind-merge';
 import {
   HiSparkles, HiTemplate, HiSearch, HiGlobe, HiChartBar, HiShieldCheck,
-  HiChevronDown, HiArrowRight, HiStar, HiCheck, HiLightningBolt,
-  HiPhotograph, HiChip, HiCube,
+  HiChevronDown, HiStar, HiLightningBolt,
 } from 'react-icons/hi';
-import { FiArrowRight, FiCheck, FiPlay, FiZap, FiLayers, FiTrendingUp, FiUsers, FiShield, FiSmartphone, FiBarChart2 } from 'react-icons/fi';
+import { FiArrowRight, FiPlay, FiLayers, FiUsers } from 'react-icons/fi';
 import Button from '../components/common/Button';
 
 const features = [

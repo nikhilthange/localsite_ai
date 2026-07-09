@@ -33,4 +33,8 @@ const businessInsightSchema = new Schema<IBusinessInsight>(
   { timestamps: true }
 );
 
+businessInsightSchema.index({ userId: 1, read: 1, dismissed: 1 });
+businessInsightSchema.index({ websiteId: 1, category: 1 });
+businessInsightSchema.index({ createdAt: -1 });
+
 export const BusinessInsight = mongoose.model<IBusinessInsight>('BusinessInsight', businessInsightSchema);

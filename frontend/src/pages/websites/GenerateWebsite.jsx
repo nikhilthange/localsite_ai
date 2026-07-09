@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { twMerge } from 'tailwind-merge';
@@ -60,6 +60,7 @@ export default function GenerateWebsite() {
   const [generationProgress, setGenerationProgress] = useState(0);
   const [genStatusIndex, setGenStatusIndex] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
+  const intervalRef = useRef(null);
   const [generatedWebsite, setGeneratedWebsite] = useState(null);
   const [deployOption, setDeployOption] = useState('subdomain');
   const [customDomain, setCustomDomain] = useState('');
@@ -78,12 +79,12 @@ export default function GenerateWebsite() {
     setIsGenerating(true);
     setCurrentStep(3);
     let progress = 0;
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       progress += 2;
       setGenerationProgress(Math.min(progress, 100));
       setGenStatusIndex(Math.min(Math.floor(progress / 17), generationStatuses.length - 1));
       if (progress >= 100) {
-        clearInterval(interval);
+        clearInterval(intervalRef.current);
         setTimeout(() => {
           setIsGenerating(false);
           setGeneratedWebsite({ id: Date.now(), name: form.name, category: form.category, template: selectedTemplate });
@@ -91,8 +92,15 @@ export default function GenerateWebsite() {
         }, 500);
       }
     }, 200);
-    return () => clearInterval(interval);
   }, [form, selectedTemplate]);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   const handleDeploy = async () => {
     await createWebsite({

@@ -23,7 +23,7 @@ export const getLeads = async (req: AuthenticatedRequest, res: Response, next: N
 
 export const getLeadById = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const lead = await leadService.getLeadById(req.params.id);
+    const lead = await leadService.getLeadById(req.params.id, req.user!.userId);
     res.json({ success: true, data: lead });
   } catch (err) {
     next(err);

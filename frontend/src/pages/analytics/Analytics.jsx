@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { twMerge } from 'tailwind-merge';
 import {
-  HiCalendar, HiDownload, HiRefresh, HiGlobe, HiEye, HiUserGroup, HiClock,
+  HiDownload, HiRefresh, HiEye, HiClock,
   HiTrendingUp, HiArrowUp, HiArrowDown, HiOutlineExclamationCircle,
 } from 'react-icons/hi';
 import { FiUsers, FiBarChart2, FiActivity, FiChevronDown, FiExternalLink } from 'react-icons/fi';
@@ -161,15 +161,29 @@ export default function Analytics() {
   useEffect(() => { fetchWebsites(); }, [fetchWebsites]);
 
   useEffect(() => {
+    const abortController = new AbortController();
+    const mounted = { current: true };
+
     setLoading(true);
     setError(null);
-    analyticsService.getOverview({ websiteId: selectedWebsite || undefined, range })
-      .then(({ data: res }) => setData(res.data || res))
+
+    analyticsService.getOverview({ websiteId: selectedWebsite || undefined, range, signal: abortController.signal })
+      .then(({ data: res }) => {
+        if (mounted.current) setData(res.data || res);
+      })
       .catch((err) => {
+        if (!mounted.current || abortController.signal.aborted) return;
         setError(err?.response?.data?.message || err?.message || 'Failed to load analytics');
         setData(null);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (mounted.current) setLoading(false);
+      });
+
+    return () => {
+      mounted.current = false;
+      abortController.abort();
+    };
   }, [selectedWebsite, range]);
 
   const totalSources = useMemo(() => sourceData.reduce((s, d) => s + d.value, 0), []);

@@ -245,7 +245,7 @@ export class AIController {
         taskType: AITaskType.WEBSITE_GENERATION,
         userId,
         websiteId,
-        userPrompt: { businessName, category, location } as unknown as string,
+        userPrompt: JSON.stringify({ businessName, category, location }) as unknown as string,
         responseFormat: 'json_object',
       });
 
@@ -267,7 +267,7 @@ export class AIController {
       const result = await engine.generate({
         taskType: AITaskType.SEO_METADATA,
         userId,
-        userPrompt: { businessName, category, location, services, audience } as unknown as string,
+        userPrompt: JSON.stringify({ businessName, category, location, services, audience }) as unknown as string,
         responseFormat: 'json_object',
       });
 
@@ -289,7 +289,7 @@ export class AIController {
       const result = await engine.generate({
         taskType: AITaskType.BLOG_GENERATION,
         userId,
-        userPrompt: { businessName, category, topic, audience, tone } as unknown as string,
+        userPrompt: JSON.stringify({ businessName, category, topic, audience, tone }) as unknown as string,
         responseFormat: 'json_object',
       });
 
@@ -311,7 +311,7 @@ export class AIController {
       const result = await engine.generate({
         taskType: AITaskType.FAQ_GENERATION,
         userId,
-        userPrompt: { businessName, category, location, count: count?.toString() || '5', topics } as unknown as string,
+        userPrompt: JSON.stringify({ businessName, category, location, count: count?.toString() || '5', topics }) as unknown as string,
         responseFormat: 'json_object',
       });
 
@@ -333,7 +333,7 @@ export class AIController {
       const result = await engine.generate({
         taskType: AITaskType.MARKETING_COPY,
         userId,
-        userPrompt: { businessName, category, location, goal, channels, usp, audience } as unknown as string,
+        userPrompt: JSON.stringify({ businessName, category, location, goal, channels, usp, audience }) as unknown as string,
         responseFormat: 'json_object',
       });
 
