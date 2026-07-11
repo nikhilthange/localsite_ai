@@ -146,61 +146,54 @@ export class AIEngineService {
       emitToUser(userId, 'ai:progress', { websiteId, taskType, step: 'Streaming response...', progress: 30 });
     }
 
-    return new Promise((resolve, reject) => {
-      this.aiClient.completeStream(
-        request,
-        (chunk: string) => {
-          onChunk(chunk);
-        },
-        async (response: AICompletionResponse) => {
-          await this.tokenUsage.recordUsage({
-            userId,
-            websiteId,
-            taskType,
-            model: response.model,
-            promptTokens: response.usage.promptTokens,
-            completionTokens: response.usage.completionTokens,
-            totalTokens: response.usage.totalTokens,
-            cost: response.cost,
-            creditsConsumed: creditResult.cost,
-            latency: response.latency,
-            cached: false,
-            success: true,
-          });
+    try {
+      const response = await this.aiClient.complete(request);
 
-          if (socketEmit) {
-            emitToUser(userId, 'ai:progress', { websiteId, taskType, step: 'Complete', progress: 100 });
-          }
+      await this.tokenUsage.recordUsage({
+        userId,
+        websiteId,
+        taskType,
+        model: response.model,
+        promptTokens: response.usage.promptTokens,
+        completionTokens: response.usage.completionTokens,
+        totalTokens: response.usage.totalTokens,
+        cost: response.cost,
+        creditsConsumed: creditResult.cost,
+        latency: response.latency,
+        cached: false,
+        success: true,
+      });
 
-          resolve(response);
-        },
-        async (error: Error) => {
-          await this.credits.refundCredits(userId, taskType, creditResult.cost.toString());
+      if (socketEmit) {
+        emitToUser(userId, 'ai:progress', { websiteId, taskType, step: 'Complete', progress: 100 });
+      }
 
-          await this.tokenUsage.recordUsage({
-            userId,
-            websiteId,
-            taskType,
-            model: request.model || TASK_MODEL_MAP[taskType],
-            promptTokens: 0,
-            completionTokens: 0,
-            totalTokens: 0,
-            cost: 0,
-            creditsConsumed: 0,
-            latency: 0,
-            cached: false,
-            success: false,
-            error: error.message,
-          });
+      return response;
+    } catch (error) {
+      await this.credits.refundCredits(userId, taskType, creditResult.cost.toString());
 
-          if (socketEmit) {
-            emitToUser(userId, 'ai:error', { websiteId, taskType, error: error.message });
-          }
+      await this.tokenUsage.recordUsage({
+        userId,
+        websiteId,
+        taskType,
+        model: request.model || TASK_MODEL_MAP[taskType],
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+        cost: 0,
+        creditsConsumed: 0,
+        latency: 0,
+        cached: false,
+        success: false,
+        error: (error as Error).message,
+      });
 
-          reject(error);
-        }
-      );
-    });
+      if (socketEmit) {
+        emitToUser(userId, 'ai:error', { websiteId, taskType, error: (error as Error).message });
+      }
+
+      throw error;
+    }
   }
 
   async checkCredits(userId: string, taskType: AITaskType): Promise<{ sufficient: boolean; required: number; available: number }> {

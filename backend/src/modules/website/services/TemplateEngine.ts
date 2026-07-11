@@ -2,7 +2,7 @@ import { Logger } from '../../../core/logging/Logger';
 import { AIClient } from '../../ai/services/AIClient';
 import { TokenUsageService } from '../../ai/services/TokenUsageService';
 import { AICreditService } from '../../ai/services/AICreditService';
-import { AITaskType, AICompletionRequest } from '../../ai/types';
+import { AITaskType, AICompletionRequest, AICompletionResponse, TASK_DEFAULT_MAX_TOKENS, AIModel } from '../../ai/types';
 import type { AiGeneratedWebsite } from '../../../types/website';
 import { ImageService } from './ImageService';
 import { emitToUser } from '../../../core/socket/SocketSetup';
@@ -255,8 +255,6 @@ export class TemplateEngine {
     const uid = userId || 'system';
     const industryKey = this.resolveIndustry(category);
 
-    emitToUser(uid, 'ai:progress', { websiteId, taskType: 'website-generation', step: 'Preparing AI generation...', progress: 5 });
-
     const creditResult = await this.credits.consumeCredits(uid, AITaskType.WEBSITE_GENERATION, websiteId);
     if (!creditResult.success) {
       const err = `Insufficient AI credits. Required: ${creditResult.cost}, Available: ${creditResult.remaining}`;
@@ -264,56 +262,28 @@ export class TemplateEngine {
       throw new Error(err);
     }
 
-    emitToUser(uid, 'ai:progress', { websiteId, taskType: 'website-generation', step: 'Generating premium website...', progress: 20 });
+    const { AIOrchestrator } = await import('./pipeline/AIOrchestrator');
+    const orchestrator = new AIOrchestrator();
 
-    const t0 = Date.now();
-    const userPrompt = this.buildUserPrompt(businessName, category, location, description, primaryColor, secondaryColor, targetAudience, tone, websiteStyle, theme);
+    const generatedWebsite = await orchestrator.generateWebsite(
+      uid,
+      websiteId || 'temp',
+      businessName,
+      category,
+      location,
+      phone,
+      email,
+      description || '',
+      theme || 'modern',
+      primaryColor,
+      secondaryColor,
+      targetAudience,
+      tone,
+      websiteStyle
+    );
 
-    const request: AICompletionRequest = {
-      taskType: AITaskType.WEBSITE_GENERATION,
-      userId: uid,
-      websiteId,
-      systemPrompt: SYSTEM_PROMPT,
-      userPrompt,
-      temperature: 0.6,
-      maxTokens: 1200,
-      responseFormat: 'json_object',
-    };
-
-    const response = await this.aiClient.complete(request);
-    const aiElapsed = Date.now() - t0;
-
-    Logger.info('AI generation completed', {
-      elapsedMs: aiElapsed,
-      promptTokens: response.usage.promptTokens,
-      completionTokens: response.usage.completionTokens,
-      totalTokens: response.usage.totalTokens,
-    });
-
-    await this.tokenUsage.recordUsage({
-      userId: uid,
-      websiteId,
-      taskType: AITaskType.WEBSITE_GENERATION,
-      model: response.model,
-      promptTokens: response.usage.promptTokens,
-      completionTokens: response.usage.completionTokens,
-      totalTokens: response.usage.totalTokens,
-      cost: response.cost,
-      creditsConsumed: creditResult.cost,
-      latency: response.latency,
-      cached: response.cached,
-      success: true,
-    });
-
-    const cleaned = response.content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-    if (!cleaned) throw new Error('Empty AI response');
-
-    const parsed = JSON.parse(cleaned);
-    const validated = this.autoFill(parsed, businessName, category, location, phone, email, description || '');
-    const plan = this.mapToAiGeneratedWebsite(validated, businessName, category, industryKey);
-    const enriched = this.enrichWithImages(plan, industryKey);
-
-    emitToUser(uid, 'ai:progress', { websiteId, taskType: 'website-generation', step: 'Complete', progress: 100 });
+    // After pipeline generation, we still apply enrichment for images
+    const enriched = this.enrichWithImages(generatedWebsite, industryKey);
 
     return enriched;
   }

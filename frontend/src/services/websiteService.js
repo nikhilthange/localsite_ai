@@ -46,7 +46,7 @@ export const websiteService = {
     if (data.email) payload.email = data.email;
     if (data.theme) payload.theme = data.theme;
     return api.post('/websites/generate-complete', payload, {
-      timeout: 180000,
+      timeout: 600000, // Match backend AI_TIMEOUT_MS
     });
   },
 

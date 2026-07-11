@@ -61,6 +61,9 @@ export const config = {
     maxTokens: parseInt(process.env.NVIDIA_MAX_TOKENS || '2000', 10),
     temperature: parseFloat(process.env.NVIDIA_TEMPERATURE || '0.7'),
     enabled: !!(process.env.NVIDIA_API_KEY && process.env.NVIDIA_API_KEY.length > 0),
+    timeoutMs: parseInt(process.env.AI_TIMEOUT_MS || '600000', 10),
+    enableStreaming: process.env.AI_ENABLE_STREAMING === 'true',
+    maxRetries: parseInt(process.env.AI_MAX_RETRIES || '3', 10),
   },
 
   email: {
