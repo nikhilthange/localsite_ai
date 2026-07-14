@@ -1,4 +1,5 @@
 import { AIClient } from '../../../ai/services/AIClient';
+import { config } from '../../../../config';
 import type { AiGeneratedWebsite } from '../../../../types/website';
 import { WebsiteGenerationPipeline } from './WebsiteGenerationPipeline';
 import { WebsiteGenerationContext } from './PromptBuilder';
@@ -11,7 +12,7 @@ export class AIOrchestrator {
   private fallbackGenerator = new FallbackGenerator();
 
   constructor() {
-    this.aiClient = new AIClient();
+    this.aiClient = AIClient.getInstance();
   }
 
   async generateWebsite(
@@ -51,6 +52,21 @@ export class AIOrchestrator {
       websiteStyle,
       accumulatedData: {}
     };
+
+    if (!config.nvidia.apiKey) {
+      Logger.warn('NVIDIA_API_KEY not set. Skipping AI generation pipeline and using fallback generator.');
+      progressEmitter.emitProgress('AI engine disabled. Applying fallback template...', 50);
+      const fallback = this.fallbackGenerator.generateFallback(
+        businessName, 
+        category, 
+        location, 
+        phone, 
+        email, 
+        description
+      );
+      progressEmitter.emitProgress('Completed.', 100);
+      return fallback;
+    }
 
     try {
       Logger.info('Starting AI Generation Pipeline', { businessName, websiteId });

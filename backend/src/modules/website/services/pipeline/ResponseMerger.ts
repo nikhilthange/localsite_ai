@@ -13,81 +13,154 @@ export class ResponseMerger {
     const footer = responses['footer'] || {};
 
     return {
-      brand: {
-        description: brand.brand?.description || 'A great business.',
-        colors: {
-          primary: brand.brand?.colors?.primary || '#000000',
-          secondary: brand.brand?.colors?.secondary || '#ffffff',
-          accent: brand.brand?.colors?.accent || '#cccccc',
-        },
-        typography: {
-          headingFont: brand.brand?.typography?.headingFont || 'Inter',
-          bodyFont: brand.brand?.typography?.bodyFont || 'Roboto',
-        },
-        logoText: brand.brand?.logoText || 'Logo',
-        designStyle: brand.brand?.designStyle || 'Modern Minimalist',
+      industry: brand.industry || 'Business',
+      theme: brand.theme || 'modern',
+      colors: {
+        primary: brand.colors?.primary || '#2563eb',
+        secondary: brand.colors?.secondary || '#1e40af',
+        accent: brand.colors?.accent || '#3b82f6',
+        background: brand.colors?.background || '#ffffff',
+        surface: brand.colors?.surface || '#f3f4f6',
+        text: brand.colors?.text || '#111827',
       },
-      navigation: {
-        links: navHero.navigation?.links || [
-          { label: 'Home', url: '/' },
-          { label: 'Services', url: '#services' },
-          { label: 'Contact', url: '#contact' },
+      fonts: {
+        heading: brand.fonts?.heading || 'Inter',
+        body: brand.fonts?.body || 'Roboto',
+      },
+      brand: {
+        tagline: brand.brand?.tagline || 'Your Premier Choice',
+        mission: brand.brand?.mission || 'Delivering excellence.',
+        logoStyle: brand.brand?.logoStyle || 'Clean and Professional',
+        logoPrompt: brand.brand?.logoPrompt || 'A professional logo',
+      },
+      announcement: {
+        text: 'Welcome to our new website!',
+        enabled: true,
+      },
+      navbar: {
+        logo: brand.brand?.name || 'Logo',
+        links: navHero.navbar?.links || [
+          { label: 'Home', href: '/' },
+          { label: 'Services', href: '#services' },
+          { label: 'About', href: '#about' },
+          { label: 'Contact', href: '#contact' },
         ],
+        cta: navHero.navbar?.cta || { text: 'Get Started', href: '#contact' },
+        sticky: true,
+        variant: 'default',
       },
       hero: {
-        headline: navHero.hero?.headline || 'Welcome to our website',
-        subheadline: navHero.hero?.subheadline || 'We provide excellent services.',
-        primaryButton: navHero.hero?.primaryButton || { text: 'Get Started', url: '#contact' },
-        secondaryButton: navHero.hero?.secondaryButton || { text: 'Learn More', url: '#about' },
-        imageDescription: navHero.hero?.imageDescription || 'A professional hero image',
-        imageUrl: '',
-      },
-      services: {
-        title: services.services?.title || 'Our Services',
-        subtitle: services.services?.subtitle || 'What we offer',
-        items: services.services?.items || [
-          { name: 'Service 1', description: 'Description 1', icon: 'star' }
-        ],
+        title: navHero.hero?.title || 'Welcome to our website',
+        subtitle: navHero.hero?.subtitle || 'Professional services tailored for you.',
+        ctaPrimary: navHero.hero?.ctaPrimary || 'Get Started',
+        ctaSecondary: navHero.hero?.ctaSecondary || 'Our Services',
+        badge: navHero.hero?.badge || 'Top Rated',
+        layout: navHero.hero?.layout || 'center',
+        backgroundType: navHero.hero?.backgroundType || 'color',
       },
       about: {
         title: about.about?.title || 'About Us',
         content: about.about?.content || 'We are a dedicated team of professionals.',
-        mission: about.about?.mission || 'To deliver excellence.',
-        imageDescription: about.about?.imageDescription || 'Team working together',
-        imageUrl: '',
+        image: about.about?.image || '',
+        stats: about.about?.stats || [],
+        features: about.about?.features || [],
+        layout: about.about?.layout || 'default',
+      },
+      services: {
+        title: services.services?.title || 'Our Services',
+        description: services.services?.description || 'What we offer',
+        items: services.services?.items || [],
+        layout: services.services?.layout || 'grid',
+      },
+      features: {
+        title: 'Why Choose Us',
+        description: 'Our core features',
+        items: [],
+        columns: 3,
+      },
+      stats: [],
+      portfolio: {
+        title: 'Our Work',
+        description: 'Recent projects',
+        items: [],
+        layout: 'grid',
+      },
+      pricing: {
+        title: 'Pricing',
+        description: 'Simple and transparent pricing',
+        items: [],
+      },
+      gallery: {
+        title: 'Gallery',
+        description: 'See our work in action',
+        images: [],
+        layout: 'grid',
       },
       testimonials: {
         title: testimonials.testimonials?.title || 'What Our Clients Say',
-        items: testimonials.testimonials?.items || [
-          { quote: 'Great service!', author: 'John Doe', role: 'Customer' }
-        ],
+        description: testimonials.testimonials?.description || 'Read our client reviews',
+        items: testimonials.testimonials?.items || [],
+        layout: testimonials.testimonials?.layout || 'grid',
       },
       faq: {
         title: faq.faq?.title || 'Frequently Asked Questions',
-        questions: faq.faq?.questions || [
-          { question: 'How can I get started?', answer: 'Contact us today.' }
-        ],
+        description: faq.faq?.description || 'Find answers to common questions',
+        items: faq.faq?.items || [],
+        layout: faq.faq?.layout || 'default',
+      },
+      process: {
+        title: 'Our Process',
+        description: 'How we work',
+        steps: [],
+      },
+      team: {
+        title: 'Our Team',
+        description: 'Meet our experts',
+        members: [],
+      },
+      cta: {
+        title: 'Ready to get started?',
+        subtitle: 'Contact us today.',
+        buttonText: 'Contact Us',
+        buttonLink: '#contact',
+        backgroundType: 'color',
       },
       contact: {
         title: contact.contact?.title || 'Contact Us',
-        description: contact.contact?.description || 'Reach out to us for any queries.',
-        email: contact.contact?.email || 'hello@example.com',
+        description: contact.contact?.description || 'Get in touch with us today.',
         phone: contact.contact?.phone || '123-456-7890',
+        email: contact.contact?.email || 'hello@example.com',
         address: contact.contact?.address || 'City, State',
-        socialLinks: contact.contact?.socialLinks || { facebook: '', twitter: '', instagram: '' },
+        mapUrl: contact.contact?.mapUrl || '',
+        socialLinks: contact.contact?.socialLinks || [],
+        formFields: contact.contact?.formFields || [],
       },
-      seo: {
-        title: seo.seo?.title || 'Business Website',
-        description: seo.seo?.description || 'Welcome to our business website.',
-        keywords: seo.seo?.keywords || ['business', 'services'],
+      newsletter: {
+        title: 'Subscribe',
+        description: 'Get our latest news',
+        placeholder: 'Enter your email',
+        buttonText: 'Subscribe',
+        enabled: false,
+      },
+      map: {
+        title: 'Find Us',
+        address: contact.contact?.address || 'City, State',
       },
       footer: {
+        description: footer.footer?.description || 'Your premier provider.',
         copyright: footer.footer?.copyright || '© 2024 All rights reserved.',
-        links: footer.footer?.links || [
-          { label: 'Privacy Policy', url: '/privacy' },
-          { label: 'Terms of Service', url: '/terms' },
-        ],
+        columns: footer.footer?.columns || [],
+        socialLinks: footer.footer?.socialLinks || [],
+        showNewsletter: false,
       },
+      seo: {
+        metaTitle: seo.seo?.metaTitle || 'Business Website',
+        metaDescription: seo.seo?.metaDescription || 'Welcome to our business website.',
+        keywords: seo.seo?.keywords || ['business', 'services'],
+        ogImage: seo.seo?.ogImage || '',
+        twitterCard: seo.seo?.twitterCard || 'summary_large_image',
+      },
+      layout: [],
     };
   }
 }

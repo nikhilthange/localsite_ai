@@ -791,7 +791,7 @@ export class TemplateEngine {
     const images = this.imageService.getImages(industry);
     const enriched = { ...plan };
 
-    if (!enriched.gallery) enriched.gallery = { title: 'Gallery', description: '', images: [] };
+    if (!enriched.gallery) enriched.gallery = { title: 'Gallery', description: '', images: [], layout: 'grid' };
     if (!enriched.gallery.images) enriched.gallery.images = [];
 
     if (enriched.gallery.images.length === 0) {
@@ -811,7 +811,7 @@ export class TemplateEngine {
       }));
     }
 
-    if (!enriched.testimonials) enriched.testimonials = { title: 'Testimonials', items: [] };
+    if (!enriched.testimonials) enriched.testimonials = { title: 'Testimonials', description: '', items: [], layout: 'grid' };
     if (!enriched.testimonials.items) enriched.testimonials.items = [];
 
     if (enriched.testimonials.items.length > 0) {
@@ -821,7 +821,7 @@ export class TemplateEngine {
       }));
     }
 
-    if (!enriched.portfolio) enriched.portfolio = { title: 'Portfolio', description: '', items: [] };
+    if (!enriched.portfolio) enriched.portfolio = { title: 'Portfolio', description: '', items: [], layout: 'grid' };
     if (!enriched.portfolio.items) enriched.portfolio.items = [];
 
     if (enriched.portfolio.items.length === 0 && images.portfolio.length > 0) {

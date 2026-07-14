@@ -33,7 +33,7 @@ export class WebsiteGenerationPipeline {
     const responses: Record<string, any> = {};
     let accumulatedProgress = 0;
     
-    let currentModel = AIModel.Llama8B as string;
+    let currentModel: AIModel = AIModel.Llama8B;
 
     for (const step of STAGES) {
       accumulatedProgress += step.weight;
@@ -78,9 +78,9 @@ export class WebsiteGenerationPipeline {
               Logger.warn(`Retrying stage ${step.stage}`, { attempt, error: error.message });
             },
             onTimeoutConsecutive: (count) => {
-              if (count >= 2 && currentModel !== 'meta/llama-3.1-8b-instruct') {
+              if (count >= 2 && currentModel !== AIModel.Llama8B) {
                 Logger.warn('Switching to smaller model due to consecutive timeouts', { stage: step.stage });
-                currentModel = 'meta/llama-3.1-8b-instruct';
+                currentModel = AIModel.Llama8B;
                 request.model = currentModel;
               }
             }
