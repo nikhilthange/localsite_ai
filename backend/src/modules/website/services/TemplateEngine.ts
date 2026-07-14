@@ -791,12 +791,18 @@ export class TemplateEngine {
     const images = this.imageService.getImages(industry);
     const enriched = { ...plan };
 
+    if (!enriched.gallery) enriched.gallery = { title: 'Gallery', description: '', images: [] };
+    if (!enriched.gallery.images) enriched.gallery.images = [];
+
     if (enriched.gallery.images.length === 0) {
       enriched.gallery.images = images.gallery.map((src, i) => ({
         src,
         alt: `${industry.replace(/-/g, ' ')} image ${i + 1}`,
       }));
     }
+
+    if (!enriched.team) enriched.team = { title: 'Our Team', description: '', members: [] };
+    if (!enriched.team.members) enriched.team.members = [];
 
     if (enriched.team.members.length > 0) {
       enriched.team.members = enriched.team.members.map((m, i) => ({
@@ -805,12 +811,18 @@ export class TemplateEngine {
       }));
     }
 
+    if (!enriched.testimonials) enriched.testimonials = { title: 'Testimonials', items: [] };
+    if (!enriched.testimonials.items) enriched.testimonials.items = [];
+
     if (enriched.testimonials.items.length > 0) {
       enriched.testimonials.items = enriched.testimonials.items.map((t, i) => ({
         ...t,
         avatar: t.avatar || `https://i.pravatar.cc/150?img=${(i % 70) + 1}`,
       }));
     }
+
+    if (!enriched.portfolio) enriched.portfolio = { title: 'Portfolio', description: '', items: [] };
+    if (!enriched.portfolio.items) enriched.portfolio.items = [];
 
     if (enriched.portfolio.items.length === 0 && images.portfolio.length > 0) {
       enriched.portfolio.items = images.portfolio.slice(0, 6).map((src, i) => ({

@@ -213,11 +213,19 @@ export class WebsiteService {
     location: string;
     description?: string;
     phone?: string;
-    email?: string;
   }): Partial<IWebsite> {
     const sections = this.buildSections(plan);
     const imageService = this.imageService;
     const industryKey = this.templateEngine.resolveIndustry(data.category);
+
+    const colors = plan.colors || {
+      primary: '#0F172A',
+      secondary: '#3B82F6',
+      accent: '#F59E0B',
+      background: '#FFFFFF',
+      surface: '#F8FAFC',
+      text: '#1E293B',
+    };
 
     return {
       description: data.description || '',
@@ -225,23 +233,23 @@ export class WebsiteService {
       sections,
       branding: {
         logo: '',
-        logoPrompt: plan.brand.logoPrompt,
+        logoPrompt: plan.brand?.logoPrompt || '',
         favicon: '',
         colors: {
-          primary: plan.colors.primary,
-          primaryLight: this.lighten(plan.colors.primary, 0.2),
-          primaryDark: this.darken(plan.colors.primary, 0.15),
-          secondary: plan.colors.secondary,
-          secondaryLight: this.lighten(plan.colors.secondary, 0.2),
-          accent: plan.colors.accent,
-          accentLight: this.lighten(plan.colors.accent, 0.2),
-          background: plan.colors.background,
-          surface: plan.colors.surface || '#FFFFFF',
-          surfaceAlt: this.darken(plan.colors.background, 0.03),
-          text: plan.colors.text,
-          textSecondary: this.darken(plan.colors.text, 0.4),
+          primary: colors.primary,
+          primaryLight: this.lighten(colors.primary, 0.2),
+          primaryDark: this.darken(colors.primary, 0.15),
+          secondary: colors.secondary,
+          secondaryLight: this.lighten(colors.secondary, 0.2),
+          accent: colors.accent,
+          accentLight: this.lighten(colors.accent, 0.2),
+          background: colors.background,
+          surface: colors.surface || '#FFFFFF',
+          surfaceAlt: this.darken(colors.background, 0.03),
+          text: colors.text,
+          textSecondary: this.darken(colors.text, 0.4),
           textInverse: '#FFFFFF',
-          border: this.lighten(plan.colors.text, 0.8),
+          border: this.lighten(colors.text, 0.8),
           success: '#22C55E',
           warning: '#F59E0B',
           error: '#EF4444',
@@ -254,14 +262,14 @@ export class WebsiteService {
             border: '#27272A',
           },
           gradients: {
-            primary: `linear-gradient(135deg, ${plan.colors.primary}, ${plan.colors.secondary})`,
-            secondary: `linear-gradient(135deg, ${plan.colors.secondary}, ${plan.colors.accent})`,
-            accent: `linear-gradient(135deg, ${plan.colors.accent}, ${this.lighten(plan.colors.accent, 0.2)})`,
+            primary: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+            secondary: `linear-gradient(135deg, ${colors.secondary}, ${colors.accent})`,
+            accent: `linear-gradient(135deg, ${colors.accent}, ${this.lighten(colors.accent, 0.2)})`,
           },
         },
         fonts: {
-          heading: plan.fonts.heading,
-          body: plan.fonts.body,
+          heading: plan.fonts?.heading || 'Inter',
+          body: plan.fonts?.body || 'Inter',
           headingWeight: 700,
           bodyWeight: 400,
         },
@@ -275,7 +283,7 @@ export class WebsiteService {
           small: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
           medium: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
           large: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-          focus: `0 0 0 2px ${plan.colors.primary}`,
+          focus: `0 0 0 2px ${colors.primary}`,
         },
         animations: {
           section: 'fade-up',
@@ -284,21 +292,21 @@ export class WebsiteService {
           hero: 'parallax',
           duration: 0.6,
         },
-        logoStyle: plan.brand.logoStyle,
+        logoStyle: plan.brand?.logoStyle || 'text',
         brandVoice: '',
-        tagline: plan.brand.tagline,
-        mission: plan.brand.mission,
+        tagline: plan.brand?.tagline || '',
+        mission: plan.brand?.mission || '',
       },
       seo: {
-        metaTitle: plan.seo.metaTitle.slice(0, 70),
-        metaDescription: plan.seo.metaDescription.slice(0, 160),
-        keywords: plan.seo.keywords,
-        ogImage: plan.seo.ogImage || imageService.getHeroImage(industryKey),
-        ogTitle: plan.seo.metaTitle.slice(0, 70),
-        ogDescription: plan.seo.metaDescription.slice(0, 160),
+        metaTitle: plan.seo?.metaTitle?.slice(0, 70) || 'Website Title',
+        metaDescription: plan.seo?.metaDescription?.slice(0, 160) || 'Website description.',
+        keywords: plan.seo?.keywords || [],
+        ogImage: plan.seo?.ogImage || imageService.getHeroImage(industryKey),
+        ogTitle: plan.seo?.metaTitle?.slice(0, 70) || 'Website Title',
+        ogDescription: plan.seo?.metaDescription?.slice(0, 160) || 'Website description.',
         structuredData: this.buildStructuredData(plan, data),
         sitemapIncluded: true,
-        twitterCard: plan.seo.twitterCard || 'summary_large_image',
+        twitterCard: plan.seo?.twitterCard || 'summary_large_image',
       },
       lastGeneratedAt: new Date(),
     } as any;
@@ -311,55 +319,61 @@ export class WebsiteService {
     const sections: any[] = [];
     let order = 0;
 
-    if (plan.announcement?.enabled) {
+    if (plan.announcement?.text) {
       sections.push({
         id: 'announcement', type: 'announcement' as SectionType,
         variant: 'default', visible: true, order: order++,
         data: { text: plan.announcement.text },
-        background: { type: 'color', value: plan.colors.primary },
+        background: { type: 'color', value: plan.colors?.primary || '#000000' },
       });
     }
 
-    sections.push({
-      id: 'navbar', type: 'navbar' as SectionType,
-      variant: plan.navbar.variant || 'transparent', visible: true, order: order++,
-      data: {
-        logo: plan.navbar.logo || '',
-        links: plan.navbar.links,
-        cta: plan.navbar.cta,
-        sticky: plan.navbar.sticky ?? true,
-      },
-    });
+    if (plan.navbar) {
+      sections.push({
+        id: 'navbar', type: 'navbar' as SectionType,
+        variant: plan.navbar.variant || 'transparent', visible: true, order: order++,
+        data: {
+          logo: plan.navbar.logo || '',
+          links: plan.navbar.links || [],
+          cta: plan.navbar.cta,
+          sticky: plan.navbar.sticky ?? true,
+        },
+      });
+    }
 
-    sections.push({
-      id: 'hero', type: 'hero' as SectionType,
-      variant: plan.hero.layout || 'centered', visible: true, order: order++,
-      data: {
-        title: plan.hero.title,
-        subtitle: plan.hero.subtitle,
-        ctaPrimary: plan.hero.ctaPrimary,
-        ctaSecondary: plan.hero.ctaSecondary,
-        badge: plan.hero.badge,
-        backgroundType: plan.hero.backgroundType,
-      },
-      background: {
-        type: 'image',
-        overlay: `linear-gradient(135deg, ${plan.colors.primary}CC, ${plan.colors.secondary}88)`,
-        parallax: true,
-      },
-    });
+    if (plan.hero) {
+      sections.push({
+        id: 'hero', type: 'hero' as SectionType,
+        variant: plan.hero.layout || 'centered', visible: true, order: order++,
+        data: {
+          title: plan.hero.title || '',
+          subtitle: plan.hero.subtitle || '',
+          ctaPrimary: plan.hero.ctaPrimary,
+          ctaSecondary: plan.hero.ctaSecondary,
+          badge: plan.hero.badge,
+          backgroundType: plan.hero.backgroundType,
+        },
+        background: {
+          type: 'image',
+          overlay: `linear-gradient(135deg, ${plan.colors?.primary || '#000000'}CC, ${plan.colors?.secondary || '#000000'}88)`,
+          parallax: true,
+        },
+      });
+    }
 
-    sections.push({
-      id: 'about', type: 'about' as SectionType,
-      variant: plan.about.layout || 'split-right', visible: true, order: order++,
-      data: {
-        title: plan.about.title,
-        content: plan.about.content,
-        image: plan.about.image,
-        stats: plan.about.stats,
-        features: plan.about.features,
-      },
-    });
+    if (plan.about) {
+      sections.push({
+        id: 'about', type: 'about' as SectionType,
+        variant: plan.about.layout || 'split-right', visible: true, order: order++,
+        data: {
+          title: plan.about.title || '',
+          content: plan.about.content || '',
+          image: plan.about.image,
+          stats: plan.about.stats,
+          features: plan.about.features,
+        },
+      });
+    }
 
     if (plan.features?.items?.length > 0) {
       sections.push({
@@ -479,36 +493,40 @@ export class WebsiteService {
       });
     }
 
-    sections.push({
-      id: 'cta', type: 'cta' as SectionType,
-      variant: 'centered', visible: true, order: order++,
-      data: {
-        title: plan.cta.title,
-        subtitle: plan.cta.subtitle,
-        buttonText: plan.cta.buttonText,
-        buttonLink: plan.cta.buttonLink,
-        backgroundType: plan.cta.backgroundType,
-      },
-      background: {
-        type: plan.cta.backgroundType || 'gradient',
-        value: `linear-gradient(135deg, ${plan.colors.primary}, ${plan.colors.secondary})`,
-      },
-    });
+    if (plan.cta) {
+      sections.push({
+        id: 'cta', type: 'cta' as SectionType,
+        variant: 'centered', visible: true, order: order++,
+        data: {
+          title: plan.cta.title || '',
+          subtitle: plan.cta.subtitle || '',
+          buttonText: plan.cta.buttonText || '',
+          buttonLink: plan.cta.buttonLink || '',
+          backgroundType: plan.cta.backgroundType || 'gradient',
+        },
+        background: {
+          type: plan.cta.backgroundType || 'gradient',
+          value: `linear-gradient(135deg, ${plan.colors?.primary || '#000000'}, ${plan.colors?.secondary || '#000000'})`,
+        },
+      });
+    }
 
-    sections.push({
-      id: 'contact', type: 'contact' as SectionType,
-      variant: 'split', visible: true, order: order++,
-      data: {
-        title: plan.contact.title,
-        description: plan.contact.description,
-        phone: plan.contact.phone,
-        email: plan.contact.email,
-        address: plan.contact.address,
-        mapUrl: plan.contact.mapUrl,
-        socialLinks: plan.contact.socialLinks,
-        formFields: plan.contact.formFields,
-      },
-    });
+    if (plan.contact) {
+      sections.push({
+        id: 'contact', type: 'contact' as SectionType,
+        variant: 'split', visible: true, order: order++,
+        data: {
+          title: plan.contact.title || '',
+          description: plan.contact.description || '',
+          phone: plan.contact.phone,
+          email: plan.contact.email,
+          address: plan.contact.address,
+          mapUrl: plan.contact.mapUrl,
+          socialLinks: plan.contact.socialLinks,
+          formFields: plan.contact.formFields,
+        },
+      });
+    }
 
     if (plan.newsletter?.enabled) {
       sections.push({
@@ -538,18 +556,20 @@ export class WebsiteService {
       });
     }
 
-    sections.push({
-      id: 'footer', type: 'footer' as SectionType,
-      variant: 'columns', visible: true, order: order++,
-      data: {
-        description: plan.footer.description,
-        copyright: plan.footer.copyright,
-        columns: plan.footer.columns,
-        socialLinks: plan.footer.socialLinks,
-        showNewsletter: plan.footer.showNewsletter,
-      },
-      background: { type: 'color', value: plan.colors.text },
-    });
+    if (plan.footer) {
+      sections.push({
+        id: 'footer', type: 'footer' as SectionType,
+        variant: 'columns', visible: true, order: order++,
+        data: {
+          description: plan.footer.description,
+          copyright: plan.footer.copyright,
+          columns: plan.footer.columns,
+          socialLinks: plan.footer.socialLinks,
+          showNewsletter: plan.footer.showNewsletter,
+        },
+        background: { type: 'color', value: plan.colors?.text || '#ffffff' },
+      });
+    }
 
     return sections;
   }
@@ -569,12 +589,12 @@ export class WebsiteService {
       '@context': 'https://schema.org',
       '@type': typeMap[industryKey] || 'LocalBusiness',
       name: data.businessName,
-      description: plan.brand.mission,
-      image: plan.seo.ogImage,
+      description: plan.brand?.mission || '',
+      image: plan.seo?.ogImage || '',
       telephone: data.phone,
       email: data.email,
-      address: { '@type': 'PostalAddress', streetAddress: plan.contact.address || `${data.businessName}, ${data.location}` },
-      sameAs: plan.contact.socialLinks.map(l => l.url),
+      address: { '@type': 'PostalAddress', streetAddress: plan.contact?.address || `${data.businessName}, ${data.location}` },
+      sameAs: Array.isArray(plan.contact?.socialLinks) ? plan.contact.socialLinks.map(l => l.url) : [],
     };
   }
 

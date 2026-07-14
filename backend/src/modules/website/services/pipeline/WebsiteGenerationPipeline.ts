@@ -33,7 +33,7 @@ export class WebsiteGenerationPipeline {
     const responses: Record<string, any> = {};
     let accumulatedProgress = 0;
     
-    let currentModel = AIModel.Llama70B as string;
+    let currentModel = AIModel.Llama8B as string;
 
     for (const step of STAGES) {
       accumulatedProgress += step.weight;

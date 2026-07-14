@@ -20,12 +20,12 @@ export const MODEL_COSTS: Record<AIModel, { input: number; output: number }> = {
 };
 
 export const TASK_MODEL_MAP: Record<AITaskType, AIModel> = {
-  [AITaskType.WEBSITE_GENERATION]: AIModel.Llama70B,
+  [AITaskType.WEBSITE_GENERATION]: AIModel.Llama8B,
   [AITaskType.SEO_METADATA]: AIModel.Llama8B,
-  [AITaskType.LOGO_GENERATION]: AIModel.Llama70B,
-  [AITaskType.BLOG_GENERATION]: AIModel.Llama70B,
+  [AITaskType.LOGO_GENERATION]: AIModel.Llama8B,
+  [AITaskType.BLOG_GENERATION]: AIModel.Llama8B,
   [AITaskType.FAQ_GENERATION]: AIModel.Llama8B,
-  [AITaskType.MARKETING_COPY]: AIModel.Llama70B,
+  [AITaskType.MARKETING_COPY]: AIModel.Llama8B,
   [AITaskType.CHATBOT_RESPONSE]: AIModel.Llama8B,
   [AITaskType.GROWTH_ANALYSIS]: AIModel.Llama8B,
 };
