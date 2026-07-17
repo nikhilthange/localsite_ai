@@ -181,7 +181,7 @@ export class QueueService {
   static async closeAll(): Promise<void> {
     const closeWorkers = Array.from(this.workers.values()).map((w) => w.close());
     const closeQueues = Array.from(this.queues.values()).map((q) => q.close());
-    await Promise.all([...closeWorkers, ...closeQueues].map((p) => p.catch(() => {})));
+    await Promise.all([...closeWorkers, ...closeQueues].map((p) => Promise.resolve(p).catch(() => {})));
     this.workers.clear();
     this.queues.clear();
   }

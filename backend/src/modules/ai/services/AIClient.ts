@@ -130,22 +130,33 @@ export class AIClient {
 
       const useStreaming = config.nvidia.enableStreaming !== false;
 
+      const requestPayload: any = {
+        model,
+        messages,
+        max_tokens: maxTokens,
+        temperature: request.temperature ?? 0.5,
+        top_p: 0.9,
+        stream: useStreaming,
+        ...(request.responseFormat === 'json_object' ? { response_format: { type: 'json_object' } } : {}),
+      };
+
+      if (model.includes('nemotron-3-ultra')) {
+        requestPayload.max_tokens = Math.max(maxTokens, 16384);
+        requestPayload.reasoning_budget = 16384;
+        requestPayload.chat_template_kwargs = { "enable_thinking": true };
+      }
+
       if (useStreaming) {
-        const stream = await this.client.chat.completions.create({
-          model,
-          messages,
-          max_tokens: maxTokens,
-          temperature: request.temperature ?? 0.5,
-          top_p: 0.9,
-          stream: true,
-          ...(request.responseFormat === 'json_object' ? { response_format: { type: 'json_object' } as const } : {}),
-        }, { signal });
+        const stream = await this.client.chat.completions.create(requestPayload, { signal });
 
         for await (const chunk of stream) {
           const delta = chunk.choices[0]?.delta?.content || '';
           if (delta) {
             content += delta;
           }
+          // Safely ignore reasoning_content so it doesn't break JSON parsing
+          // const reasoning = (chunk.choices[0]?.delta as any)?.reasoning_content;
+          
           if (chunk.choices[0]?.finish_reason) {
             finishReason = chunk.choices[0].finish_reason;
           }
@@ -155,15 +166,7 @@ export class AIClient {
           }
         }
       } else {
-        const completion = await this.client.chat.completions.create({
-          model,
-          messages,
-          max_tokens: maxTokens,
-          temperature: request.temperature ?? 0.5,
-          top_p: 0.9,
-          stream: false,
-          ...(request.responseFormat === 'json_object' ? { response_format: { type: 'json_object' } as const } : {}),
-        }, { signal });
+        const completion = await this.client.chat.completions.create(requestPayload, { signal });
 
         content = completion.choices[0]?.message?.content || '';
         finishReason = completion.choices[0]?.finish_reason || 'stop';

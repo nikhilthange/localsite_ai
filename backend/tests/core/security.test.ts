@@ -2,7 +2,10 @@ import { SecurityMiddleware } from '../../src/core/security/SecurityMiddleware';
 import { authMiddleware, adminMiddleware } from '../../src/core/security/AuthMiddleware';
 import { AuthService } from '../../src/modules/auth/services/AuthService';
 
+import { Logger } from '../../src/core/logging/Logger';
+
 vi.mock('../../src/core/events/EventBus', () => ({ EventBus: { emit: vi.fn() } }));
+vi.mock('../../src/core/logging/Logger', () => ({ Logger: { info: vi.fn(), error: vi.fn() } }));
 vi.mock('../../src/modules/auth/repositories/AuthRepository', () => {
   const mock = { findByEmail: vi.fn(), findById: vi.fn(), addRefreshToken: vi.fn(), removeRefreshToken: vi.fn(), update: vi.fn() };
   return { AuthRepository: vi.fn().mockImplementation(() => mock) };
@@ -44,25 +47,25 @@ describe('SecurityMiddleware', () => {
       const req = { method: 'GET', path: '/api/test', user: { userId: 'user-1' } } as any;
       const res = {} as any;
       const next = vi.fn();
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
+      const loggerSpy = vi.spyOn(Logger, 'info').mockImplementation();
 
       SecurityMiddleware.requestLogger(req, res, next);
 
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(loggerSpy).toHaveBeenCalled();
       expect(next).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      loggerSpy.mockRestore();
     });
 
     it('should use anonymous for unauthenticated users', () => {
       const req = { method: 'POST', path: '/api/health', user: undefined } as any;
       const res = {} as any;
       const next = vi.fn();
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
+      const loggerSpy = vi.spyOn(Logger, 'info').mockImplementation();
 
       SecurityMiddleware.requestLogger(req, res, next);
 
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('anonymous'));
-      consoleSpy.mockRestore();
+      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('anonymous'));
+      loggerSpy.mockRestore();
     });
   });
 

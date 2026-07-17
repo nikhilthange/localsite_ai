@@ -171,16 +171,18 @@ export default function Signup() {
                   {showPassword ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
                 </button>
               </div>
-              {form.password && (
-                <div className="mt-2">
-                  <div className="flex gap-1 mb-1">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className={`h-1.5 flex-1 rounded-full ${i <= strength ? strengthConfig[strength].color : 'bg-[rgb(var(--color-border))]'}`} />
-                    ))}
-                  </div>
-                  <p className="text-xs text-[rgb(var(--color-text-muted))]">{strengthConfig[strength]?.label || ''}</p>
-                </div>
-              )}
+              <div className="mt-2 h-7">
+                {form.password && (
+                  <>
+                    <div className="flex gap-1 mb-1">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className={`h-1.5 flex-1 rounded-full ${i <= strength ? strengthConfig[strength].color : 'bg-[rgb(var(--color-border))]'}`} />
+                      ))}
+                    </div>
+                    <p className="text-xs text-[rgb(var(--color-text-muted))]">{strengthConfig[strength]?.label || ''}</p>
+                  </>
+                )}
+              </div>
               {errors.password && <p className="mt-1.5 text-sm text-red-500">{errors.password}</p>}
             </div>
 

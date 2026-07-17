@@ -21,6 +21,14 @@ vi.mock('../../src/core/events/EventBus', () => ({
   EventBus: { emit: vi.fn() },
 }));
 
+vi.mock('../../src/modules/website/models/Website', () => ({
+  Website: {
+    findOne: vi.fn().mockReturnValue({
+      lean: vi.fn().mockResolvedValue({ _id: '507f1f77bcf86cd799439011', userId: '507f1f77bcf86cd799439011' }),
+    }),
+  },
+}));
+
 const mockLeadRepository = (global as any).__mockLeadRepository;
 
 describe('LeadService', () => {
@@ -45,15 +53,15 @@ describe('LeadService', () => {
 
   describe('getLeadById', () => {
     it('should return a lead by ID', async () => {
-      const lead = { _id: VALID_ID, name: 'Jane Smith', email: 'jane@example.com' };
+      const lead = { _id: VALID_ID, name: 'Jane Smith', email: 'jane@example.com', websiteId: { toString: () => VALID_ID } };
       mockLeadRepository.findById.mockResolvedValue(lead);
 
-      expect(await service.getLeadById(VALID_ID)).toBe(lead);
+      expect(await service.getLeadById(VALID_ID, VALID_ID)).toBe(lead);
     });
 
     it('should throw NotFoundError for missing lead', async () => {
       mockLeadRepository.findById.mockResolvedValue(null);
-      await expect(service.getLeadById(VALID_ID)).rejects.toThrow('Lead not found');
+      await expect(service.getLeadById(VALID_ID, VALID_ID)).rejects.toThrow('Lead not found');
     });
   });
 
@@ -80,7 +88,7 @@ describe('LeadService', () => {
 
   describe('assignLead', () => {
     it('should assign a lead to a user', async () => {
-      const lead = { _id: VALID_ID, name: 'Jane Smith' };
+      const lead = { _id: VALID_ID, name: 'Jane Smith', websiteId: { toString: () => VALID_ID } };
       mockLeadRepository.findById.mockResolvedValue(lead);
       mockLeadRepository.assignLead.mockResolvedValue({ ...lead, assignedTo: 'agent-1' });
 

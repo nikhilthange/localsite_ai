@@ -12,15 +12,17 @@ export enum AITaskType {
 export enum AIModel {
   Llama70B = 'meta/llama-3.3-70b-instruct',
   Llama8B = 'meta/llama-3.1-8b-instruct',
+  NemotronUltra = 'nvidia/nemotron-3-ultra-550b-a55b',
 }
 
 export const MODEL_COSTS: Record<AIModel, { input: number; output: number }> = {
   [AIModel.Llama70B]: { input: 0.0000009, output: 0.0000009 },
   [AIModel.Llama8B]: { input: 0.0000001, output: 0.0000001 },
+  [AIModel.NemotronUltra]: { input: 0.000001, output: 0.000001 },
 };
 
 export const TASK_MODEL_MAP: Record<AITaskType, AIModel> = {
-  [AITaskType.WEBSITE_GENERATION]: AIModel.Llama8B,
+  [AITaskType.WEBSITE_GENERATION]: AIModel.NemotronUltra,
   [AITaskType.SEO_METADATA]: AIModel.Llama8B,
   [AITaskType.LOGO_GENERATION]: AIModel.Llama8B,
   [AITaskType.BLOG_GENERATION]: AIModel.Llama8B,

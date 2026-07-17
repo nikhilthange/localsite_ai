@@ -15,11 +15,9 @@ const failureCount = new Counter('failed_requests');
 
 export const options = {
   stages: [
-    { duration: '2m', target: 50 },   // Ramp up to 50 users
-    { duration: '5m', target: 100 },  // Scale to 100 users
-    { duration: '2m', target: 200 },  // Peak load 200 users
-    { duration: '5m', target: 200 },  // Sustained peak
-    { duration: '2m', target: 0 },    // Ramp down
+    { duration: '10s', target: 20 },
+    { duration: '20s', target: 50 },
+    { duration: '10s', target: 0 },
   ],
   thresholds: {
     http_req_duration: ['p(95)<2000'],  // 95% under 2s

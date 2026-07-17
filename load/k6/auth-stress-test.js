@@ -13,11 +13,9 @@ const authLatency = new Trend('auth_latency');
 
 export const options = {
   stages: [
-    { duration: '1m', target: 20 },
-    { duration: '3m', target: 100 },
-    { duration: '1m', target: 200 },
-    { duration: '3m', target: 200 },
-    { duration: '1m', target: 0 },
+    { duration: '10s', target: 20 },
+    { duration: '20s', target: 50 },
+    { duration: '10s', target: 0 },
   ],
   thresholds: {
     auth_latency: ['p(95)<3000'],

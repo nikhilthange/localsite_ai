@@ -1,4 +1,16 @@
 import { CacheService } from '../../src/core/cache/CacheService';
+import { connect } from 'net';
+
+vi.mock('net', () => ({
+  connect: vi.fn().mockImplementation((port, host, cb) => {
+    if (cb) setTimeout(cb, 10);
+    return {
+      destroy: vi.fn(),
+      on: vi.fn(),
+      setTimeout: vi.fn(),
+    };
+  }),
+}));
 
 const mockRedisMethods = {
   connect: vi.fn().mockResolvedValue(undefined),
