@@ -55,9 +55,17 @@ export function setupSocketIO(httpServer: HttpServer): Server {
     }
   });
 
+  io.engine.on('connection_error', (err) => {
+    Logger.debug('Socket.IO transport error', { error: err.message });
+  });
+
   io.on('connection', (socket: Socket) => {
     const userId = (socket as any).userId;
     const userRole = (socket as any).userRole;
+
+    socket.on('error', (err) => {
+      Logger.debug('Socket error', { socketId: socket.id, error: err.message });
+    });
 
     socket.join(`user:${userId}`);
 

@@ -63,7 +63,7 @@ export default function DashboardLayout({ children, user, isAdmin, onLogout, onT
 
               <nav className="hidden sm:flex items-center gap-2 text-sm" aria-label="Breadcrumb">
                 {breadcrumbs.map((crumb, idx) => (
-                  <span key={crumb.href} className="flex items-center gap-2">
+                  <span key={`${crumb.href}-${idx}`} className="flex items-center gap-2">
                     {idx > 0 && <HiChevronRight className="w-4 h-4 text-[rgb(var(--color-text-muted))]" />}
                     {idx === breadcrumbs.length - 1 ? (
                       <span className="text-[rgb(var(--color-text))] font-medium">{crumb.label}</span>

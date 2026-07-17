@@ -282,10 +282,109 @@ export class TemplateEngine {
       websiteStyle
     );
 
-    // After pipeline generation, we still apply enrichment for images
-    const enriched = this.enrichWithImages(generatedWebsite, industryKey);
+    // After pipeline generation, fill any missing sections with rich defaults
+    const filled = this.fillMissingSections(generatedWebsite, businessName, category, location);
+
+    // Then apply enrichment for images
+    const enriched = this.enrichWithImages(filled, industryKey);
 
     return enriched;
+  }
+
+  private fillMissingSections(plan: AiGeneratedWebsite, businessName: string, category: string, location: string): AiGeneratedWebsite {
+    const industryKey = this.resolveIndustry(category);
+    const city = location ? location.split(',')[0].trim() : 'your area';
+
+    if (!plan.features?.items || plan.features.items.length === 0) {
+      plan.features = {
+        title: 'Why Choose Us',
+        description: `What sets ${businessName} apart.`,
+        items: [
+          { title: 'Experienced Team', description: `Our team brings years of ${category} expertise to every project.`, icon: 'users' },
+          { title: 'Quality Commitment', description: 'We never compromise on quality and excellence.', icon: 'shield' },
+          { title: 'Customer First', description: 'Your satisfaction is our top priority.', icon: 'heart' },
+          { title: 'Innovation Driven', description: 'We stay ahead with the latest industry practices.', icon: 'zap' },
+        ],
+        columns: 4,
+      };
+    }
+
+    if (!plan.stats || plan.stats.length === 0) {
+      plan.stats = [
+        { value: '500+', label: 'Happy Clients', icon: 'users' },
+        { value: '10+', label: 'Years Experience', icon: 'clock' },
+        { value: '98%', label: 'Satisfaction Rate', icon: 'trending-up' },
+        { value: '50+', label: 'Projects Completed', icon: 'check-circle' },
+      ];
+    }
+
+    if (!plan.pricing?.items || plan.pricing.items.length === 0) {
+      plan.pricing = {
+        title: 'Pricing Plans',
+        description: 'Choose the perfect plan for your needs.',
+        items: [
+          { title: 'Starter', price: '$99', period: '/month', description: 'Essential features to get started.', features: ['Core feature access', 'Basic support', 'Standard setup', 'Monthly reports'], cta: 'Get Started', featured: false, icon: 'rocket' },
+          { title: 'Professional', price: '$199', period: '/month', description: 'Best for growing businesses.', features: ['All Starter features', 'Priority support', 'Advanced analytics', 'Custom integrations', 'Dedicated manager'], cta: 'Choose Plan', featured: true, icon: 'zap' },
+          { title: 'Enterprise', price: '$499', period: '/month', description: 'For established businesses.', features: ['All Professional features', '24/7 phone support', 'Custom development', 'SLA guarantee', 'Team training', 'API access'], cta: 'Contact Us', featured: false, icon: 'crown' },
+        ],
+      };
+    }
+
+    if (!plan.process?.steps || plan.process.steps.length === 0) {
+      plan.process = {
+        title: 'How It Works',
+        description: 'Our simple 3-step process.',
+        steps: [
+          { title: 'Discovery', description: 'We learn about your needs and goals through a detailed consultation.', icon: 'search' },
+          { title: 'Planning', description: 'We create a customized strategy tailored to your requirements.', icon: 'file-text' },
+          { title: 'Execution', description: 'Our expert team brings the plan to life with precision and care.', icon: 'zap' },
+        ],
+      };
+    }
+
+    if (!plan.team?.members || plan.team.members.length === 0) {
+      plan.team = {
+        title: 'Meet Our Team',
+        description: 'The passionate people behind our success.',
+        members: [
+          { name: 'Alex Rodriguez', role: 'Founder & CEO', bio: `Visionary leader with over 15 years of experience in the ${category} industry.`, avatar: '' },
+          { name: 'Emily Watson', role: 'Operations Director', bio: 'Ensuring excellence in every project we deliver.', avatar: '' },
+          { name: 'James Chen', role: 'Head of Customer Success', bio: 'Dedicated to ensuring every client exceeds their goals.', avatar: '' },
+        ],
+      };
+    }
+
+    if (plan.hero && (!plan.hero.backgroundType || plan.hero.backgroundType === 'color')) {
+      plan.hero.backgroundType = 'image';
+    }
+
+    if (plan.about) {
+      if (!plan.about.stats || plan.about.stats.length === 0) {
+        plan.about.stats = [
+          { value: '10+', label: 'Years Experience' },
+          { value: '500+', label: 'Happy Clients' },
+          { value: '50+', label: 'Team Members' },
+        ];
+      }
+      if (!plan.about.image) {
+        plan.about.image = this.imageService.getAboutImage(industryKey);
+      }
+    }
+
+    if (!plan.services?.items || plan.services.items.length === 0) {
+      plan.services = {
+        title: 'Our Services',
+        description: `Comprehensive ${category} solutions tailored for you.`,
+        items: [
+          { title: `Professional ${category} Consultation`, description: `Expert consultation services tailored to your unique needs. Our team provides personalized guidance every step of the way.`, icon: 'star', features: ['In-depth needs assessment', 'Customized strategy', 'Expert recommendations', 'Follow-up support'], cta: 'Learn More' },
+          { title: `Premium ${category} Service`, description: `High-quality service delivered with precision and care. We use the latest techniques to ensure exceptional results.`, icon: 'shield', features: ['Quality assured', 'Timely delivery', 'Ongoing support', 'Satisfaction guaranteed'], cta: 'Learn More' },
+          { title: `Custom ${category} Solutions`, description: `Tailored solutions designed to address your specific challenges and goals. Every project is unique.`, icon: 'zap', features: ['Custom approach', 'Flexible options', 'Results focused', 'Continuous improvement'], cta: 'Learn More' },
+        ],
+        layout: 'grid-3',
+      };
+    }
+
+    return plan;
   }
 
   private buildUserPrompt(

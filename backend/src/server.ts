@@ -12,6 +12,19 @@ import { createServer } from 'http';
 
 const httpServer = createServer(app);
 
+httpServer.on('clientError', (err, socket) => {
+  if ((err as NodeJS.ErrnoException).code === 'ECONNRESET') {
+    Logger.debug('Client connection reset');
+  } else {
+    Logger.warn('HTTP client error', { error: err.message });
+  }
+  socket.destroy();
+});
+
+httpServer.on('error', (err) => {
+  Logger.error('HTTP server error', { error: err.message });
+});
+
 function printBanner(): void {
   console.log('');
   console.log('  ╔══════════════════════════════════════════╗');
