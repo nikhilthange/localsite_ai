@@ -147,7 +147,7 @@ export class AIClient {
       }
 
       if (useStreaming) {
-        const stream = await this.client.chat.completions.create(requestPayload, { signal });
+        const stream = await this.client.chat.completions.create(requestPayload, { signal }) as unknown as AsyncIterable<any>;
 
         for await (const chunk of stream) {
           const delta = chunk.choices[0]?.delta?.content || '';
@@ -166,7 +166,7 @@ export class AIClient {
           }
         }
       } else {
-        const completion = await this.client.chat.completions.create(requestPayload, { signal });
+        const completion = await this.client.chat.completions.create(requestPayload, { signal }) as any;
 
         content = completion.choices[0]?.message?.content || '';
         finishReason = completion.choices[0]?.finish_reason || 'stop';
