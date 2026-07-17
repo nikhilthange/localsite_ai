@@ -51,7 +51,7 @@ export class FallbackGenerator {
       },
       hero: {
         title: `Welcome to ${businessName}`,
-        subtitle: `Professional ${category} services tailored for you.`,
+        subtitle: description ? `${description.substring(0, 120)}` : `Professional ${category} services tailored for you.`,
         ctaPrimary: 'Get Started',
         ctaSecondary: 'Our Services',
         badge: 'Top Rated',
@@ -60,7 +60,7 @@ export class FallbackGenerator {
       },
       about: {
         title: 'About Us',
-        content: `At ${businessName}, we are passionate about providing the best ${category} services. With years of experience and a commitment to excellence, we strive to exceed your expectations.`,
+        content: description || `At ${businessName}, we are passionate about providing the best ${category} services. With years of experience and a commitment to excellence, we strive to exceed your expectations.`,
         image: '',
         stats: [],
         features: [],

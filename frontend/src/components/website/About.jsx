@@ -35,7 +35,7 @@ export default function About({ content = {}, branding = {} }) {
               </div>
             )}
             {stats.length > 0 && (
-              <div className="grid grid-cols-3 gap-6 mt-8 pt-8 border-t" style={{ borderColor: colors.border || '#E4E4E7' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-8 pt-8 border-t" style={{ borderColor: colors.border || '#E4E4E7' }}>
                 {stats.map((stat, i) => (
                   <div key={i}>
                     <div className="text-2xl font-bold" style={{ color: primaryColor }}>{stat.value}</div>

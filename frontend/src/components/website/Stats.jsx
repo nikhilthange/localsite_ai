@@ -19,7 +19,7 @@ export default function Stats({ content = {}, branding = {} }) {
       }}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
           {items.map((stat, i) => {
             const Icon = iconMap[stat.icon] || HiStar;
             return (

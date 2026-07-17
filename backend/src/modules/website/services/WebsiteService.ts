@@ -213,7 +213,20 @@ export class WebsiteService {
     location: string;
     description?: string;
     phone?: string;
+    email?: string;
+    address?: string;
+    socialLinks?: Array<{ platform: string; url: string }>;
   }): Partial<IWebsite> {
+    if (data.phone && plan.contact) plan.contact.phone = data.phone;
+    if (data.email && plan.contact) plan.contact.email = data.email;
+    if (data.address && plan.contact) plan.contact.address = data.address;
+    if (data.address && plan.map) plan.map.address = data.address;
+    if (data.socialLinks && data.socialLinks.length > 0) {
+      const enriched = data.socialLinks.map(s => ({ platform: s.platform, url: s.url, icon: s.platform }));
+      if (plan.contact) plan.contact.socialLinks = enriched;
+      if (plan.footer) plan.footer.socialLinks = enriched;
+    }
+
     const sections = this.buildSections(plan);
     const imageService = this.imageService;
     const industryKey = this.templateEngine.resolveIndustry(data.category);

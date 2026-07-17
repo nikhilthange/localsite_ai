@@ -283,7 +283,7 @@ export class TemplateEngine {
     );
 
     // After pipeline generation, fill any missing sections with rich defaults
-    const filled = this.fillMissingSections(generatedWebsite, businessName, category, location);
+    const filled = this.fillMissingSections(generatedWebsite, businessName, category, location, description);
 
     // Then apply enrichment for images
     const enriched = this.enrichWithImages(filled, industryKey);
@@ -291,14 +291,15 @@ export class TemplateEngine {
     return enriched;
   }
 
-  private fillMissingSections(plan: AiGeneratedWebsite, businessName: string, category: string, location: string): AiGeneratedWebsite {
+  private fillMissingSections(plan: AiGeneratedWebsite, businessName: string, category: string, location: string, description?: string): AiGeneratedWebsite {
     const industryKey = this.resolveIndustry(category);
     const city = location ? location.split(',')[0].trim() : 'your area';
+    const descSnippet = description ? description.substring(0, 100) : '';
 
     if (!plan.features?.items || plan.features.items.length === 0) {
       plan.features = {
         title: 'Why Choose Us',
-        description: `What sets ${businessName} apart.`,
+        description: descSnippet || `What sets ${businessName} apart.`,
         items: [
           { title: 'Experienced Team', description: `Our team brings years of ${category} expertise to every project.`, icon: 'users' },
           { title: 'Quality Commitment', description: 'We never compromise on quality and excellence.', icon: 'shield' },

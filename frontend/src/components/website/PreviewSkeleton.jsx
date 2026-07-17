@@ -100,7 +100,7 @@ function SkeletonTestimonials() {
 function SkeletonFooter() {
   return (
     <div className="px-6 py-10 bg-slate-900 dark:bg-slate-950">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="space-y-3">
             <SkeletonBlock className="w-20 h-4 bg-slate-700" />

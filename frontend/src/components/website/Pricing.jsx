@@ -35,7 +35,7 @@ export default function Pricing({ content = {}, branding = {} }) {
               className={twMerge(
                 'relative rounded-3xl p-8 transition-all duration-300 border',
                 plan.featured
-                  ? 'scale-105 md:scale-110 z-10 shadow-xl'
+                  ? 'md:scale-110 z-10 shadow-xl'
                   : 'hover:shadow-lg'
               )}
               style={{

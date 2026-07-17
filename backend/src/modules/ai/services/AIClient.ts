@@ -6,6 +6,7 @@ import {
   AICompletionRequest,
   AICompletionResponse,
   AIModel,
+  AITaskType,
   MODEL_COSTS,
   TASK_MODEL_MAP,
   TASK_DEFAULT_MAX_TOKENS,
@@ -142,8 +143,12 @@ export class AIClient {
 
       if (model.includes('nemotron-3-ultra')) {
         requestPayload.max_tokens = Math.max(maxTokens, 16384);
-        requestPayload.reasoning_budget = 16384;
-        requestPayload.chat_template_kwargs = { "enable_thinking": true };
+        if (request.taskType === AITaskType.WEBSITE_GENERATION) {
+          requestPayload.chat_template_kwargs = { "enable_thinking": false };
+        } else {
+          requestPayload.reasoning_budget = 16384;
+          requestPayload.chat_template_kwargs = { "enable_thinking": true };
+        }
       }
 
       if (useStreaming) {

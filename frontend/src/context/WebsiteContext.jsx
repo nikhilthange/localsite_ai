@@ -52,6 +52,9 @@ export function WebsiteProvider({ children }) {
       if (websiteData.description) payload.description = websiteData.description;
       if (websiteData.phone) payload.phone = websiteData.phone;
       if (websiteData.email) payload.email = websiteData.email;
+      if (websiteData.address) payload.address = websiteData.address;
+      if (websiteData.socialLinks) payload.socialLinks = websiteData.socialLinks;
+      if (websiteData.targetAudience) payload.targetAudience = websiteData.targetAudience;
       if (websiteData.theme) payload.theme = websiteData.theme;
       const { data } = await websiteService.generateComplete(payload);
       const website = data?.website || data?.data || data;

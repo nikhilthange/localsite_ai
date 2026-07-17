@@ -22,7 +22,7 @@ export default function Gallery({ content = {}, branding = {} }) {
             {description && <p className="text-lg max-w-2xl mx-auto" style={{ color: colors.textSecondary }}>{description}</p>}
           </motion.div>
         )}
-        <div className={`grid gap-4 ${isMasonry ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'}`}>
+          <div className={`grid gap-4 ${isMasonry ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}>
           {images.slice(0, 8).map((img, i) => (
             <motion.div
               key={i}

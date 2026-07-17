@@ -12,20 +12,23 @@ export class ResponseMerger {
     const seo = responses['seo'] || {};
     const footer = responses['footer'] || {};
 
+    const brandData = brand.brand || {};
+    const navData = navHero.navigation || {};
+
     return {
-      industry: brand.industry || 'Business',
-      theme: brand.theme || 'modern',
+      industry: brandData.industry || 'Business',
+      theme: brandData.theme || 'modern',
       colors: {
-        primary: brand.colors?.primary || '#2563eb',
-        secondary: brand.colors?.secondary || '#1e40af',
-        accent: brand.colors?.accent || '#3b82f6',
-        background: brand.colors?.background || '#ffffff',
-        surface: brand.colors?.surface || '#f3f4f6',
-        text: brand.colors?.text || '#111827',
+        primary: brandData.colors?.primary || '#2563eb',
+        secondary: brandData.colors?.secondary || '#1e40af',
+        accent: brandData.colors?.accent || '#3b82f6',
+        background: brandData.colors?.background || '#ffffff',
+        surface: brandData.colors?.surface || '#f3f4f6',
+        text: brandData.colors?.text || '#111827',
       },
       fonts: {
-        heading: brand.fonts?.heading || 'Inter',
-        body: brand.fonts?.body || 'Roboto',
+        heading: brandData.typography?.headingFont || 'Inter',
+        body: brandData.typography?.bodyFont || 'Roboto',
       },
       brand: {
         tagline: brand.brand?.tagline || 'Your Premier Choice',
@@ -38,14 +41,14 @@ export class ResponseMerger {
         enabled: true,
       },
       navbar: {
-        logo: brand.brand?.name || 'Logo',
-        links: navHero.navbar?.links || [
+        logo: brandData.name || 'Logo',
+        links: navData.links || [
           { label: 'Home', href: '/' },
           { label: 'Services', href: '#services' },
           { label: 'About', href: '#about' },
           { label: 'Contact', href: '#contact' },
         ],
-        cta: navHero.navbar?.cta || { text: 'Get Started', href: '#contact' },
+        cta: navData.cta || { text: 'Get Started', href: '#contact' },
         sticky: true,
         variant: 'default',
       },

@@ -1,5 +1,6 @@
 import { AIClient } from '../../../ai/services/AIClient';
-import { AITaskType, AICompletionRequest, AIModel } from '../../../ai/types';
+import { AITaskType, AICompletionRequest, AIModel, TASK_MODEL_MAP } from '../../../ai/types';
+import { config } from '../../../../config';
 import { Logger } from '../../../../core/logging/Logger';
 import { GenerationStage, PromptBuilder, WebsiteGenerationContext } from './PromptBuilder';
 import { RetryHandler } from './RetryHandler';
@@ -33,7 +34,8 @@ export class WebsiteGenerationPipeline {
     const responses: Record<string, any> = {};
     let accumulatedProgress = 0;
     
-    let currentModel: AIModel = AIModel.Llama8B;
+    const envModel = config.nvidia.model as AIModel;
+    let currentModel: AIModel = envModel || TASK_MODEL_MAP[AITaskType.WEBSITE_GENERATION] || AIModel.Llama70B;
 
     for (const step of STAGES) {
       accumulatedProgress += step.weight;
@@ -44,13 +46,12 @@ export class WebsiteGenerationPipeline {
 
       const request: AICompletionRequest = {
         taskType: AITaskType.WEBSITE_GENERATION,
-        userId: 'system', // the actual usage might be recorded differently, we can omit or pass
+        userId: 'system',
         websiteId: 'temp',
         systemPrompt,
         userPrompt,
         temperature: 0.5,
-        maxTokens: 1000,
-        responseFormat: 'json_object',
+        maxTokens: 2000,
         model: currentModel
       };
 
@@ -61,13 +62,18 @@ export class WebsiteGenerationPipeline {
         const response = await this.retryHandler.executeWithRetry(
           async () => {
             const res = await this.aiClient.complete(request);
-            let cleaned = res.content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+            let cleaned = res.content
+              .replace(/```json\s*/gi, '')
+              .replace(/```\s*/g, '')
+              .replace(/^[\s\S]*?(\{)/, '$1')
+              .replace(/(\})[\s\S]*$/, '$1')
+              .trim();
             if (!cleaned) throw new Error('Empty AI response');
             
             try {
               return { parsed: JSON.parse(cleaned), usage: res.usage };
             } catch (e) {
-              throw new Error(`Failed to parse JSON for stage ${step.stage}: ${cleaned.substring(0, 50)}...`);
+              throw new Error(`Failed to parse JSON for stage ${step.stage}: ${cleaned.substring(0, 80)}...`);
             }
           },
           {
@@ -78,9 +84,9 @@ export class WebsiteGenerationPipeline {
               Logger.warn(`Retrying stage ${step.stage}`, { attempt, error: error.message });
             },
             onTimeoutConsecutive: (count) => {
-              if (count >= 2 && currentModel !== AIModel.Llama8B) {
-                Logger.warn('Switching to smaller model due to consecutive timeouts', { stage: step.stage });
-                currentModel = AIModel.Llama8B;
+              if (count >= 2) {
+                Logger.warn('Switching to Llama70B model due to consecutive timeouts', { stage: step.stage });
+                currentModel = AIModel.Llama70B;
                 request.model = currentModel;
               }
             }
@@ -90,7 +96,6 @@ export class WebsiteGenerationPipeline {
         const duration = Date.now() - t0;
         responses[step.stage] = response.parsed;
         
-        // Expose to context so later stages could potentially use it
         context.accumulatedData[step.stage] = response.parsed;
 
         Logger.info(`Stage completed successfully`, {
@@ -114,8 +119,6 @@ export class WebsiteGenerationPipeline {
           error: error.message
         });
         
-        // If a stage fails after retries, we throw to abort the pipeline.
-        // The orchestrator will catch it and run the fallback generator.
         throw new Error(`Pipeline aborted at stage ${step.stage}: ${error.message}`);
       }
     }

@@ -25,7 +25,7 @@ export default function Newsletter({ content = {}, branding = {} }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h3 className="text-2xl font-bold mb-2" style={{ color: colors.text }}>{title}</h3>
+          <h3 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: colors.text }}>{title}</h3>
           {description && <p className="text-sm mb-6" style={{ color: colors.textSecondary }}>{description}</p>}
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input

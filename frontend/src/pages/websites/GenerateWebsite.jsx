@@ -70,7 +70,7 @@ export default function GenerateWebsite() {
   const navigate = useNavigate();
   const { generateWebsite } = useWebsites();
   const [currentStep, setCurrentStep] = useState(1);
-  const [form, setForm] = useState({ name: '', category: '', location: '', description: '' });
+  const [form, setForm] = useState({ name: '', category: '', location: '', phone: '', email: '', address: '', socialFacebook: '', socialInstagram: '', socialTwitter: '', socialLinkedin: '', targetAudience: '', description: '' });
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [selectedTheme, setSelectedTheme] = useState('modern');
   const [generationProgress, setGenerationProgress] = useState(0);
@@ -118,8 +118,22 @@ export default function GenerateWebsite() {
     setGenStatusIndex(0);
 
     try {
+      const socialLinks = [];
+      if (form.socialFacebook) socialLinks.push({ platform: 'facebook', url: form.socialFacebook });
+      if (form.socialInstagram) socialLinks.push({ platform: 'instagram', url: form.socialInstagram });
+      if (form.socialTwitter) socialLinks.push({ platform: 'twitter', url: form.socialTwitter });
+      if (form.socialLinkedin) socialLinks.push({ platform: 'linkedin', url: form.socialLinkedin });
+
       const result = await generateWebsite({
-        ...form,
+        businessName: form.name,
+        category: form.category,
+        location: form.location,
+        description: form.description,
+        phone: form.phone,
+        email: form.email,
+        address: form.address,
+        socialLinks: socialLinks.length > 0 ? socialLinks : undefined,
+        targetAudience: form.targetAudience || undefined,
         theme: selectedTheme,
       });
 
@@ -164,16 +178,16 @@ export default function GenerateWebsite() {
   };
 
   const renderStepIndicator = () => (
-    <div className="flex items-center justify-center gap-0 mb-12">
+    <div className="flex items-center justify-center gap-0 mb-12 overflow-x-auto px-2">
       {steps.map((step, i) => {
         const StepIcon = step.icon;
         const isActive = currentStep === step.id;
         const isCompleted = currentStep > step.id;
         return (
-          <div key={step.id} className="flex items-center">
+          <div key={step.id} className="flex items-center shrink-0">
             <div
               className={twMerge(
-                'flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all',
+                'flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-full text-sm font-medium transition-all',
                 isActive && 'badge-primary',
                 isCompleted && 'badge-success',
                 !isActive && !isCompleted && 'text-[rgb(var(--color-text-muted))]'
@@ -185,7 +199,7 @@ export default function GenerateWebsite() {
             {i < steps.length - 1 && (
               <div
                 className={twMerge(
-                  'w-8 h-0.5 mx-1 rounded-full',
+                  'w-4 sm:w-8 h-0.5 mx-0.5 sm:mx-1 rounded-full shrink-0',
                   isCompleted ? 'bg-emerald-400' : 'bg-[rgb(var(--color-border))]'
                 )}
               />
@@ -261,6 +275,85 @@ export default function GenerateWebsite() {
                     placeholder="New York, NY"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Phone (optional)</label>
+                  <input
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                    className="input-field"
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Email (optional)</label>
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                    className="input-field"
+                    placeholder="hello@example.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Street Address (optional)</label>
+                <input
+                  type="text"
+                  value={form.address}
+                  onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
+                  className="input-field"
+                  placeholder="123 Main St, New York, NY 10001"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Social Links (optional)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input
+                    type="url"
+                    value={form.socialFacebook}
+                    onChange={(e) => setForm((p) => ({ ...p, socialFacebook: e.target.value }))}
+                    className="input-field"
+                    placeholder="Facebook URL"
+                  />
+                  <input
+                    type="url"
+                    value={form.socialInstagram}
+                    onChange={(e) => setForm((p) => ({ ...p, socialInstagram: e.target.value }))}
+                    className="input-field"
+                    placeholder="Instagram URL"
+                  />
+                  <input
+                    type="url"
+                    value={form.socialTwitter}
+                    onChange={(e) => setForm((p) => ({ ...p, socialTwitter: e.target.value }))}
+                    className="input-field"
+                    placeholder="Twitter URL"
+                  />
+                  <input
+                    type="url"
+                    value={form.socialLinkedin}
+                    onChange={(e) => setForm((p) => ({ ...p, socialLinkedin: e.target.value }))}
+                    className="input-field"
+                    placeholder="LinkedIn URL"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Target Audience (optional)</label>
+                <input
+                  type="text"
+                  value={form.targetAudience}
+                  onChange={(e) => setForm((p) => ({ ...p, targetAudience: e.target.value }))}
+                  className="input-field"
+                  placeholder="e.g., Small business owners, local homeowners, tech startups"
+                />
               </div>
 
               <div>

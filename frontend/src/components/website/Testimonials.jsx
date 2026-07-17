@@ -43,8 +43,13 @@ function CarouselLayout({ items, colors }) {
 }
 
 function GridLayout({ items, colors, columns }) {
+  const gridCols = {
+    2: 'md:grid-cols-2',
+    3: 'md:grid-cols-3',
+  }[columns] || 'md:grid-cols-2';
+
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-${columns || 2} gap-6`}>
+    <div className={`grid grid-cols-1 ${gridCols} gap-6`}>
       {items.map((t, i) => (
         <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           transition={{ delay: i * 0.1 }}
