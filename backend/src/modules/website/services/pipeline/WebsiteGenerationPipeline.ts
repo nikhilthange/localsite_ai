@@ -62,6 +62,11 @@ export class WebsiteGenerationPipeline {
         const response = await this.retryHandler.executeWithRetry(
           async () => {
             const res = await this.aiClient.complete(request);
+            Logger.info('Raw AI response', { 
+              stage: step.stage, 
+              rawContent: res.content.substring(0, 500),
+              contentLength: res.content.length
+            });
             let cleaned = res.content
               .replace(/```json\s*/gi, '')
               .replace(/```\s*/g, '')
@@ -70,10 +75,16 @@ export class WebsiteGenerationPipeline {
               .trim();
             if (!cleaned) throw new Error('Empty AI response');
             
+            Logger.info('Cleaned AI response', { 
+              stage: step.stage, 
+              cleanedContent: cleaned.substring(0, 500),
+              cleanedLength: cleaned.length
+            });
+            
             try {
               return { parsed: JSON.parse(cleaned), usage: res.usage };
             } catch (e) {
-              throw new Error(`Failed to parse JSON for stage ${step.stage}: ${cleaned.substring(0, 80)}...`);
+              throw new Error(`Failed to parse JSON for stage ${step.stage}: ${cleaned.substring(0, 200)}...`);
             }
           },
           {

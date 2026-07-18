@@ -21,20 +21,28 @@ export default function Features({ content = {}, branding = {} }) {
   }[columns] || 'sm:grid-cols-2 lg:grid-cols-3';
 
   return (
-    <section className="py-16 md:py-24" style={{ backgroundColor: colors.background || '#FAFAFA' }}>
+    <section className="py-20 md:py-28" style={{ backgroundColor: colors.background || '#FAFAFA' }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {(title || description) && (
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12 md:mb-16"
+            className="text-center mb-14 md:mb-20"
           >
-            {title && <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: colors.text }}>{title}</h2>}
-            {description && <p className="text-lg max-w-2xl mx-auto" style={{ color: colors.textSecondary }}>{description}</p>}
+            {title && (
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 tracking-tight" style={{ color: colors.text }}>
+                {title}
+              </h2>
+            )}
+            {description && (
+              <p className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed" style={{ color: colors.textSecondary }}>
+                {description}
+              </p>
+            )}
           </motion.div>
         )}
-        <div className={twMerge('grid grid-cols-1', gridCols, 'gap-8')}>
+        <div className={twMerge('grid grid-cols-1', gridCols, 'gap-8 md:gap-10')}>
           {items.map((item, i) => {
             const Icon = iconMap[item.icon] || HiStar;
             return (
@@ -44,16 +52,16 @@ export default function Features({ content = {}, branding = {} }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="text-center"
+                className="group text-center"
               >
                 <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                  style={{ backgroundColor: primaryColor + '15', color: primaryColor }}
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
+                  style={{ backgroundColor: primaryColor + '12', color: primaryColor }}
                 >
-                  <Icon className="w-7 h-7" />
+                  <Icon className="w-8 h-8" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2" style={{ color: colors.text }}>{item.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: colors.textSecondary }}>{item.description}</p>
+                <h3 className="text-lg font-semibold mb-3" style={{ color: colors.text }}>{item.title}</h3>
+                <p className="text-sm leading-relaxed max-w-xs mx-auto" style={{ color: colors.textSecondary }}>{item.description}</p>
               </motion.div>
             );
           })}

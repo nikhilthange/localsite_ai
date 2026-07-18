@@ -1,77 +1,67 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '../../utils/cn';
 import {
   HiOfficeBuilding, HiCollection, HiSparkles, HiEye, HiGlobe,
   HiCheck, HiChevronLeft, HiChevronRight, HiLocationMarker,
-  HiColorSwatch, HiDesktopComputer, HiLightningBolt,
+  HiColorSwatch, HiDesktopComputer, HiPhone,
+  HiMail, HiUserGroup, HiMap,
 } from 'react-icons/hi';
 import { FiArrowRight, FiCheck } from 'react-icons/fi';
-import Button from '@/components/common/Button';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
 import { useWebsites } from '@/hooks/useWebsite';
 import { useSocket } from '@/hooks/useWebsocket';
-import { THEMES } from '@/context/WebsiteThemeContext';
 
 const categories = [
-  'Restaurant & Cafe', 'Portfolio', 'E-Commerce', 'SaaS / Tech',
-  'Local Business', 'Agency', 'Blog', 'Real Estate', 'Fitness',
-  'Education', 'Healthcare', 'Creative',
+  'Restaurant', 'Gym/Fitness', 'Law Firm', 'Real Estate',
+  'E-Commerce', 'SaaS/Tech', 'Plumber/HVAC', 'Medical/Dental',
+  'Salon/Spa', 'Photography', 'Consulting', 'Construction',
+  'Auto Repair', 'Cleaning Service', 'Education/Tutor',
+  'Event Planning', 'Marketing Agency', 'Non-Profit', 'Financial/Accounting'
 ];
 
 const templates = [
-  { id: 1, name: 'Restaurant Pro', category: 'Restaurant & Cafe', color: 'from-rose-500 to-pink-600', popular: true },
-  { id: 2, name: 'Portfolio Plus', category: 'Portfolio', color: 'from-violet-500 to-purple-600' },
-  { id: 3, name: 'Storefront', category: 'E-Commerce', color: 'from-emerald-500 to-teal-600' },
-  { id: 4, name: 'SaaS Landing', category: 'SaaS / Tech', color: 'from-blue-500 to-indigo-600' },
-  { id: 5, name: 'Local Business', category: 'Local Business', color: 'from-amber-500 to-orange-600' },
-  { id: 6, name: 'Creative Agency', category: 'Agency', color: 'from-cyan-500 to-sky-600' },
-  { id: 7, name: 'Blog Master', category: 'Blog', color: 'from-fuchsia-500 to-pink-600' },
-  { id: 8, name: 'Health & Wellness', category: 'Healthcare', color: 'from-lime-500 to-emerald-600' },
+  { id: 1, name: 'Minimalist Premium', category: 'Universal', color: 'from-surface-700 to-surface-900', popular: true },
+  { id: 2, name: 'Bold & Creative', category: 'Universal', color: 'from-primary-500 to-indigo-600' },
+  { id: 3, name: 'Corporate Elegance', category: 'Universal', color: 'from-slate-700 to-slate-900' },
+  { id: 4, name: 'Modern Glass', category: 'Universal', color: 'from-emerald-500 to-teal-600' },
 ];
 
 const themeOptions = [
   { id: 'modern', name: 'Modern', colors: ['#6366f1', '#14b8a6'], popular: true },
   { id: 'luxury', name: 'Luxury', colors: ['#b8860b', '#d4af37'] },
   { id: 'minimal', name: 'Minimal', colors: ['#18181b', '#a1a1aa'] },
-  { id: 'dark', name: 'Dark', colors: ['#8b5cf6', '#06b6d4'] },
+  { id: 'dark', name: 'Dark Mode', colors: ['#8b5cf6', '#06b6d4'] },
   { id: 'corporate', name: 'Corporate', colors: ['#2563eb', '#059669'] },
   { id: 'creative', name: 'Creative', colors: ['#ec4899', '#8b5cf6'] },
-  { id: 'elegant', name: 'Elegant', colors: ['#1e293b', '#cbd5e1'] },
-  { id: 'glassmorphism', name: 'Glass', colors: ['#6366f1', '#34d399'] },
-  { id: 'gradient', name: 'Gradient', colors: ['#f43f5e', '#3b82f6'] },
-  { id: 'premium', name: 'Premium', colors: ['#fbbf24', '#f59e0b'] },
 ];
 
 const generationStatuses = [
-  { message: 'Analyzing your business information...', icon: HiOfficeBuilding },
-  { message: 'Generating website structure...', icon: HiCollection },
-  { message: 'Creating compelling content...', icon: HiSparkles },
-  { message: 'Applying design and styling...', icon: HiColorSwatch },
-  { message: 'Optimizing for performance...', icon: HiDesktopComputer },
-  { message: 'Finalizing your website!', icon: HiCheck },
+  { message: 'Analyzing industry requirements...', icon: HiOfficeBuilding },
+  { message: 'Architecting bespoke structure...', icon: HiCollection },
+  { message: 'Generating premium copy...', icon: HiSparkles },
+  { message: 'Applying design tokens...', icon: HiColorSwatch },
+  { message: 'Optimizing components...', icon: HiDesktopComputer },
+  { message: 'Finalizing deployment...', icon: HiCheck },
 ];
 
 const steps = [
-  { id: 1, label: 'Business Info', icon: HiOfficeBuilding },
-  { id: 2, label: 'Choose Theme', icon: HiColorSwatch },
+  { id: 1, label: 'Business Profile', icon: HiOfficeBuilding },
+  { id: 2, label: 'Aesthetics', icon: HiColorSwatch },
   { id: 3, label: 'AI Generation', icon: HiSparkles },
   { id: 4, label: 'Preview', icon: HiEye },
-  { id: 5, label: 'Deploy', icon: HiGlobe },
+  { id: 5, label: 'Launch', icon: HiGlobe },
 ];
-
-const stepVariants = {
-  initial: { opacity: 0, x: 80 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -80 },
-};
 
 export default function GenerateWebsite() {
   const navigate = useNavigate();
   const { generateWebsite } = useWebsites();
   const [currentStep, setCurrentStep] = useState(1);
-  const [form, setForm] = useState({ name: '', category: '', location: '', phone: '', email: '', address: '', socialFacebook: '', socialInstagram: '', socialTwitter: '', socialLinkedin: '', targetAudience: '', description: '' });
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [form, setForm] = useState({ name: '', category: '', location: '', phone: '', email: '', address: '', targetAudience: '', description: '' });
+  const [selectedTemplate, setSelectedTemplate] = useState(templates[0]);
   const [selectedTheme, setSelectedTheme] = useState('modern');
   const [generationProgress, setGenerationProgress] = useState(0);
   const [genStatusIndex, setGenStatusIndex] = useState(0);
@@ -100,12 +90,12 @@ export default function GenerateWebsite() {
       }
     });
     return () => { unsubProgress(); unsubError(); };
-  }, [isGenerating, socketOn, generationStatuses]);
+  }, [isGenerating, socketOn]);
 
   const validateStep1 = () => {
     const errs = {};
     if (!form.name.trim()) errs.name = 'Business name is required';
-    if (!form.category) errs.category = 'Please select a category';
+    if (!form.category) errs.category = 'Industry is required';
     if (!form.description.trim()) errs.description = 'Brief description is required';
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -118,12 +108,6 @@ export default function GenerateWebsite() {
     setGenStatusIndex(0);
 
     try {
-      const socialLinks = [];
-      if (form.socialFacebook) socialLinks.push({ platform: 'facebook', url: form.socialFacebook });
-      if (form.socialInstagram) socialLinks.push({ platform: 'instagram', url: form.socialInstagram });
-      if (form.socialTwitter) socialLinks.push({ platform: 'twitter', url: form.socialTwitter });
-      if (form.socialLinkedin) socialLinks.push({ platform: 'linkedin', url: form.socialLinkedin });
-
       const result = await generateWebsite({
         businessName: form.name,
         category: form.category,
@@ -132,7 +116,6 @@ export default function GenerateWebsite() {
         phone: form.phone,
         email: form.email,
         address: form.address,
-        socialLinks: socialLinks.length > 0 ? socialLinks : undefined,
         targetAudience: form.targetAudience || undefined,
         theme: selectedTheme,
       });
@@ -144,7 +127,7 @@ export default function GenerateWebsite() {
         setTimeout(() => {
           setIsGenerating(false);
           setCurrentStep(4);
-        }, 500);
+        }, 800);
       } else {
         throw new Error('No website returned from generation');
       }
@@ -153,54 +136,42 @@ export default function GenerateWebsite() {
       const errorMsg = err.response?.data?.message || err.message || 'Generation failed. Please try again.';
       setGenerationError(errorMsg);
     }
-  }, [form, selectedTheme, generateWebsite, generationStatuses.length]);
+  }, [form, selectedTheme, generateWebsite]);
 
   const handleDeploy = async () => {
-    try {
-      const websiteId = generatedWebsite?._id || generatedWebsite?.id;
-      if (websiteId) {
-        navigate(`/websites/${websiteId}/preview`);
-      } else {
-        navigate('/websites');
-      }
-    } catch {
-      navigate('/websites');
-    }
+    const websiteId = generatedWebsite?._id || generatedWebsite?.id;
+    navigate(`/websites/${websiteId}`);
   };
 
   const handlePreview = () => {
     const websiteId = generatedWebsite?._id || generatedWebsite?.id;
-    if (websiteId) {
-      navigate(`/websites/${websiteId}/preview`);
-    } else {
-      navigate('/websites');
-    }
+    navigate(`/websites/${websiteId}/preview`);
   };
 
   const renderStepIndicator = () => (
-    <div className="flex items-center justify-center gap-0 mb-12 overflow-x-auto px-2">
+    <div className="flex items-center justify-center gap-0 mb-12 overflow-x-auto px-2 py-4">
       {steps.map((step, i) => {
         const StepIcon = step.icon;
         const isActive = currentStep === step.id;
         const isCompleted = currentStep > step.id;
         return (
           <div key={step.id} className="flex items-center shrink-0">
-            <div
-              className={twMerge(
-                'flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-full text-sm font-medium transition-all',
-                isActive && 'badge-primary',
-                isCompleted && 'badge-success',
-                !isActive && !isCompleted && 'text-[rgb(var(--color-text-muted))]'
-              )}
-            >
-              <StepIcon className="w-4 h-4" />
-              <span className="hidden sm:inline">{step.label}</span>
-            </div>
+             <div
+               className={cn(
+                 'flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-300',
+                 isActive ? 'bg-primary-500 text-white shadow-glow' :
+                 isCompleted ? 'bg-surface-900 text-white dark:bg-white dark:text-surface-900 shadow-sm' :
+                 'text-surface-400 bg-surface-100 dark:bg-surface-900'
+               )}
+             >
+               {isCompleted ? <FiCheck className="w-4 h-4" /> : <StepIcon className="w-4 h-4" />}
+               <span className="hidden sm:inline font-display">{step.label}</span>
+             </div>
             {i < steps.length - 1 && (
               <div
-                className={twMerge(
-                  'w-4 sm:w-8 h-0.5 mx-0.5 sm:mx-1 rounded-full shrink-0',
-                  isCompleted ? 'bg-emerald-400' : 'bg-[rgb(var(--color-border))]'
+                className={cn(
+                  'w-6 sm:w-12 h-1 mx-2 rounded-full shrink-0 transition-all duration-500',
+                  isCompleted ? 'bg-surface-900 dark:bg-white' : 'bg-surface-200 dark:bg-surface-800'
                 )}
               />
             )}
@@ -211,285 +182,262 @@ export default function GenerateWebsite() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in max-w-5xl mx-auto">
       {renderStepIndicator()}
 
       <AnimatePresence mode="wait">
         {currentStep === 1 && (
           <motion.div
             key="step1"
-            variants={stepVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            className="card"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
           >
-            <h2 className="text-2xl font-bold text-[rgb(var(--color-text))] mb-2">Tell us about your business</h2>
-            <p className="text-[rgb(var(--color-text-secondary))] mb-8">
-              We'll use this information to generate the perfect website.
-            </p>
+            <div className="text-center mb-10">
+              <h2 className="text-4xl font-display font-bold text-surface-950 dark:text-white mb-3">Define your business</h2>
+              <p className="text-lg text-surface-500 max-w-xl mx-auto">
+                Provide details to help our AI craft a bespoke website tailored to your exact industry.
+              </p>
+            </div>
+
             <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Business Name</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                  className={twMerge('input-field', errors.name && 'border-red-500 focus:ring-red-500/20')}
-                  placeholder="e.g., The Coffee House"
-                />
-                {errors.name && <p className="mt-1.5 text-sm text-red-500">{errors.name}</p>}
-              </div>
+              <Card className="p-8">
+                <h3 className="text-lg font-display font-semibold text-surface-900 dark:text-white mb-6 flex items-center gap-3">
+                   <div className="w-8 h-8 rounded-lg bg-surface-100 dark:bg-surface-800 flex items-center justify-center text-primary-500">
+                     <HiOfficeBuilding className="w-5 h-5" />
+                   </div>
+                   Core Details
+                </h3>
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Business Name <span className="text-red-500">*</span></label>
+                    <Input
+                      type="text"
+                      value={form.name}
+                      onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                      error={errors.name}
+                      placeholder="e.g. Acme Corp"
+                      className="text-lg py-3"
+                    />
+                    {errors.name && <p className="mt-1.5 text-sm text-red-500">{errors.name}</p>}
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Category</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setForm((p) => ({ ...p, category: cat }))}
-                      className={twMerge(
-                        'px-4 py-3 rounded-xl border text-sm font-medium transition-all',
-                        form.category === cat
-                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-                          : 'border-[rgb(var(--color-border))] text-[rgb(var(--color-text-secondary))] hover:border-[rgb(var(--color-text-muted))]'
-                      )}
-                    >
-                      {cat}
-                    </button>
-                  ))}
+                  <div>
+                    <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-3">Industry <span className="text-red-500">*</span></label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setForm((p) => ({ ...p, category: cat }))}
+                          className={cn(
+                            'px-3 py-3 rounded-xl border text-sm font-medium transition-all duration-200 text-center',
+                            form.category === cat
+                              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 shadow-sm'
+                              : 'border-surface-200 dark:border-surface-800 text-surface-600 dark:text-surface-400 hover:border-primary-200 hover:bg-surface-50 dark:hover:bg-surface-900'
+                          )}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                    {errors.category && <p className="mt-2 text-sm text-red-500">{errors.category}</p>}
+                  </div>
                 </div>
-                {errors.category && <p className="mt-1.5 text-sm text-red-500">{errors.category}</p>}
-              </div>
+              </Card>
 
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Location (optional)</label>
-                <div className="relative">
-                  <HiLocationMarker className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[rgb(var(--color-text-muted))]" />
-                  <input
-                    type="text"
-                    value={form.location}
-                    onChange={(e) => setForm((p) => ({ ...p, location: e.target.value }))}
-                    className="input-field pl-12"
-                    placeholder="New York, NY"
-                  />
-                </div>
-              </div>
+              <Card className="p-8">
+                 <h3 className="text-lg font-display font-semibold text-surface-900 dark:text-white mb-6 flex items-center gap-3">
+                   <div className="w-8 h-8 rounded-lg bg-surface-100 dark:bg-surface-800 flex items-center justify-center text-primary-500">
+                     <HiLocationMarker className="w-5 h-5" />
+                   </div>
+                   Contact Information
+                </h3>
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Location (City, State)</label>
+                      <Input
+                        type="text"
+                        value={form.location}
+                        onChange={(e) => setForm((p) => ({ ...p, location: e.target.value }))}
+                        leftIcon={<HiLocationMarker className="w-5 h-5" />}
+                        placeholder="New York, NY"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Street Address</label>
+                      <Input
+                        type="text"
+                        value={form.address}
+                        onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
+                        leftIcon={<HiMap className="w-5 h-5" />}
+                        placeholder="123 Main St"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Phone</label>
+                      <Input
+                        type="tel"
+                        value={form.phone}
+                        onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                        leftIcon={<HiPhone className="w-5 h-5" />}
+                        placeholder="(555) 123-4567"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Email</label>
+                      <Input
+                        type="email"
+                        value={form.email}
+                        onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                        leftIcon={<HiMail className="w-5 h-5" />}
+                        placeholder="hello@example.com"
+                      />
+                    </div>
+                 </div>
+              </Card>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Phone (optional)</label>
-                  <input
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-                    className="input-field"
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Email (optional)</label>
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                    className="input-field"
-                    placeholder="hello@example.com"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Street Address (optional)</label>
-                <input
-                  type="text"
-                  value={form.address}
-                  onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
-                  className="input-field"
-                  placeholder="123 Main St, New York, NY 10001"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Social Links (optional)</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input
-                    type="url"
-                    value={form.socialFacebook}
-                    onChange={(e) => setForm((p) => ({ ...p, socialFacebook: e.target.value }))}
-                    className="input-field"
-                    placeholder="Facebook URL"
-                  />
-                  <input
-                    type="url"
-                    value={form.socialInstagram}
-                    onChange={(e) => setForm((p) => ({ ...p, socialInstagram: e.target.value }))}
-                    className="input-field"
-                    placeholder="Instagram URL"
-                  />
-                  <input
-                    type="url"
-                    value={form.socialTwitter}
-                    onChange={(e) => setForm((p) => ({ ...p, socialTwitter: e.target.value }))}
-                    className="input-field"
-                    placeholder="Twitter URL"
-                  />
-                  <input
-                    type="url"
-                    value={form.socialLinkedin}
-                    onChange={(e) => setForm((p) => ({ ...p, socialLinkedin: e.target.value }))}
-                    className="input-field"
-                    placeholder="LinkedIn URL"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Target Audience (optional)</label>
-                <input
-                  type="text"
-                  value={form.targetAudience}
-                  onChange={(e) => setForm((p) => ({ ...p, targetAudience: e.target.value }))}
-                  className="input-field"
-                  placeholder="e.g., Small business owners, local homeowners, tech startups"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text))] mb-2">Description</label>
-                <textarea
-                  rows={4}
-                  value={form.description}
-                  onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-                  className={twMerge('input-field resize-none', errors.description && 'border-red-500 focus:ring-red-500/20')}
-                  placeholder="Describe your business, what makes it unique, and what you want visitors to know..."
-                />
-                {errors.description && <p className="mt-1.5 text-sm text-red-500">{errors.description}</p>}
-              </div>
+              <Card className="p-8">
+                 <h3 className="text-lg font-display font-semibold text-surface-900 dark:text-white mb-6 flex items-center gap-3">
+                   <div className="w-8 h-8 rounded-lg bg-surface-100 dark:bg-surface-800 flex items-center justify-center text-primary-500">
+                     <HiUserGroup className="w-5 h-5" />
+                   </div>
+                   Audience & Tone
+                </h3>
+                 <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Target Audience</label>
+                      <Input
+                        type="text"
+                        value={form.targetAudience}
+                        onChange={(e) => setForm((p) => ({ ...p, targetAudience: e.target.value }))}
+                        leftIcon={<HiUserGroup className="w-5 h-5" />}
+                        placeholder="e.g. Local homeowners, tech startups, families"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Business Description <span className="text-red-500">*</span></label>
+                      <textarea
+                        rows={5}
+                        value={form.description}
+                        onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                        className={cn(
+                          'w-full p-4 rounded-xl border bg-surface-50 dark:bg-surface-950 text-surface-900 dark:text-white placeholder:text-surface-400 focus:ring-2 focus:ring-primary-500/30 outline-none transition-all resize-none',
+                          errors.description ? 'border-red-500' : 'border-surface-200 dark:border-surface-800 focus:border-primary-500'
+                        )}
+                        placeholder="Describe your business, services offered, and what makes you unique..."
+                      />
+                      {errors.description && <p className="mt-1.5 text-sm text-red-500">{errors.description}</p>}
+                    </div>
+                 </div>
+              </Card>
             </div>
 
             <div className="flex justify-end mt-8">
               <Button
-              variant="primary"
-              size="lg"
-              onClick={() => { if (validateStep1()) setCurrentStep(2); }}
-            >
-              Choose Theme <FiArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </div>
-        </motion.div>
+                variant="primary"
+                size="lg"
+                className="px-8 shadow-glow"
+                onClick={() => { if (validateStep1()) setCurrentStep(2); }}
+              >
+                Continue to Aesthetics <FiArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </div>
+          </motion.div>
         )}
 
         {currentStep === 2 && (
           <motion.div
             key="step2"
-            variants={stepVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
           >
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-[rgb(var(--color-text))] mb-2">Choose your style</h2>
-              <p className="text-[rgb(var(--color-text-secondary))]">Pick a template design and color theme.</p>
+            <div className="text-center mb-10">
+              <h2 className="text-4xl font-display font-bold text-surface-950 dark:text-white mb-3">Choose Aesthetics</h2>
+              <p className="text-lg text-surface-500 max-w-xl mx-auto">
+                Select a visual foundation. The AI will perfectly adapt it to your industry.
+              </p>
             </div>
 
-            <div className="card mb-6">
-              <h3 className="font-semibold text-[rgb(var(--color-text))] mb-4">Color Theme</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <Card className="p-8 mb-8">
+              <h3 className="text-lg font-display font-semibold text-surface-900 dark:text-white mb-6">Color Palette</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                 {themeOptions.map((theme) => (
                   <button
                     key={theme.id}
                     onClick={() => setSelectedTheme(theme.id)}
-                    className={twMerge(
-                      'relative p-4 rounded-xl border-2 transition-all text-center',
+                    className={cn(
+                      'relative p-4 rounded-2xl border-2 transition-all duration-300 text-center flex flex-col items-center',
                       selectedTheme === theme.id
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-lg shadow-primary-500/10'
-                        : 'border-[rgb(var(--color-border))] hover:border-[rgb(var(--color-text-muted))]'
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10 shadow-lg shadow-primary-500/10 scale-[1.02]'
+                        : 'border-surface-200 dark:border-surface-800 hover:border-primary-300 hover:bg-surface-50 dark:hover:bg-surface-900/50'
                     )}
                   >
-                    <div className="flex items-center justify-center gap-1.5 mb-3">
-                      {theme.colors.slice(0, 3).map((color, ci) => (
+                    <div className="flex -space-x-2 mb-4">
+                      {theme.colors.map((color, ci) => (
                         <div
                           key={ci}
-                          className="w-6 h-6 rounded-full border border-white/20"
+                          className="w-8 h-8 rounded-full border-2 border-white dark:border-surface-900 shadow-sm z-10"
                           style={{ backgroundColor: color }}
                         />
                       ))}
                     </div>
-                    <p className="text-sm font-medium text-[rgb(var(--color-text))]">{theme.name}</p>
-                    {theme.popular && (
-                      <span className="absolute -top-2 -right-2 px-2 py-0.5 text-[10px] font-semibold bg-primary-500 text-white rounded-full">
-                        Popular
-                      </span>
-                    )}
+                    <p className="text-sm font-medium text-surface-900 dark:text-white">{theme.name}</p>
                     {selectedTheme === theme.id && (
-                      <div className="absolute top-2 left-2 w-5 h-5 bg-primary-500 rounded-full flex items-center justify-center">
+                      <div className="absolute -top-3 -right-3 w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center shadow-sm">
                         <HiCheck className="w-3 h-3 text-white" />
                       </div>
                     )}
                   </button>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            <div className="card">
-              <h3 className="font-semibold text-[rgb(var(--color-text))] mb-4">Template</h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {templates.map((template, i) => (
-                  <motion.button
+            <Card className="p-8">
+              <h3 className="text-lg font-display font-semibold text-surface-900 dark:text-white mb-6">Layout Structure</h3>
+              <div className="grid sm:grid-cols-2 gap-6">
+                {templates.map((template) => (
+                  <button
                     key={template.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
                     onClick={() => setSelectedTemplate(template)}
-                    className={twMerge(
-                      'relative text-left rounded-2xl overflow-hidden border-2 transition-all',
-                      selectedTemplate?.id === template.id
-                        ? 'border-primary-500 shadow-lg shadow-primary-500/10'
-                        : 'border-transparent hover:border-[rgb(var(--color-border))]'
+                    className={cn(
+                      'relative text-left rounded-2xl overflow-hidden border-2 transition-all duration-300 group',
+                      selectedTemplate.id === template.id
+                        ? 'border-primary-500 shadow-xl shadow-primary-500/10 scale-[1.01]'
+                        : 'border-surface-200 dark:border-surface-800 hover:border-primary-300'
                     )}
                   >
-                    <div className={`aspect-[3/4] bg-gradient-to-br ${template.color} p-4 flex flex-col justify-between`}>
-                      <div className="flex justify-between items-start">
-                        <div className="w-8 h-2 bg-white/30 rounded-full" />
-                        {template.popular && (
-                          <span className="px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[10px] text-white font-medium">
-                            Popular
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <div className="w-full h-2 bg-white/20 rounded-full mb-2" />
-                        <div className="w-3/4 h-2 bg-white/20 rounded-full mb-4" />
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="aspect-square bg-white/10 rounded-lg" />
-                          <div className="aspect-square bg-white/10 rounded-lg" />
-                        </div>
-                      </div>
-                      {selectedTemplate?.id === template.id && (
-                        <div className="absolute top-2 right-2 w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
-                          <HiCheck className="w-4 h-4 text-white" />
+                    <div className={`h-40 bg-gradient-to-br ${template.color} p-6 flex flex-col relative overflow-hidden`}>
+                       <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                       <div className="w-12 h-3 bg-white/30 rounded-full mb-6" />
+                       <div className="w-3/4 h-6 bg-white/20 rounded-lg mb-3" />
+                       <div className="w-1/2 h-3 bg-white/20 rounded-full" />
+                       {selectedTemplate.id === template.id && (
+                        <div className="absolute top-4 right-4 w-7 h-7 bg-white text-primary-600 rounded-full flex items-center justify-center shadow-lg">
+                          <HiCheck className="w-4 h-4" />
                         </div>
                       )}
                     </div>
-                    <div className="p-3 bg-[rgb(var(--color-bg))]">
-                      <p className="font-medium text-sm text-[rgb(var(--color-text))]">{template.name}</p>
-                      <p className="text-xs text-[rgb(var(--color-text-secondary))]">{template.category}</p>
+                    <div className="p-4 bg-white dark:bg-surface-950">
+                      <p className="font-semibold text-surface-900 dark:text-white">{template.name}</p>
+                      <p className="text-sm text-surface-500">Industry adaptive structure</p>
                     </div>
-                  </motion.button>
+                  </button>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            <div className="flex justify-between mt-8">
-              <Button variant="ghost" onClick={() => setCurrentStep(1)}>
+            <div className="flex justify-between mt-10">
+              <Button variant="outline" size="lg" onClick={() => setCurrentStep(1)}>
                 <HiChevronLeft className="mr-2 w-5 h-5" /> Back
               </Button>
               <Button
                 variant="primary"
                 size="lg"
-                disabled={!selectedTemplate}
+                className="px-8 shadow-glow"
                 onClick={startGeneration}
               >
                 Generate Website <HiSparkles className="ml-2 w-5 h-5" />
@@ -503,27 +451,27 @@ export default function GenerateWebsite() {
             key="step3"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="card text-center py-12"
+            className="card text-center py-20 border-dashed max-w-2xl mx-auto"
           >
-            <div className="relative w-24 h-24 mx-auto mb-8">
-              <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+            <div className="relative w-32 h-32 mx-auto mb-10">
+              <svg className="w-32 h-32 -rotate-90 drop-shadow-xl" viewBox="0 0 100 100">
                 <circle
                   cx="50" cy="50" r="45"
-                  fill="none" stroke="currentColor" strokeWidth="6"
-                  className="text-[rgb(var(--color-border))]"
+                  fill="none" stroke="currentColor" strokeWidth="4"
+                  className="text-surface-100 dark:text-surface-800"
                 />
                 <circle
                   cx="50" cy="50" r="45"
-                  fill="none" stroke="currentColor" strokeWidth="6"
+                  fill="none" stroke="currentColor" strokeWidth="4"
                   strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * 45}`}
                   strokeDashoffset={`${2 * Math.PI * 45 * (1 - generationProgress / 100)}`}
-                  className="text-primary-500 transition-all duration-300"
+                  className="text-primary-500 transition-all duration-500 ease-out"
                 />
               </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl font-bold text-[rgb(var(--color-text))]">
-                  {generationProgress}%
+              <div className="absolute inset-0 flex items-center justify-center flex-col">
+                <span className="text-3xl font-display font-bold text-surface-900 dark:text-white">
+                  {Math.round(generationProgress)}%
                 </span>
               </div>
             </div>
@@ -534,38 +482,35 @@ export default function GenerateWebsite() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="flex items-center justify-center gap-3"
+                className="flex flex-col items-center justify-center gap-3"
               >
                 {(() => {
                   const Icon = generationStatuses[genStatusIndex]?.icon || HiSparkles;
-                  return <Icon className="w-5 h-5 text-primary-500 animate-pulse" />;
+                  return (
+                    <div className="w-12 h-12 bg-primary-50 dark:bg-primary-900/20 rounded-xl flex items-center justify-center shadow-sm">
+                      <Icon className="w-6 h-6 text-primary-500 animate-pulse" />
+                    </div>
+                  );
                 })()}
-                <span className="text-lg text-[rgb(var(--color-text-secondary))]">
+                <span className="text-xl font-medium text-surface-900 dark:text-white">
                   {generationStatuses[genStatusIndex]?.message}
                 </span>
+                <p className="text-sm text-surface-500 max-w-xs">Our AI is analyzing {form.category} trends to create the perfect structure.</p>
               </motion.div>
             </AnimatePresence>
-
-            <div className="mt-8 w-full max-w-md mx-auto bg-[rgb(var(--color-border))] rounded-full h-2 overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-primary-500 to-indigo-600 rounded-full"
-                animate={{ width: `${generationProgress}%` }}
-                transition={{ duration: 0.3 }}
-              />
-            </div>
 
             {generationError && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
+                className="mt-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
               >
-                <p className="text-sm text-red-600 dark:text-red-400">{generationError}</p>
+                <p className="text-sm text-red-600 dark:text-red-400 font-medium">{generationError}</p>
                 <button
                   onClick={() => { setGenerationError(null); setCurrentStep(1); }}
-                  className="mt-3 text-sm font-medium text-red-600 dark:text-red-400 hover:underline"
+                  className="mt-3 text-sm font-semibold text-red-700 dark:text-red-300 hover:underline"
                 >
-                  Go back and try again
+                  Return to setup and try again
                 </button>
               </motion.div>
             )}
@@ -575,53 +520,55 @@ export default function GenerateWebsite() {
         {currentStep === 4 && generatedWebsite && (
           <motion.div
             key="step4"
-            variants={stepVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            className="space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-8"
           >
-            <div className="card overflow-hidden p-0">
-              <div className="p-3 bg-[rgb(var(--color-surface))] flex items-center gap-3 border-b border-[rgb(var(--color-border))]">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                  <div className="w-3 h-3 rounded-full bg-green-500" />
-                </div>
-                <div className="flex-1 max-w-md mx-auto h-7 bg-[rgb(var(--color-bg))] rounded-lg flex items-center justify-center text-xs text-[rgb(var(--color-text-muted))]">
-                  {form.name.toLowerCase().replace(/\s+/g, '-')}.localsite.app
-                </div>
+             <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-medium text-sm mb-4">
+                 <FiCheck className="w-4 h-4" /> Generation Complete
               </div>
-              <div className={`aspect-video bg-gradient-to-br ${selectedTemplate?.color} p-8 flex items-center justify-center`}>
-                <div className="text-center">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs mb-6">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-300 animate-pulse" />
-                    AI Generated
-                  </div>
-                  <h3 className="text-4xl font-bold text-white mb-4">{form.name}</h3>
-                  <p className="text-xl text-white/80 max-w-lg mx-auto">{form.description.slice(0, 100)}</p>
-                  <div className="mt-8 flex justify-center gap-4">
-                    <div className="w-32 h-8 bg-white/20 rounded-lg" />
-                    <div className="w-32 h-8 bg-white/30 rounded-lg" />
-                  </div>
-                </div>
-              </div>
+              <h2 className="text-4xl font-display font-bold text-surface-950 dark:text-white mb-3">Your website is ready</h2>
+              <p className="text-lg text-surface-500 max-w-xl mx-auto">
+                Review your AI-generated {form.category} website.
+              </p>
             </div>
 
-            <div className="flex justify-between">
-              <Button variant="ghost" onClick={() => setCurrentStep(2)}>
-                <HiChevronLeft className="mr-2 w-5 h-5" /> Change Theme
+            <Card className="p-0 overflow-hidden shadow-xl border-surface-200 dark:border-surface-800 max-w-4xl mx-auto">
+              <div className="bg-surface-100 dark:bg-surface-900 p-3 flex items-center justify-between border-b border-surface-200 dark:border-surface-800">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-400" />
+                  <div className="w-3 h-3 rounded-full bg-amber-400" />
+                  <div className="w-3 h-3 rounded-full bg-green-400" />
+                </div>
+                <div className="text-xs font-mono text-surface-500 bg-white dark:bg-surface-950 px-4 py-1.5 rounded-full shadow-sm">
+                  {form.name.toLowerCase().replace(/\s+/g, '-')}.localsite.app
+                </div>
+                <div className="w-16" /> {/* Spacer */}
+              </div>
+              <div className={`aspect-video bg-gradient-to-br ${selectedTemplate.color} flex items-center justify-center p-8 relative overflow-hidden group`}>
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-20">
+                   <Button variant="primary" size="lg" className="shadow-2xl scale-110" onClick={handlePreview}>
+                      <HiEye className="mr-2 w-5 h-5" /> View Interactive Preview
+                   </Button>
+                </div>
+                <div className="text-center text-white relative z-10">
+                  <h3 className="text-5xl font-display font-bold mb-4 drop-shadow-md">{form.name}</h3>
+                  <p className="text-xl text-white/90 max-w-2xl mx-auto drop-shadow-sm leading-relaxed">{form.description.slice(0, 150)}{form.description.length > 150 ? '...' : ''}</p>
+                </div>
+              </div>
+            </Card>
+
+            <div className="flex justify-between items-center max-w-4xl mx-auto mt-8">
+              <Button variant="outline" size="lg" onClick={() => setCurrentStep(2)}>
+                <HiChevronLeft className="mr-2 w-5 h-5" /> Adjust Aesthetics
               </Button>
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={handlePreview}
-                >
-                  <HiEye className="mr-1.5 w-5 h-5" /> Full Preview
+              <div className="flex gap-4">
+                <Button variant="ghost" size="lg" onClick={() => navigate(`/websites/${generatedWebsite._id || generatedWebsite.id}/edit`)}>
+                  Open Editor
                 </Button>
-                <Button variant="primary" size="lg" onClick={() => setCurrentStep(5)}>
-                  Continue <FiArrowRight className="ml-2 w-5 h-5" />
+                <Button variant="primary" size="lg" className="shadow-glow" onClick={() => setCurrentStep(5)}>
+                  Proceed to Launch <FiArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </div>
             </div>
@@ -631,88 +578,87 @@ export default function GenerateWebsite() {
         {currentStep === 5 && (
           <motion.div
             key="step5"
-            variants={stepVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            className="card"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="max-w-2xl mx-auto space-y-8"
           >
-            <h2 className="text-2xl font-bold text-[rgb(var(--color-text))] mb-2">Launch your website</h2>
-            <p className="text-[rgb(var(--color-text-secondary))] mb-8">
-              Choose how you want to deploy your site.
-            </p>
-
-            <div className="space-y-4 mb-8">
-              <label
-                className={twMerge(
-                  'flex items-center gap-4 p-5 rounded-xl border cursor-pointer transition-all',
-                  deployOption === 'subdomain'
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-[rgb(var(--color-border))] hover:border-[rgb(var(--color-text-muted))]'
-                )}
-              >
-                <input
-                  type="radio"
-                  name="deploy"
-                  value="subdomain"
-                  checked={deployOption === 'subdomain'}
-                  onChange={() => setDeployOption('subdomain')}
-                  className="w-4 h-4 text-primary-600"
-                />
-                <div>
-                  <p className="font-medium text-[rgb(var(--color-text))]">Free Subdomain</p>
-                  <p className="text-sm text-[rgb(var(--color-text-secondary))]">
-                    yourbusiness.localsite.app — included free
-                  </p>
-                </div>
-              </label>
-
-              <label
-                className={twMerge(
-                  'flex items-center gap-4 p-5 rounded-xl border cursor-pointer transition-all',
-                  deployOption === 'custom'
-                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                    : 'border-[rgb(var(--color-border))] hover:border-[rgb(var(--color-text-muted))]'
-                )}
-              >
-                <input
-                  type="radio"
-                  name="deploy"
-                  value="custom"
-                  checked={deployOption === 'custom'}
-                  onChange={() => setDeployOption('custom')}
-                  className="w-4 h-4 text-primary-600"
-                />
-                <div className="flex-1">
-                  <p className="font-medium text-[rgb(var(--color-text))]">Custom Domain</p>
-                  <p className="text-sm text-[rgb(var(--color-text-secondary))]">
-                    Use your own domain (requires paid plan)
-                  </p>
-                  {deployOption === 'custom' && (
-                    <input
-                      type="text"
-                      value={customDomain}
-                      onChange={(e) => setCustomDomain(e.target.value)}
-                      className="mt-3 input-field"
-                      placeholder="mybusiness.com"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  )}
-                </div>
-              </label>
-            </div>
-
-            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-8">
-              <p className="text-sm text-amber-700 dark:text-amber-400">
-                <strong>Tip:</strong> You can always connect a custom domain later from the website settings.
+            <div className="text-center mb-8">
+              <h2 className="text-4xl font-display font-bold text-surface-950 dark:text-white mb-3">Launch Configuration</h2>
+              <p className="text-lg text-surface-500">
+                Choose how you want to deploy your {form.name} website to the world.
               </p>
             </div>
 
-            <div className="flex justify-between">
-              <Button variant="ghost" onClick={() => setCurrentStep(4)}>
-                <HiChevronLeft className="mr-2 w-5 h-5" /> Back to Preview
+            <Card className="p-8">
+               <div className="space-y-4">
+                <label
+                  className={cn(
+                    'flex items-center gap-5 p-5 rounded-2xl border-2 cursor-pointer transition-all',
+                    deployOption === 'subdomain'
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10'
+                      : 'border-surface-200 dark:border-surface-800 hover:border-primary-200'
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="deploy"
+                    value="subdomain"
+                    checked={deployOption === 'subdomain'}
+                    onChange={() => setDeployOption('subdomain')}
+                    className="w-5 h-5 text-primary-600 focus:ring-primary-500"
+                  />
+                  <div>
+                    <p className="font-semibold text-surface-900 dark:text-white text-lg">Free Subdomain</p>
+                    <p className="text-sm text-surface-500 mt-1">
+                      {form.name.toLowerCase().replace(/\s+/g, '-')}.localsite.app
+                    </p>
+                  </div>
+                  <span className="ml-auto bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-400 text-xs font-bold px-3 py-1 rounded-full">INCLUDED</span>
+                </label>
+
+                <label
+                  className={cn(
+                    'flex items-center gap-5 p-5 rounded-2xl border-2 cursor-pointer transition-all',
+                    deployOption === 'custom'
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10'
+                      : 'border-surface-200 dark:border-surface-800 hover:border-primary-200'
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="deploy"
+                    value="custom"
+                    checked={deployOption === 'custom'}
+                    onChange={() => setDeployOption('custom')}
+                    className="w-5 h-5 text-primary-600 focus:ring-primary-500"
+                  />
+                  <div className="flex-1">
+                    <p className="font-semibold text-surface-900 dark:text-white text-lg">Custom Domain</p>
+                    <p className="text-sm text-surface-500 mt-1">
+                      Connect your own domain (e.g. {form.name.toLowerCase().replace(/\s+/g, '')}.com)
+                    </p>
+                    {deployOption === 'custom' && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-4">
+                        <Input
+                          type="text"
+                          value={customDomain}
+                          onChange={(e) => setCustomDomain(e.target.value)}
+                          placeholder="www.yourdomain.com"
+                          onClick={(e) => e.stopPropagation()}
+                          className="bg-white dark:bg-surface-950"
+                        />
+                      </motion.div>
+                    )}
+                  </div>
+                </label>
+              </div>
+            </Card>
+
+            <div className="flex justify-between items-center mt-10">
+              <Button variant="ghost" size="lg" onClick={() => setCurrentStep(4)}>
+                <HiChevronLeft className="mr-2 w-5 h-5" /> Back
               </Button>
-              <Button variant="primary" size="lg" onClick={handleDeploy}>
+              <Button variant="primary" size="lg" className="px-10 shadow-glow text-lg" onClick={handleDeploy}>
                 <HiGlobe className="mr-2 w-5 h-5" /> Deploy Website
               </Button>
             </div>

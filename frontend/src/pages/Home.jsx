@@ -1,17 +1,17 @@
 import { useState, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
-import { twMerge } from 'tailwind-merge';
+import { useNavigate } from 'react-router-dom';
 import {
   HiSparkles, HiTemplate, HiSearch, HiGlobe, HiChartBar, HiShieldCheck,
   HiChevronDown, HiStar, HiLightningBolt,
 } from 'react-icons/hi';
-import { FiArrowRight, FiPlay, FiLayers, FiUsers } from 'react-icons/fi';
-import Button from '../components/common/Button';
+import { FiArrowRight, FiPlay, FiLayers, FiUsers, FiCheck } from 'react-icons/fi';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
 
 const features = [
   { icon: HiSparkles, title: 'AI-Powered Generation', description: 'Describe your business and watch as AI creates a complete, professional website tailored to your brand in seconds.' },
-  { icon: HiTemplate, title: '500+ Templates', description: 'Choose from hundreds of stunning, professionally designed templates across every industry.' },
+  { icon: HiTemplate, title: 'Bespoke Templates', description: 'Choose from hundreds of stunning, professionally designed industry-specific templates.' },
   { icon: HiSearch, title: 'SEO Optimized', description: 'Built-in SEO tools ensure your website ranks high on Google and other search engines from day one.' },
   { icon: HiGlobe, title: 'Custom Domain', description: 'Connect your own domain or get a free subdomain. Launch in minutes with one click.' },
   { icon: HiChartBar, title: 'Analytics Dashboard', description: 'Track visitors, leads, and conversions with powerful built-in analytics and insights.' },
@@ -19,40 +19,16 @@ const features = [
 ];
 
 const steps = [
-  { step: '01', title: 'Describe Your Business', description: 'Tell us about your business — name, category, style preferences, and what makes you unique.' },
-  { step: '02', title: 'AI Generates Website', description: 'Our advanced AI analyzes your input and creates a complete, stunning website in under 30 seconds.' },
-  { step: '03', title: 'Customize & Refine', description: 'Tweak colors, fonts, content, and layout with our intuitive drag-and-drop editor. No coding needed.' },
-  { step: '04', title: 'Launch & Grow', description: 'Publish to the web with a custom domain, track performance, and start growing your business.' },
-];
-
-const templates = [
-  { name: 'Restaurant Pro', category: 'Restaurant', color: 'from-rose-500 to-pink-600' },
-  { name: 'Portfolio Plus', category: 'Portfolio', color: 'from-violet-500 to-purple-600' },
-  { name: 'Storefront', category: 'E-Commerce', color: 'from-emerald-500 to-teal-600' },
-  { name: 'SaaS Landing', category: 'Tech', color: 'from-blue-500 to-indigo-600' },
-  { name: 'Local Business', category: 'Services', color: 'from-amber-500 to-orange-600' },
-  { name: 'Creative Agency', category: 'Agency', color: 'from-cyan-500 to-sky-600' },
+  { step: '01', title: 'Contextualize', description: 'Input your business details. Our models learn your brand voice.' },
+  { step: '02', title: 'Generate', description: 'AI constructs the perfect layout and copy in under 30 seconds.' },
+  { step: '03', title: 'Refine', description: 'Tweak styling seamlessly with our visual block editor.' },
+  { step: '04', title: 'Deploy', description: 'Publish instantly to our global edge network.' },
 ];
 
 const faqs = [
-  { q: 'How does the AI website generation work?', a: 'Simply enter your business details, and our AI creates a complete website with relevant content, images, and design in under 30 seconds.' },
-  { q: 'Can I customize the generated website?', a: 'Absolutely! You have full control over every aspect. Change colors, fonts, layouts, content, and images with our intuitive editor.' },
-  { q: 'Do I need technical skills?', a: 'Not at all. Our platform is designed for everyone. The AI handles the heavy lifting, and the editor is intuitive and user-friendly.' },
-  { q: 'Can I use my own domain?', a: 'Yes! You can connect any custom domain you own, or purchase one through us. All paid plans include custom domain support.' },
-  { q: 'What kind of support do you offer?', a: 'Free users get community support. Starter plans include email support, and Professional plans include priority support.' },
-];
-
-const testimonials = [
-  { name: 'Sarah Johnson', role: 'Restaurant Owner', content: 'LocalSite AI created a beautiful website for my restaurant in minutes. The AI understood exactly what I needed.', rating: 5 },
-  { name: 'Mike Chen', role: 'Freelance Designer', content: 'The portfolio templates are stunning. I had my site live with a custom domain in under an hour.', rating: 5 },
-  { name: 'Emily Davis', role: 'Real Estate Agent', content: 'The lead capture features are incredible. I\'m getting more inquiries than ever before.', rating: 5 },
-];
-
-const stats = [
-  { value: '50K+', label: 'Websites Generated' },
-  { value: '15K+', label: 'Active Users' },
-  { value: '500+', label: 'Templates' },
-  { value: '99.9%', label: 'Uptime' },
+  { q: 'How does the AI generation work?', a: 'We use advanced LLMs (Llama 3) to understand your business context and generate optimized layout structures, compelling copy, and brand-aligned styling automatically.' },
+  { q: 'Can I export the code?', a: 'Yes. You own your website. Enterprise users can export the full React/Next.js source code.' },
+  { q: 'Do you provide hosting?', a: 'All generated sites are hosted on our global edge network for blazing fast performance.' },
 ];
 
 const containerVariants = {
@@ -70,190 +46,126 @@ export default function Home() {
   const navigate = useNavigate();
   const { scrollYProgress } = useScroll();
   const heroRef = useRef(null);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 0.98]);
+  
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
+  const heroY = useTransform(scrollYProgress, [0, 0.2], [0, 50]);
 
   return (
-    <div className="min-h-screen">
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-surface-50 to-white dark:from-surface-950 dark:to-surface-900">
-        <motion.div style={{ opacity: heroOpacity, scale: heroScale }} className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 via-transparent to-secondary-500/10 dark:from-primary-900/20 dark:via-transparent dark:to-secondary-900/20" />
-          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary-500/10 rounded-full blur-[120px] animate-pulse-slow" />
-          <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-secondary-500/10 rounded-full blur-[120px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
-          <div className="absolute bottom-1/4 left-1/3 w-[300px] h-[300px] bg-accent-500/10 rounded-full blur-[100px] animate-pulse-slow" style={{ animationDelay: '4s' }} />
-          <div className="absolute inset-0 bg-grid opacity-[0.03]" />
+    <div className="min-h-screen bg-surface-950">
+      
+      {/* Premium Hero Section - Linear/Vercel Aesthetic */}
+      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+        <motion.div style={{ opacity: heroOpacity, scale: heroScale, y: heroY }} className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 bg-grid-dark opacity-40 mask-fade-bottom" />
+          {/* Glowing orbs */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-600/20 rounded-full blur-[128px] animate-pulse-slow" />
+          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-[128px] animate-pulse-slow" style={{ animationDelay: '2s' }} />
         </motion.div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -60 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-            >
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 dark:bg-primary-900/30 rounded-full text-sm font-medium text-primary-700 dark:text-primary-300 mb-8 border border-primary-200/50 dark:border-primary-800/50"
-              >
-                <HiSparkles className="w-4 h-4" />
-                AI-Powered Website Builder
-              </motion.div>
-
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold text-[rgb(var(--color-text))] leading-[0.95] mb-6 text-balance">
-                Turn Your Business
-                <br />
-                <span className="gradient-text">Into a Website</span>
-                <br />
-                With AI
-              </h1>
-
-              <p className="text-lg sm:text-xl text-[rgb(var(--color-text-secondary))] mb-10 max-w-xl leading-relaxed">
-                Describe your business once. Our AI creates a stunning, professional website instantly. No coding, no designers, no hassle.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    variant="primary"
-                    size="xl"
-                    className="group shadow-lg shadow-primary-500/25"
-                    onClick={() => navigate('/signup')}
-                  >
-                    Get Started Free
-                    <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    variant="outline"
-                    size="xl"
-                    className="group"
-                    onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                  >
-                    <FiPlay className="w-5 h-5" />
-                    See How It Works
-                  </Button>
-                </motion.div>
-              </div>
-
-              <div className="flex items-center gap-8 mt-12 pt-8 border-t border-[rgb(var(--color-border))]">
-                <div className="flex -space-x-2">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 border-2 border-white dark:border-surface-900 flex items-center justify-center text-white text-xs font-bold ring-2 ring-primary-500/20">
-                      {String.fromCharCode(65 + i)}
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <div className="flex items-center gap-0.5 mb-1">
-                    {[...Array(5)].map((_, i) => (
-                      <HiStar key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-[rgb(var(--color-text-muted))]">Trusted by 15,000+ businesses</p>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 60 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="relative"
-            >
-              <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl shadow-primary-500/20 border border-[rgb(var(--color-border))]">
-                <div className="absolute inset-0 bg-gradient-to-br from-surface-900 to-surface-950">
-                  <div className="absolute top-0 left-0 right-0 h-12 bg-surface-800 flex items-center px-4 gap-2 border-b border-surface-700">
-                    <div className="flex gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-red-500" />
-                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                      <div className="w-3 h-3 rounded-full bg-green-500" />
-                    </div>
-                    <div className="ml-4 flex-1 max-w-md h-6 bg-surface-700 rounded-lg flex items-center px-3">
-                      <span className="text-xs text-surface-400">mybusiness.com</span>
-                    </div>
-                  </div>
-                  <div className="pt-16 px-8 pb-8">
-                    <div className="w-24 h-2.5 bg-primary-500 rounded-full mb-6" />
-                    <div className="w-3/4 h-3.5 bg-surface-700 rounded-lg mb-3" />
-                    <div className="w-1/2 h-3.5 bg-surface-700 rounded-lg mb-6" />
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="aspect-square bg-surface-700 rounded-2xl" />
-                      ))}
-                    </div>
-                    <div className="w-full h-2 bg-surface-700 rounded-full mb-2" />
-                    <div className="w-5/6 h-2 bg-surface-700 rounded-full mb-2" />
-                    <div className="w-2/3 h-2 bg-surface-700 rounded-full" />
-                  </div>
-                  <motion.div
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="absolute bottom-4 right-4 px-4 py-2 bg-primary-500/20 backdrop-blur-sm border border-primary-500/30 rounded-xl"
-                  >
-                    <span className="text-xs text-primary-300">✨ AI Generating...</span>
-                  </motion.div>
-                </div>
-              </div>
-              <motion.div
-                animate={{ y: [0, -12, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -bottom-4 -right-4 w-24 h-24 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-xl shadow-primary-500/25"
-              >
-                <HiSparkles className="w-10 h-10 text-white" />
-              </motion.div>
-            </motion.div>
-          </div>
-        </div>
-
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        >
-          <HiChevronDown className="w-6 h-6 text-[rgb(var(--color-text-muted))]" />
-        </motion.div>
-      </section>
-
-      <section className="py-16 bg-[rgb(var(--color-surface))] border-y border-[rgb(var(--color-border))]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
           <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={containerVariants}
-            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            className="flex flex-col items-center"
           >
-            {stats.map((stat) => (
-              <motion.div key={stat.label} variants={itemVariants} className="text-center">
-                <div className="text-4xl font-black gradient-text mb-2">{stat.value}</div>
-                <div className="text-sm text-[rgb(var(--color-text-muted))] font-medium">{stat.label}</div>
-              </motion.div>
-            ))}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="badge-primary mb-8 border-primary-500/30 shadow-glow"
+            >
+              <HiSparkles className="w-3.5 h-3.5 mr-1.5" />
+              LocalSite AI 2.0 is now live
+            </motion.div>
+
+            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-display font-bold tracking-tight text-white leading-[1.05] mb-8 text-balance">
+              Design the future <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 via-indigo-400 to-purple-400">
+                with AI-driven precision.
+              </span>
+            </h1>
+
+            <p className="text-lg sm:text-xl text-surface-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+              Describe your vision and deploy a stunning, production-ready website in seconds. Built for speed, optimized for growth.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button
+                variant="primary"
+                size="xl"
+                className="group w-full sm:w-auto"
+                onClick={() => navigate('/signup')}
+              >
+                Start building free
+                <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button
+                variant="outline"
+                size="xl"
+                className="w-full sm:w-auto bg-surface-900/50 backdrop-blur border-surface-800 text-white hover:bg-surface-800"
+                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                <FiPlay className="w-5 h-5 mr-2" />
+                Watch Demo
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* Hero Dashboard Preview */}
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-20 relative max-w-4xl mx-auto"
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-primary-500/10 to-transparent blur-2xl -z-10" />
+            <div className="rounded-t-2xl border border-surface-800 border-b-0 bg-surface-900/80 backdrop-blur-xl shadow-glass overflow-hidden">
+              <div className="h-12 border-b border-surface-800 flex items-center px-4 gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-surface-700" />
+                  <div className="w-3 h-3 rounded-full bg-surface-700" />
+                  <div className="w-3 h-3 rounded-full bg-surface-700" />
+                </div>
+                <div className="mx-auto h-6 w-64 bg-surface-800/50 rounded flex items-center justify-center border border-surface-700/50">
+                  <span className="text-[10px] text-surface-500 font-mono">editor.localsite.ai</span>
+                </div>
+              </div>
+              <div className="h-[400px] bg-surface-950 p-6 flex gap-6 relative">
+                 {/* Fake Editor UI */}
+                 <div className="w-64 border-r border-surface-800 pr-6 flex flex-col gap-4 hidden sm:flex">
+                    <div className="h-8 bg-surface-900 rounded border border-surface-800" />
+                    <div className="h-24 bg-surface-900 rounded border border-surface-800" />
+                    <div className="h-32 bg-primary-900/20 border border-primary-500/30 rounded flex items-center justify-center flex-col">
+                       <HiSparkles className="text-primary-400 mb-2" />
+                       <span className="text-xs text-primary-300">Generating sections...</span>
+                    </div>
+                 </div>
+                 <div className="flex-1 bg-surface-900 rounded-xl border border-surface-800 overflow-hidden relative">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-indigo-500" />
+                 </div>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
 
-      <section id="features" className="py-24 lg:py-32 relative">
+      {/* Features Section */}
+      <section id="features" className="py-32 relative bg-surface-950 border-t border-surface-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={containerVariants}
-            className="text-center mb-16"
+            className="text-center mb-20"
           >
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 dark:bg-primary-900/30 rounded-full text-sm font-medium text-primary-700 dark:text-primary-300 mb-6 border border-primary-200/50 dark:border-primary-800/50">
-              <HiLightningBolt className="w-4 h-4" />
-              Powerful Features
-            </motion.div>
-            <motion.h2 variants={itemVariants} className="section-heading mb-4">
-              Everything You Need
+            <motion.h2 variants={itemVariants} className="section-heading mb-6">
+              A complete toolkit.
             </motion.h2>
             <motion.p variants={itemVariants} className="section-subheading mx-auto">
-              Powerful features to help you create, manage, and grow your online presence.
+              Everything you need to launch and scale your online business.
             </motion.p>
           </motion.div>
 
@@ -267,21 +179,14 @@ export default function Home() {
             {features.map((feature, i) => {
               const Icon = feature.icon;
               return (
-                <motion.div
-                  key={feature.title}
-                  variants={itemVariants}
-                  custom={i}
-                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                  className="group relative card-hover overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary-500/0 via-transparent to-primary-500/0 group-hover:from-primary-500/5 group-hover:to-primary-500/5 transition-all duration-500" />
-                  <div className="relative z-10">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-primary-500/20">
-                      <Icon className="w-6 h-6 text-white" />
+                <motion.div key={feature.title} variants={itemVariants}>
+                  <Card variant="flat" hover className="h-full bg-surface-900/50 border-surface-800">
+                    <div className="w-12 h-12 bg-surface-800 rounded-xl flex items-center justify-center mb-6 border border-surface-700 shadow-sm">
+                      <Icon className="w-6 h-6 text-primary-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-[rgb(var(--color-text))] mb-3">{feature.title}</h3>
-                    <p className="text-sm text-[rgb(var(--color-text-secondary))] leading-relaxed">{feature.description}</p>
-                  </div>
+                    <h3 className="text-lg font-semibold text-white mb-3">{feature.title}</h3>
+                    <p className="text-sm text-surface-400 leading-relaxed">{feature.description}</p>
+                  </Card>
                 </motion.div>
               );
             })}
@@ -289,244 +194,9 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-24 lg:py-32 bg-[rgb(var(--color-surface))] relative overflow-hidden">
-        <div className="absolute inset-0 bg-dot opacity-50" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={containerVariants}
-            className="text-center mb-16"
-          >
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 bg-secondary-50 dark:bg-secondary-900/30 rounded-full text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-6 border border-secondary-200/50 dark:border-secondary-800/50">
-              <FiLayers className="w-4 h-4" />
-              Simple Process
-            </motion.div>
-            <motion.h2 variants={itemVariants} className="section-heading mb-4">
-              How It Works
-            </motion.h2>
-            <motion.p variants={itemVariants} className="section-subheading mx-auto">
-              Four simple steps to your professional website.
-            </motion.p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            {steps.map((step, i) => (
-              <motion.div
-                key={step.title}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="relative text-center md:text-left"
-              >
-                <div className="text-7xl font-black bg-gradient-to-b from-primary-100 to-primary-50 dark:from-primary-900 dark:to-primary-800 bg-clip-text text-transparent mb-4 leading-none">
-                  {step.step}
-                </div>
-                <h3 className="text-xl font-bold text-[rgb(var(--color-text))] mb-3">{step.title}</h3>
-                <p className="text-sm text-[rgb(var(--color-text-secondary))] leading-relaxed">{step.description}</p>
-                {i < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-8 -right-4 w-8 h-0.5 bg-gradient-to-r from-primary-400 to-transparent" />
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 lg:py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={containerVariants}
-            className="text-center mb-16"
-          >
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 bg-accent-50 dark:bg-accent-900/30 rounded-full text-sm font-medium text-accent-700 dark:text-accent-300 mb-6 border border-accent-200/50 dark:border-accent-800/50">
-              <HiTemplate className="w-4 h-4" />
-              Stunning Templates
-            </motion.div>
-            <motion.h2 variants={itemVariants} className="section-heading mb-4">
-              500+ Templates
-            </motion.h2>
-            <motion.p variants={itemVariants} className="section-subheading mx-auto">
-              Choose from hundreds of professionally designed templates across every industry.
-            </motion.p>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={containerVariants}
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {templates.map((template, i) => (
-              <motion.div
-                key={template.name}
-                variants={itemVariants}
-                custom={i}
-                whileHover={{ y: -6, scale: 1.01 }}
-                className="group cursor-pointer"
-              >
-                <div className={`aspect-[4/3] bg-gradient-to-br ${template.color} rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden shadow-lg`}>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
-                  <div className="relative z-10">
-                    <div className="w-12 h-2 bg-white/30 rounded-full mb-2" />
-                    <div className="w-24 h-1.5 bg-white/20 rounded-full" />
-                  </div>
-                  <div className="relative z-10">
-                    <div className="w-full h-2 bg-white/20 rounded-full mb-2" />
-                    <div className="w-3/4 h-2 bg-white/20 rounded-full mb-4" />
-                    <div className="grid grid-cols-3 gap-2">
-                      {[...Array(3)].map((_, j) => (
-                        <div key={j} className="aspect-square bg-white/10 rounded-xl" />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="absolute bottom-4 right-4 bg-white/20 backdrop-blur-md rounded-lg px-3 py-1">
-                    <span className="text-xs text-white font-medium">{template.category}</span>
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold text-[rgb(var(--color-text))] mt-4">{template.name}</h3>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mt-12"
-          >
-            <Button variant="outline" size="lg" className="rounded-2xl" onClick={() => navigate('/signup')}>
-              <HiTemplate className="w-5 h-5" />
-              View All Templates
-            </Button>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="py-24 lg:py-32 bg-[rgb(var(--color-surface))]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={containerVariants}
-            className="text-center mb-16"
-          >
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 dark:bg-primary-900/30 rounded-full text-sm font-medium text-primary-700 dark:text-primary-300 mb-6 border border-primary-200/50 dark:border-primary-800/50">
-              <FiUsers className="w-4 h-4" />
-              Testimonials
-            </motion.div>
-            <motion.h2 variants={itemVariants} className="section-heading mb-4">
-              Loved by Thousands
-            </motion.h2>
-            <motion.p variants={itemVariants} className="section-subheading mx-auto">
-              See what our users are saying about LocalSite AI.
-            </motion.p>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={containerVariants}
-            className="grid md:grid-cols-3 gap-6"
-          >
-            {testimonials.map((t, i) => (
-              <motion.div key={t.name} variants={itemVariants} custom={i} className="card">
-                <div className="flex items-center gap-1 mb-4">
-                  {[...Array(t.rating)].map((_, j) => (
-                    <HiStar key={j} className="w-4 h-4 text-yellow-400 fill-current" />
-                  ))}
-                </div>
-                <p className="text-sm text-[rgb(var(--color-text-secondary))] mb-6 leading-relaxed">"{t.content}"</p>
-                <div className="flex items-center gap-3 pt-4 border-t border-[rgb(var(--color-border))]">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-bold">
-                    {t.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[rgb(var(--color-text))]">{t.name}</p>
-                    <p className="text-xs text-[rgb(var(--color-text-muted))]">{t.role}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="py-24 lg:py-32">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={containerVariants}
-            className="text-center mb-16"
-          >
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 dark:bg-primary-900/30 rounded-full text-sm font-medium text-primary-700 dark:text-primary-300 mb-6 border border-primary-200/50 dark:border-primary-800/50">
-              <HiSparkles className="w-4 h-4" />
-              FAQ
-            </motion.div>
-            <motion.h2 variants={itemVariants} className="section-heading mb-4">
-              Frequently Asked Questions
-            </motion.h2>
-            <motion.p variants={itemVariants} className="section-subheading mx-auto">
-              Got questions? We've got answers.
-            </motion.p>
-          </motion.div>
-
-          <div className="space-y-3">
-            {faqs.map((faq, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className="bg-[rgb(var(--color-surface))] rounded-2xl overflow-hidden border border-[rgb(var(--color-border))]"
-              >
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between p-5 text-left"
-                  aria-expanded={openFaq === i}
-                >
-                  <span className="text-base font-semibold text-[rgb(var(--color-text))] pr-4">{faq.q}</span>
-                  <motion.div
-                    animate={{ rotate: openFaq === i ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <HiChevronDown className="w-5 h-5 text-[rgb(var(--color-text-muted))] shrink-0" />
-                  </motion.div>
-                </button>
-                <AnimatePresence>
-                  {openFaq === i && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
-                    >
-                      <p className="px-5 pb-5 text-sm text-[rgb(var(--color-text-secondary))] leading-relaxed">{faq.a}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 lg:py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-600 via-primary-700 to-primary-800" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
-        <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+      {/* CTA Section */}
+      <section className="py-32 relative overflow-hidden bg-surface-900 border-t border-surface-800">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary-900/20 via-transparent to-transparent" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial="hidden"
@@ -534,21 +204,20 @@ export default function Home() {
             viewport={{ once: true }}
             variants={containerVariants}
           >
-            <motion.h2 variants={itemVariants} className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 text-balance">
-              Ready to Transform Your Online Presence?
+            <motion.h2 variants={itemVariants} className="text-4xl sm:text-5xl font-display font-bold text-white mb-6">
+              Build your site today.
             </motion.h2>
-            <motion.p variants={itemVariants} className="text-lg sm:text-xl text-primary-100 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Join 15,000+ businesses already using LocalSite AI. Create your website in minutes, not weeks. Start free, no credit card required.
+            <motion.p variants={itemVariants} className="text-lg text-surface-400 mb-10 max-w-2xl mx-auto">
+              Join leading businesses utilizing AI to stay ahead of the curve.
             </motion.p>
-            <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div variants={itemVariants} className="flex justify-center">
               <Button
-                variant="secondary"
+                variant="primary"
                 size="xl"
-                className="bg-white text-primary-700 hover:bg-primary-50 shadow-xl shadow-black/20"
                 onClick={() => navigate('/signup')}
               >
-                Get Started Free
-                <FiArrowRight className="w-5 h-5" />
+                Get Started
+                <FiArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </motion.div>
           </motion.div>

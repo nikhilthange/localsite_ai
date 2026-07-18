@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { twMerge } from 'tailwind-merge';
-import { HiUser, HiMail, HiLockClosed, HiKey, HiBell, HiCreditCard, HiGlobe, HiColorSwatch, HiEye, HiEyeOff } from 'react-icons/hi';
-import Button from '@/components/common/Button';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../../utils/cn';
+import { HiUser, HiLockClosed, HiBell, HiColorSwatch, HiEye, HiEyeOff } from 'react-icons/hi';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import toast from 'react-hot-toast';
 import api from '@/lib/axios';
 
 const tabs = [
-  { id: 'profile', label: 'Profile', icon: HiUser },
-  { id: 'security', label: 'Security', icon: HiLockClosed },
-  { id: 'notifications', label: 'Notifications', icon: HiBell },
-  { id: 'billing', label: 'Billing', icon: HiCreditCard },
-  { id: 'appearance', label: 'Appearance', icon: HiColorSwatch },
+  { id: 'profile', label: 'Profile', icon: HiUser, desc: 'Manage your personal details' },
+  { id: 'security', label: 'Security', icon: HiLockClosed, desc: 'Update your password and security' },
+  { id: 'notifications', label: 'Notifications', icon: HiBell, desc: 'Control your email alerts' },
+  { id: 'appearance', label: 'Appearance', icon: HiColorSwatch, desc: 'Customize your dashboard' },
 ];
 
 export default function Settings() {
@@ -36,6 +37,7 @@ export default function Settings() {
     setSaving(true);
     try {
       await updateProfile(profileForm);
+      toast.success('Profile updated successfully');
     } catch {
       toast.error('Failed to update profile');
     } finally {
@@ -52,7 +54,7 @@ export default function Settings() {
     setSaving(true);
     try {
       await api.put('/user/password', passwordForm);
-      toast.success('Password updated');
+      toast.success('Password updated successfully');
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch {
       toast.error('Failed to update password');
@@ -61,217 +63,190 @@ export default function Settings() {
     }
   };
 
-  const tabsList = (
-    <div className="flex overflow-x-auto gap-1 p-1 bg-[rgb(var(--color-surface))] rounded-xl">
-      {tabs.map((tab) => {
-        const Icon = tab.icon;
-        return (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={twMerge('flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all',
-              activeTab === tab.id ? 'bg-white dark:bg-surface-800 shadow-sm text-[rgb(var(--color-text))]' : 'text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text-secondary))]')}>
-            <Icon className="w-4 h-4" /> {tab.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-[rgb(var(--color-text))]">Settings</h1>
-        <p className="text-sm text-[rgb(var(--color-text-muted))]">Manage your account, security, and preferences</p>
+    <div className="max-w-6xl mx-auto space-y-8 animate-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-display font-bold text-surface-950 dark:text-white">Settings</h1>
+          <p className="text-surface-500 mt-1">Manage your account preferences and security</p>
+        </div>
       </div>
 
-      {tabsList}
-
-      {activeTab === 'profile' && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <form onSubmit={handleProfileUpdate} className="card space-y-6">
-            <div className="flex items-center gap-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-2xl flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-primary-500/25">
-                {profileForm.name?.charAt(0)?.toUpperCase() || 'U'}
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-[rgb(var(--color-text))]">{profileForm.name || 'User'}</h2>
-                <p className="text-[rgb(var(--color-text-muted))]">{profileForm.email}</p>
-              </div>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text-secondary))] mb-2">Full Name</label>
-                <input type="text" value={profileForm.name} onChange={(e) => setProfileForm((p) => ({ ...p, name: e.target.value }))}
-                  className="input-field" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text-secondary))] mb-2">Email</label>
-                <input type="email" value={profileForm.email} onChange={(e) => setProfileForm((p) => ({ ...p, email: e.target.value }))}
-                  className="input-field bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text-muted))] cursor-not-allowed" disabled />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text-secondary))] mb-2">Phone</label>
-                <input type="tel" value={profileForm.phone} onChange={(e) => setProfileForm((p) => ({ ...p, phone: e.target.value }))}
-                  className="input-field" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text-secondary))] mb-2">Company</label>
-                <input type="text" value={profileForm.company} onChange={(e) => setProfileForm((p) => ({ ...p, company: e.target.value }))}
-                  className="input-field" />
-              </div>
-            </div>
-            <div>
-              <Button type="submit" variant="primary" loading={saving}>Save Changes</Button>
-            </div>
-          </form>
-        </motion.div>
-      )}
-
-      {activeTab === 'security' && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <form onSubmit={handlePasswordChange} className="card space-y-6">
-            <h2 className="text-xl font-bold text-[rgb(var(--color-text))]">Change Password</h2>
-            <div className="space-y-4 max-w-md">
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text-secondary))] mb-2">Current Password</label>
-                <div className="relative">
-                  <HiLockClosed className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[rgb(var(--color-text-muted))]" />
-                  <input type={showPasswords.current ? 'text' : 'password'} value={passwordForm.currentPassword}
-                    onChange={(e) => setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))}
-                    className="input-field pl-11 pr-12" />
-                  <button type="button" onClick={() => setShowPasswords((p) => ({ ...p, current: !p.current }))} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))]">
-                    {showPasswords.current ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text-secondary))] mb-2">New Password</label>
-                <div className="relative">
-                  <HiKey className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[rgb(var(--color-text-muted))]" />
-                  <input type={showPasswords.new ? 'text' : 'password'} value={passwordForm.newPassword}
-                    onChange={(e) => setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))}
-                    className="input-field pl-11 pr-12" />
-                  <button type="button" onClick={() => setShowPasswords((p) => ({ ...p, new: !p.new }))} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))]">
-                    {showPasswords.new ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[rgb(var(--color-text-secondary))] mb-2">Confirm New Password</label>
-                <div className="relative">
-                  <HiKey className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[rgb(var(--color-text-muted))]" />
-                  <input type={showPasswords.confirm ? 'text' : 'password'} value={passwordForm.confirmPassword}
-                    onChange={(e) => setPasswordForm((p) => ({ ...p, confirmPassword: e.target.value }))}
-                    className="input-field pl-11 pr-12" />
-                  <button type="button" onClick={() => setShowPasswords((p) => ({ ...p, confirm: !p.confirm }))} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[rgb(var(--color-text-muted))] hover:text-[rgb(var(--color-text))]">
-                    {showPasswords.confirm ? <HiEyeOff className="w-5 h-5" /> : <HiEye className="w-5 h-5" />}
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div>
-              <Button type="submit" variant="primary" loading={saving}>Update Password</Button>
-            </div>
-          </form>
-        </motion.div>
-      )}
-
-      {activeTab === 'notifications' && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card">
-          <h2 className="text-xl font-bold text-[rgb(var(--color-text))] mb-6">Notification Preferences</h2>
-          <div className="space-y-4">
-            {[
-              { key: 'email', label: 'Email notifications', desc: 'Receive emails about account activity' },
-              { key: 'website', label: 'Website updates', desc: 'Get notified when websites are published or updated' },
-              { key: 'leads', label: 'New leads', desc: 'Alert when someone submits a contact form' },
-              { key: 'marketing', label: 'Marketing emails', desc: 'Tips, product updates, and promotional offers' },
-              { key: 'deployment', label: 'Deployment status', desc: 'Get notified when your website is deployed' },
-            ].map((item) => (
-              <label key={item.key} className="flex items-center justify-between p-4 rounded-xl hover:bg-[rgb(var(--color-surface))] transition-colors cursor-pointer">
-                <div>
-                  <p className="font-medium text-[rgb(var(--color-text))] text-sm">{item.label}</p>
-                  <p className="text-xs text-[rgb(var(--color-text-muted))]">{item.desc}</p>
-                </div>
-                <div className="relative">
-                  <input type="checkbox" defaultChecked className="sr-only peer" />
-                  <div className="w-11 h-6 bg-[rgb(var(--color-border))] rounded-full peer-checked:bg-primary-500 after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
-                </div>
-              </label>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {activeTab === 'billing' && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="card space-y-6">
-            <h2 className="text-xl font-bold text-[rgb(var(--color-text))]">Billing & Subscription</h2>
-            <p className="text-[rgb(var(--color-text-muted))] -mt-4">Manage your subscription and payment methods.</p>
-            <div className="p-6 bg-[rgb(var(--color-surface))] rounded-xl border border-[rgb(var(--color-border))] space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-[rgb(var(--color-text))]">Current Plan</p>
-                  <p className="text-sm text-[rgb(var(--color-text-muted))]">Professional &bull; $49/month</p>
-                </div>
-                <span className="badge-success">Active</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-[rgb(var(--color-text-muted))]">Next billing date</span>
-                <span className="text-[rgb(var(--color-text))] font-medium">June 15, 2026</span>
-              </div>
-              <div className="w-full h-2 bg-[rgb(var(--color-border))] rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-primary-500 to-indigo-600 rounded-full" style={{ width: '65%' }} />
-              </div>
-              <div className="flex gap-3">
-                <Button variant="primary" size="sm" onClick={() => window.location.href = '/pricing'}>Change Plan</Button>
-                <Button variant="outline" size="sm">View Invoices</Button>
-              </div>
-            </div>
-            <div className="p-6 bg-[rgb(var(--color-surface))] rounded-xl border border-[rgb(var(--color-border))]">
-              <h3 className="font-medium text-[rgb(var(--color-text))] mb-4">Payment Method</h3>
-              <div className="flex items-center gap-4 p-4 bg-white dark:bg-surface-900 rounded-xl border border-[rgb(var(--color-border))]">
-                <div className="w-12 h-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg flex items-center justify-center text-white text-xs font-bold">VISA</div>
-                <div>
-                  <p className="font-medium text-[rgb(var(--color-text))]">Visa ending in 4242</p>
-                  <p className="text-sm text-[rgb(var(--color-text-muted))]">Expires 12/2027</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {activeTab === 'appearance' && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card space-y-6">
-          <h2 className="text-xl font-bold text-[rgb(var(--color-text))]">Appearance</h2>
-          <div className="flex items-center justify-between p-4 rounded-xl bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))]">
-            <div>
-              <p className="font-medium text-[rgb(var(--color-text))]">Dark Mode</p>
-              <p className="text-sm text-[rgb(var(--color-text-muted))]">Toggle between light and dark theme</p>
-            </div>
-            <button onClick={toggleTheme}
-              className={twMerge('relative w-14 h-7 rounded-full transition-colors', isDark ? 'bg-primary-500' : 'bg-[rgb(var(--color-border))]')}>
-              <div className={twMerge('absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform', isDark ? 'translate-x-7.5 left-0.5' : 'left-0.5')} />
-            </button>
-          </div>
-          <div className="p-4 rounded-xl bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))]">
-            <p className="font-medium text-[rgb(var(--color-text))] mb-3">Theme Preview</p>
-            <div className="grid grid-cols-5 gap-2">
-              {[
-                { color: 'bg-violet-600', label: 'Violet' },
-                { color: 'bg-indigo-600', label: 'Indigo' },
-                { color: 'bg-emerald-600', label: 'Emerald' },
-                { color: 'bg-blue-600', label: 'Blue' },
-                { color: 'bg-rose-600', label: 'Rose' },
-              ].map(({ color, label }) => (
-                <button key={label} className="text-center">
-                  <div className={`w-full aspect-square rounded-xl ${color} mb-1 ring-1 ring-[rgb(var(--color-border))]`} />
-                  <span className="text-xs text-[rgb(var(--color-text-muted))]">{label}</span>
+      <div className="flex flex-col md:flex-row gap-8">
+        <aside className="w-full md:w-64 shrink-0">
+          <nav className="flex flex-col gap-2">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'flex items-start gap-3 p-3 rounded-xl transition-all text-left',
+                    isActive 
+                      ? 'bg-white dark:bg-surface-900 shadow-sm border border-surface-200 dark:border-surface-800' 
+                      : 'hover:bg-surface-100 dark:hover:bg-surface-900 border border-transparent opacity-80 hover:opacity-100'
+                  )}
+                >
+                  <div className={cn(
+                    'p-2 rounded-lg', 
+                    isActive ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : 'text-surface-500'
+                  )}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className={cn('text-sm font-medium', isActive ? 'text-surface-900 dark:text-white' : 'text-surface-600 dark:text-surface-300')}>{tab.label}</p>
+                    <p className="text-xs text-surface-500 line-clamp-1">{tab.desc}</p>
+                  </div>
                 </button>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-      )}
+              );
+            })}
+          </nav>
+        </aside>
+
+        <div className="flex-1 min-w-0">
+           <AnimatePresence mode="wait">
+              {activeTab === 'profile' && (
+                <motion.div key="profile" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                  <Card className="p-8">
+                    <h2 className="text-xl font-display font-bold text-surface-900 dark:text-white mb-6">Profile Details</h2>
+                    <form onSubmit={handleProfileUpdate} className="space-y-6">
+                      <div className="flex items-center gap-6">
+                        <div className="w-24 h-24 bg-gradient-to-br from-primary-500 to-indigo-600 rounded-3xl flex items-center justify-center text-4xl font-bold text-white shadow-lg shadow-primary-500/25">
+                          {profileForm.name?.charAt(0)?.toUpperCase() || 'U'}
+                        </div>
+                        <div>
+                           <Button variant="outline" size="sm" type="button">Upload New Avatar</Button>
+                           <p className="text-xs text-surface-500 mt-2">JPG, PNG or WEBP. Max 2MB.</p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid sm:grid-cols-2 gap-6 pt-6 border-t border-surface-200 dark:border-surface-800">
+                        <div>
+                          <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Full Name</label>
+                          <Input type="text" value={profileForm.name} onChange={(e) => setProfileForm((p) => ({ ...p, name: e.target.value }))} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Email Address</label>
+                          <Input type="email" value={profileForm.email} disabled className="opacity-70 cursor-not-allowed" />
+                          <p className="text-xs text-surface-500 mt-1">Contact support to change your email.</p>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Phone Number</label>
+                          <Input type="tel" value={profileForm.phone} onChange={(e) => setProfileForm((p) => ({ ...p, phone: e.target.value }))} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Company / Organization</label>
+                          <Input type="text" value={profileForm.company} onChange={(e) => setProfileForm((p) => ({ ...p, company: e.target.value }))} />
+                        </div>
+                      </div>
+                      <div className="pt-4 flex justify-end">
+                        <Button type="submit" variant="primary" loading={saving} className="shadow-glow px-8">Save Profile</Button>
+                      </div>
+                    </form>
+                  </Card>
+                </motion.div>
+              )}
+
+              {activeTab === 'security' && (
+                <motion.div key="security" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                  <Card className="p-8">
+                    <h2 className="text-xl font-display font-bold text-surface-900 dark:text-white mb-6">Change Password</h2>
+                    <form onSubmit={handlePasswordChange} className="space-y-6 max-w-md">
+                      <div>
+                        <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Current Password</label>
+                        <Input 
+                           type={showPasswords.current ? 'text' : 'password'} 
+                           value={passwordForm.currentPassword}
+                           onChange={(e) => setPasswordForm((p) => ({ ...p, currentPassword: e.target.value }))}
+                           rightIcon={
+                              <button type="button" onClick={() => setShowPasswords(p => ({ ...p, current: !p.current }))} className="text-surface-400 hover:text-surface-600 focus:outline-none">
+                                 {showPasswords.current ? <HiEyeOff /> : <HiEye />}
+                              </button>
+                           }
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">New Password</label>
+                        <Input 
+                           type={showPasswords.new ? 'text' : 'password'} 
+                           value={passwordForm.newPassword}
+                           onChange={(e) => setPasswordForm((p) => ({ ...p, newPassword: e.target.value }))}
+                           rightIcon={
+                              <button type="button" onClick={() => setShowPasswords(p => ({ ...p, new: !p.new }))} className="text-surface-400 hover:text-surface-600 focus:outline-none">
+                                 {showPasswords.new ? <HiEyeOff /> : <HiEye />}
+                              </button>
+                           }
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">Confirm New Password</label>
+                        <Input 
+                           type={showPasswords.confirm ? 'text' : 'password'} 
+                           value={passwordForm.confirmPassword}
+                           onChange={(e) => setPasswordForm((p) => ({ ...p, confirmPassword: e.target.value }))}
+                           rightIcon={
+                              <button type="button" onClick={() => setShowPasswords(p => ({ ...p, confirm: !p.confirm }))} className="text-surface-400 hover:text-surface-600 focus:outline-none">
+                                 {showPasswords.confirm ? <HiEyeOff /> : <HiEye />}
+                              </button>
+                           }
+                        />
+                      </div>
+                      <div className="pt-2">
+                        <Button type="submit" variant="primary" loading={saving} className="shadow-glow">Update Password</Button>
+                      </div>
+                    </form>
+                  </Card>
+                </motion.div>
+              )}
+
+              {activeTab === 'notifications' && (
+                <motion.div key="notifications" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                  <Card className="p-8">
+                    <h2 className="text-xl font-display font-bold text-surface-900 dark:text-white mb-6">Notification Preferences</h2>
+                    <div className="space-y-4">
+                      {[
+                        { key: 'email', label: 'Email Notifications', desc: 'Receive emails about account activity and security.' },
+                        { key: 'website', label: 'Website Updates', desc: 'Get notified when your AI websites are deployed.' },
+                        { key: 'leads', label: 'New Leads', desc: 'Instant alerts when someone submits a contact form on your site.' },
+                        { key: 'marketing', label: 'Marketing Emails', desc: 'Tips, product updates, and promotional offers.' },
+                      ].map((item) => (
+                        <label key={item.key} className="flex items-start sm:items-center justify-between p-5 rounded-xl border border-surface-200 dark:border-surface-800 hover:bg-surface-50 dark:hover:bg-surface-900 transition-colors cursor-pointer group">
+                          <div className="pr-4">
+                            <p className="font-medium text-surface-900 dark:text-white">{item.label}</p>
+                            <p className="text-sm text-surface-500 mt-1">{item.desc}</p>
+                          </div>
+                          <div className="relative mt-1 sm:mt-0 shrink-0">
+                            <input type="checkbox" defaultChecked className="sr-only peer" />
+                            <div className="w-11 h-6 bg-surface-200 dark:bg-surface-800 rounded-full peer-checked:bg-primary-500 after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border after:border-gray-300 peer-checked:after:border-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full shadow-inner" />
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
+
+              {activeTab === 'appearance' && (
+                <motion.div key="appearance" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                  <Card className="p-8">
+                    <h2 className="text-xl font-display font-bold text-surface-900 dark:text-white mb-6">Appearance</h2>
+                    <div className="flex items-center justify-between p-6 rounded-2xl bg-surface-50 dark:bg-surface-950 border border-surface-200 dark:border-surface-800">
+                      <div>
+                        <p className="font-medium text-surface-900 dark:text-white text-lg">Dark Mode</p>
+                        <p className="text-surface-500 mt-1">Toggle the dashboard theme to reduce eye strain in low-light environments.</p>
+                      </div>
+                      <button onClick={toggleTheme} className={cn('relative w-14 h-8 rounded-full transition-colors shrink-0 shadow-inner', isDark ? 'bg-primary-500' : 'bg-surface-300 dark:bg-surface-700')}>
+                        <div className={cn('absolute top-1 w-6 h-6 bg-white rounded-full shadow transition-transform', isDark ? 'translate-x-7 left-1' : 'left-1')} />
+                      </button>
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
+           </AnimatePresence>
+        </div>
+      </div>
     </div>
   );
 }

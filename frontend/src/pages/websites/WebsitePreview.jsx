@@ -26,30 +26,34 @@ const frameStyles = {
 function PreviewToolbar({ viewMode, onChange, website, onShare }) {
   const navigate = useNavigate();
   const name = website?.businessName || 'Website Preview';
+  const colors = website?.branding?.colors || {};
 
   return (
-    <div className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
-      <div className="flex items-center justify-between px-4 py-2.5 max-w-7xl mx-auto">
+    <div className="sticky top-0 z-50 border-b border-slate-200/70 dark:border-slate-700/50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl shadow-sm">
+      <div className="flex items-center justify-between px-4 py-3 max-w-7xl mx-auto">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200"
             aria-label="Go back"
           >
             <HiChevronLeft className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <HiGlobe className="w-4 h-4 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-sm" style={{ backgroundColor: colors.primary || '#6366F1' }}>
+              {(name[0] || 'W').toUpperCase()}
             </div>
-            <span className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate max-w-[200px]">
-              {name}
-            </span>
+            <div>
+              <span className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate max-w-[200px] block leading-tight">
+                {name}
+              </span>
+              <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">Website Preview</span>
+            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-0.5">
+          <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-0.5 ring-1 ring-slate-200/50 dark:ring-slate-700/50">
             {[
               { mode: 'desktop', Icon: HiDesktopComputer, label: 'Desktop' },
               { mode: 'tablet', Icon: HiDeviceTablet, label: 'Tablet' },
@@ -59,7 +63,7 @@ function PreviewToolbar({ viewMode, onChange, website, onShare }) {
                 key={mode}
                 onClick={() => onChange(mode)}
                 className={twMerge(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200',
                   viewMode === mode
                     ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm'
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
@@ -71,23 +75,24 @@ function PreviewToolbar({ viewMode, onChange, website, onShare }) {
             ))}
           </div>
 
-          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block" />
+          <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block" />
 
           {(website?.domain || website?.subdomain) && (
             <a
               href={`https://${website.domain || website.subdomain + '.localsiteai.com'}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+              style={{ color: colors.primary || '#059669' }}
             >
               <HiExternalLink className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Live Site</span>
+              <span className="hidden md:inline">Live</span>
             </a>
           )}
 
           <button
             onClick={onShare}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200"
             aria-label="Share"
           >
             <HiShare className="w-4 h-4" />
