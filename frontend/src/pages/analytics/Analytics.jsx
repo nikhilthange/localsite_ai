@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../utils/cn';
 import {
   HiDownload, HiRefresh, HiEye, HiClock,
   HiTrendingUp, HiArrowUp, HiArrowDown, HiOutlineExclamationCircle,

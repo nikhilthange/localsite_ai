@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../utils/cn';
 import { HiCreditCard, HiDocumentText, HiCheck, HiDownload, HiPlus, HiShieldCheck } from 'react-icons/hi';
 import { FiDollarSign, FiFileText, FiCreditCard, FiShield, FiArrowRight } from 'react-icons/fi';
 import { Button } from '@/components/ui/Button';

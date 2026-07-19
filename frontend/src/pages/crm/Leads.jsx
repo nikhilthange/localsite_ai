@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '../../../utils/cn';
+import { cn } from '../../utils/cn';
 import { HiSearch, HiMail, HiPhone, HiStar, HiTag, HiX, HiCheck, HiBan, HiDownload, HiViewList, HiViewBoards } from 'react-icons/hi';
 import { FiUsers, FiUserPlus, FiMoreVertical } from 'react-icons/fi';
 import { Button } from '@/components/ui/Button';
