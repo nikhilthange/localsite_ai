@@ -68,6 +68,7 @@ describe('EventBus', () => {
         EventBus.on('test:overflow' as any, () => {});
       }
       expect(() => EventBus.emit('test:overflow' as any, {})).not.toThrow();
+      EventBus.removeAllListeners('test:overflow' as any);
     });
   });
 
